@@ -1,5 +1,6 @@
 <?php
 include "config.php"; // Include your database connection file
+include "../inc/header.php";
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
 

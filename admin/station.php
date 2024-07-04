@@ -31,11 +31,13 @@ if ($result_user && $result_user->num_rows > 0) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "../inc/head.php" ?>
 </head>
+
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
         <?php include "../inc/nav.php" ?>
@@ -54,7 +56,10 @@ if ($result_user && $result_user->num_rows > 0) {
                                 if (isset($_SESSION['success_message'])) {
                                     echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
+                                       
+                                   <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                        <span aria-hidden='true'>&times;</span>
+                                    </button>
                                 </div>";
                                     unset($_SESSION['success_message']);
                                 }
@@ -62,7 +67,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                 if (isset($_SESSION['error_message'])) {
                                     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
+                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                        <span aria-hidden='true'>&times;</span>
+                                    </button>
                                 </div>";
                                     unset($_SESSION['error_message']);
                                 }
@@ -90,9 +97,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Station ID</th>
                                         <th>Station Name</th>
                                         <th>Station Type</th>
-                                        <?php if (!$canEditStation && !$canDeleteStation): ?>
+                                        <?php if (!$canEditStation && !$canDeleteStation) : ?>
                                             <th style="display:none;"></th>
-                                        <?php else: ?>
+                                        <?php else : ?>
                                             <th>Option</th>
                                         <?php endif; ?>
                                     </tr>
@@ -110,11 +117,11 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>{$row['station_id']}</td>";
                                             echo "<td class='py-1'>{$row['station_name']}</td>";
                                             echo "<td class='py-1'>{$row['station_type']}</td>";
-                                            
+
                                             if (!$canEditStation && !$canDeleteStation) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
-                                                echo "<td>";
+                                                echo "<td class='py-1'>";
                                                 if ($canEditStation) {
                                                     echo "<a href='edit_station.php?id={$row['id']}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
@@ -175,4 +182,5 @@ if ($result_user && $result_user->num_rows > 0) {
         });
     </script>
 </body>
+
 </html>

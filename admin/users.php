@@ -64,7 +64,9 @@ if ($result_user && $result_user->num_rows > 0) {
                             if (isset($_SESSION['success_message'])) {
                                 echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
+                                     <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                        <span aria-hidden='true'>&times;</span>
+                                    </button>
                                 </div>";
                                 unset($_SESSION['success_message']); // Clear the message after displaying
                             }
@@ -72,7 +74,9 @@ if ($result_user && $result_user->num_rows > 0) {
                             if (isset($_SESSION['error_message'])) {
                                 echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
+                                     <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                        <span aria-hidden='true'>&times;</span>
+                                    </button>
                                 </div>";
                                 unset($_SESSION['error_message']); // Clear the message after displaying
                             }
