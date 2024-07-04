@@ -28,7 +28,6 @@ if ($result_user && $result_user->num_rows > 0) {
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">

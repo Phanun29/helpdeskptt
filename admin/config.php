@@ -1,5 +1,5 @@
 <?php
-$conn = mysqli_connect('localhost', 'root', '', 'help');
+$conn = new mysqli('localhost', 'root', '', 'help');
 
 if (!$conn) {
     //echo "NO";

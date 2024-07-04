@@ -2,6 +2,37 @@
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id'];
+
+$query_user = "
+    SELECT u.*, r.list_user_rules, r.add_user_rules, r.edit_user_rules, r.delete_user_rules 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
+$result_user = $conn->query($query_user);
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+
+    $listUsersRules1 = $user['list_user_rules'];
+    $AddUserRules = $user['add_user_rules'];
+    $EditUserRules = $user['edit_user_rules'];
+    $DeleteUserRules = $user['delete_user_rules'];
+
+    if (!$listUsersRules1) {
+        header("location: 404.php");
+        exit();
+    }
+    if (!$AddUserRules) {
+        header("location: 404.php");
+        exit();
+    }
+} else {
+    $_SESSION['error_message'] = "User not found or permission check failed.";
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     $rules_name = $_POST['rules_name'];

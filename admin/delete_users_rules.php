@@ -1,6 +1,30 @@
 <?php
 include "config.php"; // Include your database connection file
-session_start(); // Initialize session for messages
+include "../inc/header.php";
+
+
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id'];
+
+$query_user = "
+    SELECT u.*, r.list_user_rules, r.add_user_rules, r.edit_user_rules, r.delete_user_rules 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
+$result_user = $conn->query($query_user);
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+
+    if (!$user['list_user_rules'] || !$user['delete_user_rules']) {
+        header("Location: 404.php");
+        exit();
+    }
+} else {
+    $_SESSION['error_message'] = "User not found or permission check failed.";
+}
+
 
 // Check if the user_id is set in the query string
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {

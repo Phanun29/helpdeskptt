@@ -28,8 +28,9 @@ $status_counts = [
   'Open' => 0,
   'On Hold' => 0,
   'In Progress' => 0,
-  'Pending Vender' => 0,
+  'Pending Vendor' => 0,
   'Close' => 0
+
 ];
 
 // Populate counts from the database result

@@ -2,6 +2,28 @@
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id']; // Example user ID
+
+$query_user = "
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
+$result_user = $conn->query($query_user);
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+
+    if (!$user['list_ticket_status'] || !$user['edit_ticket_status']) {
+        header("Location: 404.php");
+        exit();
+    }
+} else {
+    $_SESSION['error_message'] = "User not found or permission check failed.";
+}
+
 // Initialize session for storing messages
 $ticket_id = $_GET['id']; // Assuming you're passing the ticket ID through a GET parameter
 
@@ -25,7 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $comment = $_POST['comment'];
 
     date_default_timezone_set('Asia/Bangkok');
-
 
     // Check if the status 
     if ($status == 'On Hold') {
@@ -164,7 +185,7 @@ $ticket_result = $stmt->get_result();
 if ($ticket_result->num_rows > 0) {
     $row = $ticket_result->fetch_assoc();
 } else {
-    $_SESSION['error_message'] = "Ticket not found.";
+    // $_SESSION['error_message'] = "Ticket not found.";
     header("Location: 404.php");
     exit;
 }

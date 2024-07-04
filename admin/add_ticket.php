@@ -2,36 +2,39 @@
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
-// Function to check if the user has permission to add station
-function AddTicket2($rules_id, $conn)
-{
-    $query = "SELECT add_ticket_status FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['add_ticket_status'] == 1; // Check if add_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
-
-
-// Assume $user_id is fetched from session or database
+// Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-// Fetch user details including rules_id
-$query_user = "SELECT * FROM tbl_users WHERE users_id = $user_id";
+
+$query_user = "
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
 $result_user = $conn->query($query_user);
+
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-    $rules_id = $user['rules_id'];
 
-    // Check if user has permission to add, edit, or delete stations
-    $AddTicket2 = AddTicket2($rules_id, $conn);
-    // Redirect to 404 page if user doesn't have permission to list users
-    if (!$AddTicket2) {
-        header("Location: 404.php");
-        exit;
+    $listTicket = $user['list_ticket_status'];
+    $AddTicket = $user['add_ticket_status'];
+    $EditTicket = $user['edit_ticket_status'];
+    $DeleteTicket = $user['delete_ticket_status'];
+
+    if (!$listTicket) {
+        header("location: 404.php");
+        exit();
     }
+    if (!$AddTicket) {
+        header("location: 404.php");
+        exit();
+    }
+} else {
+    $_SESSION['error_message'] = "User not found or permission check failed.";
 }
+
+
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];

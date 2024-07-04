@@ -1,79 +1,4 @@
 <?php
-// session_start();
-// include "config.php";
-
-
-
-// // Check if the session variables are set
-// if (isset($_SESSION['email']) && isset($_SESSION['password'])) {
-//     $email = $_SESSION['email'];
-//     $password = $_SESSION['password'];
-
-//     if ($email != false && $password != false) {
-//         // Use a prepared statement to prevent SQL injection
-//         $stmt = $conn->prepare("SELECT * FROM tbl_users WHERE email = ?");
-//         $stmt->bind_param("s", $email);
-//         $stmt->execute();
-//         $result = $stmt->get_result();
-
-//         if ($result->num_rows > 0) {
-//             $fetch_info = $result->fetch_assoc();
-//             $status = $fetch_info['status'];
-//             $code = $fetch_info['code'];
-//             // Proceed with the rest of your code here if the user is found
-//         } else {
-//             echo "No user found with the given email.";
-//         }
-
-//         $stmt->close();
-//     } else {
-//         echo "Email or password is invalid.";
-//     }
-// } else {
-//     // Redirect to the login page if the session variables are not set
-//     header("Location: ../index.php");
-//     exit;
-// }
-
-// session_start();
-// include "config.php";
-
-// // Check if the session variables are set
-// if (isset($_SESSION['email']) && isset($_SESSION['password'])) {
-//     $email = $_SESSION['email'];
-//     $password = $_SESSION['password'];
-
-//     if ($email != false && $password != false) {
-//         // Use a prepared statement to prevent SQL injection
-//         $stmt = $conn->prepare("SELECT * FROM tbl_users WHERE email = ?");
-//         $stmt->bind_param("s", $email);
-//         $stmt->execute();
-//         $result = $stmt->get_result();
-
-//         if ($result->num_rows > 0) {
-//             $fetch_info = $result->fetch_assoc();
-//             $status = $fetch_info['status'];
-//             $code = $fetch_info['code'];
-//             // Proceed with the rest of your code here if the user is found
-//         } else {
-//             // Redirect to the 404 page if no user is found
-//             header("Location: 404.php");
-//             exit;
-//         }
-
-//         $stmt->close();
-//     } else {
-//         // Redirect to the 404 page if email or password is invalid
-//         header("Location: 404.php");
-//         exit;
-//     }
-// } else {
-//     // Redirect to the login page if the session variables are not set
-//     header("Location: ../index.php");
-//     exit;
-// }
-// 
-
 session_start();
 include "config.php";
 
@@ -111,6 +36,3 @@ if (isset($_SESSION['email']) && isset($_SESSION['password'])) {
     header("Location: ../index.php");
     exit;
 }
-?>
-
-

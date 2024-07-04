@@ -2,37 +2,38 @@
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
-
-// Function to check if the user has permission to add station
-function AddTicket($rules_id, $conn)
-{
-    $query = "SELECT add_station FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['add_station'] == 1; // Check if add_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
-
-
-// Assume $user_id is fetched from session or database
+// Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-// Fetch user details including rules_id
-$query_user = "SELECT * FROM tbl_users WHERE users_id = $user_id";
+
+$query_user = "
+    SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
 $result_user = $conn->query($query_user);
+
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-    $rules_id = $user['rules_id'];
 
-    // Check if user has permission to add, edit, or delete stations
-    $AddTicket = AddTicket($rules_id, $conn);
-    // Redirect to 404 page if user doesn't have permission to list users
-    if (!$AddTicket) {
-        header("Location: 404.php");
-        exit;
+    $listStation1 = $user['list_station'];
+    $canAddStation = $user['add_station'];
+    $canEditStation = $user['edit_station'];
+    $canDeleteStation = $user['delete_station'];
+
+    if (!$listStation1) {
+        header("location: 404.php");
+        exit();
     }
+    if (!$canAddStation) {
+        header("location: 404.php");
+        exit();
+    }
+} else {
+    $_SESSION['error_message'] = "User not found or permission check failed.";
 }
+
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
@@ -53,7 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 //$conn->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -78,10 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <h1 class="m-0">Add Station</h1>
                         </div>
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">Ticket</li>
-                            </ol> -->
+
                             <!-- alert -->
                             <?php if (isset($_SESSION['success_message'])) : ?>
                                 <div class="alert alert-success alert-dismissible fade show " role="alert">
