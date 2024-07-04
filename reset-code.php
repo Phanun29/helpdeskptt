@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
+    <!-- icon -->
+    <link rel="icon" href="img/favicon.ico.png">
 </head>
 
 <body class="hold-transition login-page">
@@ -25,7 +27,7 @@
                 <a href="" class="h1">Code Verification</a>
             </div>
             <div class="card-body">
-                
+
                 <?php
                 if (isset($_SESSION['info'])) {
                 ?>
@@ -50,7 +52,7 @@
                 ?>
                 <form method="post">
                     <div class="input-group mb-3">
-                    <input class="form-control" type="number" name="otp" placeholder="Enter code" required>
+                        <input class="form-control" type="number" name="otp" placeholder="Enter code" required>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-envelope"></span>
@@ -59,7 +61,7 @@
                     </div>
                     <div class="row">
                         <div class="col-12">
-                        <input class="form-control button btn-primary" type="submit" name="check-reset-otp" value="Submit">
+                            <input class="form-control button btn-primary" type="submit" name="check-reset-otp" value="Submit">
                         </div>
                         <!-- /.col -->
                     </div>

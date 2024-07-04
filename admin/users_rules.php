@@ -3,81 +3,33 @@ include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
 
-// Function to check if 
-function listUsersRules1($rules_id, $conn)
-{
-    $query = "SELECT list_user_rules FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['list_user_rules'] == 1; // Check if delete_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id'];
 
-// Function to check if the user has permission to add station
-function AddUserRules($rules_id, $conn)
-{
-    $query = "SELECT add_user_rules FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['add_user_rules'] == 1; // Check if add_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
+$query_user = "
+    SELECT u.*, r.list_user_rules, r.add_user_rules, r.edit_user_rules, r.delete_user_rules 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
 
-// Function to check if the user has permission to edit station
-function EditUserRules($rules_id, $conn)
-{
-    $query = "SELECT edit_user_rules FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['edit_user_rules'] == 1; // Check if edit_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
-
-// Function to check if the user has permission to delete station
-function DeleteUserRules($rules_id, $conn)
-{
-    $query = "SELECT delete_user_rules FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['delete_user_rules'] == 1; // Check if delete_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
-
-// Assume $user_id is fetched from session or database
-$user_id = $fetch_info['users_id']; // Example user ID
-
-// Fetch user details including rules_id
-$query_user = "SELECT * FROM tbl_users WHERE users_id = $user_id";
 $result_user = $conn->query($query_user);
+
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-    $rules_id = $user['rules_id'];
 
-    // Check if user has permission to add, edit, or delete stations
-    $AddUserRules = AddUserRules($rules_id, $conn);
-    $EditUserRules = EditUserRules($rules_id, $conn);
-    $DeleteUserRules = DeleteUserRules($rules_id, $conn);
-    $listUsersRules1 = listUsersRules1($rules_id, $conn);
-    // Redirect to 404 page if user doesn't have permission to list users
+    $listUsersRules1 = $user['list_user_rules'];
+    $AddUserRules = $user['add_user_rules'];
+    $EditUserRules = $user['edit_user_rules'];
+    $DeleteUserRules = $user['delete_user_rules'];
+
     if (!$listUsersRules1) {
-        header("Location: 404.php");
-        exit;
+        header("location: 404.php");
+        exit();
     }
 } else {
-    // Handle error if user not found or permission check fails
     $_SESSION['error_message'] = "User not found or permission check failed.";
-    // header("Location: users_rules.php"); // Redirect to appropriate page
-    // exit;
-
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -107,12 +59,8 @@ if ($result_user && $result_user->num_rows > 0) {
                             <h1 class="m-0">Users Rules</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">User Rules</li>
-                            </ol> -->
+
                             <?php
-                            // session_start(); // Start the session at the beginning of your file
 
                             if (isset($_SESSION['success_message'])) {
                                 echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -144,7 +92,7 @@ if ($result_user && $result_user->num_rows > 0) {
                     <div class="card">
 
                         <!-- /.card-header -->
-                        <div class="card-body p-0">
+                        <div class="card-body p-0" style="overflow: hidden;">
 
                             <?php if (isset($AddUserRules) && $AddUserRules) : ?>
                                 <div class="card-header">

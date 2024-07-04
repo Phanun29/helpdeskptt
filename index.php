@@ -5,8 +5,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LOG IN</title>
 
-    <?php include "icon.php" ?>
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
+    <!-- icon -->
+    <link rel="icon" href="img/favicon.ico.png">
 </head>
 
 <body class="hold-transition login-page">
@@ -64,7 +66,7 @@
                             </div>
                         </div>
                         <!-- /.col -->
-                        
+
                     </div>
                     <div class="row">
 

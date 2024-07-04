@@ -21,6 +21,8 @@ if ($_SESSION['info'] == false) {
     <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
+    <!-- icon -->
+    <link rel="icon" href="img/favicon.ico.png">
 </head>
 
 <body class="hold-transition login-page">

@@ -1,7 +1,32 @@
 <?php
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
-include "../inc/permissiont.php";
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id']; // Example user ID
+
+$query_user = "
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status 
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
+$result_user = $conn->query($query_user);
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+
+    $listTicket = $user['list_ticket_status'];
+    $AddTicket = $user['add_ticket_status'];
+    $EditTicket = $user['edit_ticket_status'];
+    $DeleteTicket = $user['delete_ticket_status'];
+
+    // if (!$listTicket) {
+    //     header("location: 404.php");
+    //     exit();
+    // }
+} else {
+    $_SESSION['error_message'] = "User not found or permission check failed.";
+}
 
 $users_type = $fetch_info['users_type'];
 $status = isset($_GET['status']) ? $_GET['status'] : ''; // Get status from URL parameter
@@ -71,8 +96,6 @@ $ticket_result = $conn->query($ticket_query);
                             <ol class="breadcrumb float-sm-right">
 
                                 <?php
-
-
                                 if (isset($_SESSION['success_message'])) {
                                     echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['success_message']}</strong>
