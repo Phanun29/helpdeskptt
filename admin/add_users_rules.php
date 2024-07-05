@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
                                     <!-- Permissions: Users -->
                                     <div class="col-12">
-                                        <h4>users</h4>
+                                        <h6>USERS</6>
                                     </div>
 
                                     <div class="row card-footer ">
@@ -205,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
                                     <!-- Permissions: Tickets -->
                                     <div class="col-12">
-                                        <h4>tikcet</h4>
+                                        <h6>TICKET</h6>
                                     </div>
                                     <div class="row card-footer">
                                         <div class="row col-12">
@@ -260,7 +260,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
                                     <!-- Permissions: Stations -->
                                     <div class="col-12">
-                                        <h4>Station</h4>
+                                        <h6>STATION</h6>
                                     </div>
                                     <div class="row card-footer">
                                         <div class="row col-12">
@@ -308,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
                                     <!-- Permissions: User Rules -->
                                     <div class="col-12">
-                                        <h4>Users Rules</h4>
+                                        <h6>USERS RULES</h6>
                                     </div>
                                     <div class="row card-footer">
                                         <div class="row col-12">

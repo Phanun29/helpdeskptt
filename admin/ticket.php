@@ -589,17 +589,18 @@ $ticket_result = $conn->query($ticket_query);
     <script>
         $(function() {
             $("#example1").DataTable({
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": [, "csv", "excel", "pdf"]
+                "buttons": [, "csv", "excel", "pdf"],
+                "lengthChange": true,
+                "autoWidth": true,
+
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
             $('#example2').DataTable({
                 "paging": true,
-                "lengthChange": false,
-                "searching": false,
+                "lengthChange": true,
+                "searching": true,
                 "ordering": true,
                 "info": true,
-                "autoWidth": false,
+                "autoWidth": true,
                 "responsive": true,
             });
         });
@@ -675,7 +676,7 @@ $ticket_result = $conn->query($ticket_query);
         </div>
     </div>
 
-
+    <!-- filter -->
     <script>
         $(document).ready(function() {
             // Handle filter button click

@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     $edit_ticket_status = in_array('edit_ticket', $permissions) ? 1 : 0;
     $delete_ticket_status = in_array('delete_ticket', $permissions) ? 1 : 0;
     $list_ticket_status = in_array('list_ticket', $permissions) ? 1 : 0;
+    $list_ticket_assign = in_array('list_ticket_assign', $permissions) ? 1 : 0;
 
     $add_station = in_array('add_station', $permissions) ? 1 : 0;
     $edit_station = in_array('edit_station', $permissions) ? 1 : 0;
@@ -73,14 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     // Update in database
     $query = "UPDATE tbl_users_rules 
               SET rules_name = ?, add_user_status = ?, edit_user_status = ?, delete_user_status = ?, list_user_status = ?,
-                  add_ticket_status = ?, edit_ticket_status = ?, delete_ticket_status = ?, list_ticket_status = ?,
+                  add_ticket_status = ?, edit_ticket_status = ?, delete_ticket_status = ?, list_ticket_status = ?,list_ticket_assign=?,
                   add_station = ?, edit_station = ?, delete_station = ?, list_station = ?,
                   add_user_rules = ?, edit_user_rules = ?, delete_user_rules = ?, list_user_rules = ?
               WHERE rules_id = ?";
 
     $stmt = $conn->prepare($query);
     $stmt->bind_param(
-        "siiiiiiiiiiiiiiiss",
+        "siiiiiiiiiiiiiiiiss",
         $rules_name,
         $add_user_status,
         $edit_user_status,
@@ -90,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         $edit_ticket_status,
         $delete_ticket_status,
         $list_ticket_status,
+        $list_ticket_assign,
         $add_station,
         $edit_station,
         $delete_station,
@@ -138,10 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                             <h1 class="m-0">Add Users Rules</h1>
                         </div>
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">Ticket</li>
-                            </ol> -->
+
                             <?php if (isset($_SESSION['success_message'])) : ?>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     <strong><?php echo $_SESSION['success_message']; ?></strong>
@@ -251,6 +250,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                             <div class="col-6">
                                                 <input type="checkbox" name="permissions[]" value="list_ticket" id="list_ticket" <?php echo $row['list_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-6">
+                                                <label for="list_ticket_assign">List Ticket Assign</label>
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="checkbox" name="permissions[]" value="list_ticket_assign" id="list_ticket_assign" value="delete_user" id="delete_user" <?php echo $row['list_ticket_assign'] ? 'checked' : ''; ?>>
+                                            </div>
+
                                         </div>
                                     </div>
 
