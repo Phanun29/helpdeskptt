@@ -6,7 +6,7 @@ include "../inc/header.php";
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -16,177 +16,102 @@ $result_user = $conn->query($query_user);
 if ($result_user && $result_user->num_rows > 0) {
   $user = $result_user->fetch_assoc();
 
-  $listTicket = $user['list_ticket_status'];
-  $AddTicket = $user['add_ticket_status'];
-  $EditTicket = $user['edit_ticket_status'];
-  $DeleteTicket = $user['delete_ticket_status'];
   $listTicketAssign = $user['list_ticket_assign'];
+  $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
 
+  // Set common parts of the query
+  $ticket_select = "
+        SELECT 
+            t.*, 
+            REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+        FROM 
+            tbl_ticket t
+        LEFT JOIN 
+            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)";
+  $group_by = "GROUP BY t.ticket_id DESC";
+
+  // Set query based on user type
   if ($listTicketAssign == 0) {
-    // User type 1: Select all tickets
-    $ticket_query = "
-            SELECT 
-                t.*, 
-                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-            FROM 
-                tbl_ticket t
-            LEFT JOIN 
-                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-            GROUP BY 
-                t.ticket_id DESC
-        ";
+    $ticket_query = "$ticket_select $group_by";
+    $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket GROUP BY status";
+    $priority_query = "SELECT priority, COUNT(*) as count FROM tbl_ticket GROUP BY priority";
+    $issue_query = "SELECT issue_type FROM tbl_ticket";
   } else {
-    // User type 0: Select tickets assigned to the current user
-    $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
-
-    $ticket_query = "
-            SELECT 
-                t.*, 
-                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-            FROM 
-                tbl_ticket t
-            LEFT JOIN 
-                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-            WHERE 
-                FIND_IN_SET($user_id, t.users_id)
-            GROUP BY 
-                t.ticket_id DESC
-        ";
+    $ticket_query = "$ticket_select WHERE FIND_IN_SET($user_id, t.users_id) $group_by";
+    $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY status";
+    $priority_query = "SELECT priority, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY priority";
+    $issue_query = "SELECT issue_type FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id)";
   }
+
+  // Execute ticket query
+  $ticket_result = $conn->query($ticket_query);
+
+  // Fetch status counts
+  $status_counts = [
+    'Open' => 0,
+    'On Hold' => 0,
+    'In Progress' => 0,
+    'Pending Vendor' => 0,
+    'Close' => 0
+  ];
+
+  $result_status = $conn->query($status_query);
+  while ($row = $result_status->fetch_assoc()) {
+    $status_counts[$row['status']] = $row['count'];
+  }
+
+  // Fetch priority counts and calculate percentages
+  $priority_counts = [
+    'CAT Hardware' => 0,
+    'CAT 1*' => 0,
+    'CAT 2*' => 0,
+    'CAT 3*' => 0,
+    'CAT 4*' => 0,
+    'CAT 4 Report*' => 0,
+    'CAT 5*' => 0
+  ];
+
+  $total_tickets = 0;
+  $result_priority = $conn->query($priority_query);
+  while ($row = $result_priority->fetch_assoc()) {
+    $priority_counts[$row['priority']] = $row['count'];
+    $total_tickets += $row['count'];
+  }
+
+  $priority_percentages = array_map(function ($count) use ($total_tickets) {
+    return $total_tickets > 0 ? round(($count / $total_tickets) * 100) : 0;
+  }, $priority_counts);
+
+  // Fetch issue counts
+  $issue_counts = [
+    'Hardware' => 0,
+    'Software' => 0,
+    'Network' => 0,
+    'Dispenser' => 0,
+    'Unassigned' => 0
+  ];
+
+  $result_issue = $conn->query($issue_query);
+  while ($row = $result_issue->fetch_assoc()) {
+    $issue_types = explode(', ', $row['issue_type']);
+    foreach ($issue_types as $issue_type) {
+      $type = trim($issue_type);
+      if (isset($issue_counts[$type])) {
+        $issue_counts[$type]++;
+      } else {
+        $issue_counts['Unassigned']++;
+      }
+    }
+  }
+
+  // Prepare labels and data for Chart.js
+  $labels = array_keys($issue_counts);
+  $data = array_values($issue_counts);
 } else {
   $_SESSION['error_message'] = "User not found or permission check failed.";
 }
-$ticket_result = $conn->query($ticket_query);
-// Determine user type and adjust query accordingly
-if ($listTicketAssign == 0) {
-
-  $query_status = "
-    SELECT status, COUNT(*) as count
-    FROM tbl_ticket
-    GROUP BY status
-";
-} else {
-  $user_id = $fetch_info['users_id'];
-  $query_status = "
-    SELECT status, COUNT(*) as count
-    FROM tbl_ticket where FIND_IN_SET($user_id, users_id)
-    GROUP BY status
-";
-}
-$result_status = $conn->query($query_status);
-
-// Initialize counts
-$status_counts = [
-  'Open' => 0,
-  'On Hold' => 0,
-  'In Progress' => 0,
-  'Pending Vendor' => 0,
-  'Close' => 0
-
-];
-
-// Populate counts from the database result
-while ($row = $result_status->fetch_assoc()) {
-  $status = $row['status'];
-  $count = $row['count'];
-  $status_counts[$status] = $count;
-}
-
-
-
-// Determine user type and adjust query accordingly
-if ($listTicketAssign == 0) {
-  // User type 1: Select all tickets
-  /// Fetch data from the database
-  // Fetch the counts of tickets by priority
-  $query_priority = "
-    SELECT priority, COUNT(*) as count
-    FROM tbl_ticket
-    GROUP BY priority
-";
-} else {
-  $user_id = $fetch_info['users_id'];
-  $query_priority = "
-    SELECT priority, COUNT(*) as count
-    FROM tbl_ticket WHERE FIND_IN_SET ($user_id,users_id)
-    GROUP BY priority
-";
-}
-
-$result_priority = $conn->query($query_priority);
-
-// Initialize priority counts
-$priority_counts = [
-  'CAT Hardware' => 0,
-  'CAT 1*' => 0,
-  'CAT 2*' => 0,
-  'CAT 3*' => 0,
-  'CAT 4*' => 0,
-  'CAT 4 Report*' => 0,
-  'CAT 5*' => 0
-];
-
-$total_tickets = 0; // Initialize total tickets count
-
-// Populate counts from the database result
-while ($row = $result_priority->fetch_assoc()) {
-  $priority = $row['priority'];
-  $count = $row['count'];
-  $priority_counts[$priority] = $count;
-  $total_tickets += $count; // Sum up total tickets
-}
-
-// Calculate percentages
-$priority_percentages = [
-  'CAT Hardware' => $total_tickets > 0 ? round(($priority_counts['CAT Hardware'] / $total_tickets) * 100) : 0,
-  'CAT 1*' => $total_tickets > 0 ? round(($priority_counts['CAT 1*'] / $total_tickets) * 100) : 0,
-  'CAT 2*' => $total_tickets > 0 ? round(($priority_counts['CAT 2*'] / $total_tickets) * 100) : 0,
-  'CAT 3*' => $total_tickets > 0 ? round(($priority_counts['CAT 3*'] / $total_tickets) * 100) : 0,
-  'CAT 4*' => $total_tickets > 0 ? round(($priority_counts['CAT 4*'] / $total_tickets) * 100) : 0,
-  'CAT 4 Report*' => $total_tickets > 0 ? round(($priority_counts['CAT 4 Report*'] / $total_tickets) * 100) : 0,
-  'CAT 5*' => $total_tickets > 0 ? round(($priority_counts['CAT 5*'] / $total_tickets) * 100) : 0,
-];
-
-
-
-// Determine user type and adjust query accordingly
-if ($listTicketAssign == 0) {
-  // User type 1: Select all tickets
-  /// Fetch data from the database
-  $query_issue = "SELECT issue_type FROM tbl_ticket";
-} else {
-  $user_id = $fetch_info['users_id'];
-  $query_issue = "SELECT issue_type FROM tbl_ticket where FIND_IN_SET($user_id, users_id)";
-}
-$result_issue = $conn->query($query_issue);
-
-// Initialize arrays to store data
-$issue_counts = [
-  'Hardware' => 0,
-  'Software' => 0,
-  'Network' => 0,
-  'Dispenser' => 0,
-  'Unassigned' => 0
-];
-
-// Process the fetched data
-while ($row = $result_issue->fetch_assoc()) {
-  $issue_types = explode(', ', $row['issue_type']);
-  foreach ($issue_types as $issue_type) {
-    $type = trim($issue_type);
-    if (isset($issue_counts[$type])) {
-      $issue_counts[$type]++;
-    } else {
-      $issue_counts['Unassigned']++; // Handle any unassigned issue types
-    }
-  }
-}
-
-// Prepare labels and data for Chart.js
-$labels = array_keys($issue_counts);
-$data = array_values($issue_counts);
-
 ?>
+
 
 
 <!DOCTYPE html>
