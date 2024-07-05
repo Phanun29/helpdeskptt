@@ -3,9 +3,9 @@ include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-
+$status = isset($_GET['status']) ? $_GET['status'] : ''; // Get status from URL parameter
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status 
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -19,53 +19,45 @@ if ($result_user && $result_user->num_rows > 0) {
     $AddTicket = $user['add_ticket_status'];
     $EditTicket = $user['edit_ticket_status'];
     $DeleteTicket = $user['delete_ticket_status'];
+    $listTicketAssign = $user['list_ticket_assign'];
 
-    // if (!$listTicket) {
-    //     header("location: 404.php");
-    //     exit();
-    // }
+    // Determine user type and adjust query accordingly
+    if ($listTicketAssign == 0) {
+        // User type 1: Select all tickets with the specified status
+        $ticket_query = "
+            SELECT 
+                t.*, 
+                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM 
+                tbl_ticket t
+            LEFT JOIN 
+                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            " . ($status ? "WHERE t.status = '$status'" : "") . "
+            GROUP BY 
+                t.ticket_id DESC
+        ";
+    } else {
+        // User type 0: Select tickets assigned to the current user with the specified status
+        $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
+
+        $ticket_query = "
+            SELECT 
+                t.*, 
+                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM 
+                tbl_ticket t
+            LEFT JOIN 
+                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            WHERE 
+                FIND_IN_SET($user_id, t.users_id)
+                " . ($status ? "AND t.status = '$status'" : "") . "
+            GROUP BY 
+                t.ticket_id DESC
+        ";
+    }
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
-
-$users_type = $fetch_info['users_type'];
-$status = isset($_GET['status']) ? $_GET['status'] : ''; // Get status from URL parameter
-
-// Determine user type and adjust query accordingly
-if ($users_type == 1) {
-    // User type 1: Select all tickets with the specified status
-    $ticket_query = "
-        SELECT 
-            t.*, 
-            REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-        FROM 
-            tbl_ticket t
-        LEFT JOIN 
-            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-        " . ($status ? "WHERE t.status = '$status'" : "") . "
-        GROUP BY 
-            t.ticket_id DESC
-    ";
-} else {
-    // User type 0: Select tickets assigned to the current user with the specified status
-    $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
-
-    $ticket_query = "
-        SELECT 
-            t.*, 
-            REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-        FROM 
-            tbl_ticket t
-        LEFT JOIN 
-            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-        WHERE 
-            FIND_IN_SET($user_id, t.users_id)
-            " . ($status ? "AND t.status = '$status'" : "") . "
-        GROUP BY 
-            t.ticket_id DESC
-    ";
-}
-
 
 $ticket_result = $conn->query($ticket_query);
 ?>

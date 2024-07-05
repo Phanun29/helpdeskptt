@@ -2,12 +2,64 @@
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
-$users_type = $fetch_info['users_type'];
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id']; // Example user ID
+
+$query_user = "
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
+    FROM tbl_users u 
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+    WHERE u.users_id = $user_id";
+
+$result_user = $conn->query($query_user);
+
+if ($result_user && $result_user->num_rows > 0) {
+  $user = $result_user->fetch_assoc();
+
+  $listTicket = $user['list_ticket_status'];
+  $AddTicket = $user['add_ticket_status'];
+  $EditTicket = $user['edit_ticket_status'];
+  $DeleteTicket = $user['delete_ticket_status'];
+  $listTicketAssign = $user['list_ticket_assign'];
+
+  if ($listTicketAssign == 0) {
+    // User type 1: Select all tickets
+    $ticket_query = "
+            SELECT 
+                t.*, 
+                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM 
+                tbl_ticket t
+            LEFT JOIN 
+                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            GROUP BY 
+                t.ticket_id DESC
+        ";
+  } else {
+    // User type 0: Select tickets assigned to the current user
+    $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
+
+    $ticket_query = "
+            SELECT 
+                t.*, 
+                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM 
+                tbl_ticket t
+            LEFT JOIN 
+                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            WHERE 
+                FIND_IN_SET($user_id, t.users_id)
+            GROUP BY 
+                t.ticket_id DESC
+        ";
+  }
+} else {
+  $_SESSION['error_message'] = "User not found or permission check failed.";
+}
+$ticket_result = $conn->query($ticket_query);
 // Determine user type and adjust query accordingly
-if ($users_type == 1) {
-  // User type 1: Select all tickets
-  /// Fetch data from the database
-  // Fetch the counts of tickets by status
+if ($listTicketAssign == 0) {
+
   $query_status = "
     SELECT status, COUNT(*) as count
     FROM tbl_ticket
@@ -41,9 +93,9 @@ while ($row = $result_status->fetch_assoc()) {
 }
 
 
-$users_type = $fetch_info['users_type'];
+
 // Determine user type and adjust query accordingly
-if ($users_type == 1) {
+if ($listTicketAssign == 0) {
   // User type 1: Select all tickets
   /// Fetch data from the database
   // Fetch the counts of tickets by priority
@@ -96,9 +148,9 @@ $priority_percentages = [
 ];
 
 
-$users_type = $fetch_info['users_type'];
+
 // Determine user type and adjust query accordingly
-if ($users_type == 1) {
+if ($listTicketAssign == 0) {
   // User type 1: Select all tickets
   /// Fetch data from the database
   $query_issue = "SELECT issue_type FROM tbl_ticket";
@@ -135,6 +187,7 @@ $labels = array_keys($issue_counts);
 $data = array_values($issue_counts);
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -325,16 +378,6 @@ $data = array_values($issue_counts);
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">Ticket</h3>
-                <!-- <div class="card-tools">
-              <div class="input-group input-group-sm" style="width: 150px;">
-                <input type="text" id="table_search" name="table_search" class="form-control float-right" placeholder="Search">
-                <div class="input-group-append">
-                  <button type="submit" class="btn btn-default">
-                    <i class="fas fa-search"></i>
-                  </button>
-                </div>
-              </div>
-            </div> -->
               </div>
               <div class="card-body table-responsive p-0">
                 <table id="myTable" class="table table-head-fixed text-nowrap">
@@ -354,66 +397,35 @@ $data = array_values($issue_counts);
                       <th>Comment</th>
                     </tr>
                   </thead>
-                  <?php
-                  $users_type = $fetch_info['users_type'];
-                  // Determine user type and adjust query accordingly
-                  if ($users_type == 1) {
-                    // User type 1: Select all tickets
-                    $ticket_query = "
-                      SELECT 
-                          t.*, 
-                          REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-                      FROM 
-                          tbl_ticket t
-                      LEFT JOIN 
-                          tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-                      GROUP BY 
-                          t.ticket_id DESC
-                  ";
-                  } else {
-                    // User type 0: Select tickets assigned to the current user
-                    $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
+                  <tbody>
+                    <?php
+                    $i = 1;
+                    if ($ticket_result->num_rows > 0) {
+                      while ($row = $ticket_result->fetch_assoc()) {
 
-                    $ticket_query = "
-                      SELECT 
-                          t.*, 
-                          REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-                      FROM 
-                          tbl_ticket t
-                      LEFT JOIN 
-                          tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-                      WHERE 
-                          FIND_IN_SET($user_id, t.users_id)
-                      GROUP BY 
-                          t.ticket_id DESC LIMIT 20
-                  ";
-                  }
+                        echo "<tr>";
+                        echo " <td>" . $i++ . "</td>";
+                        echo "<td>" . $row['ticket_id'] . "</td>";
+                        echo "<td>" . $row['station_id'] . "</td>";
+                        echo "<td>" . $row['station_name'] . "</td>";
+                        echo "<td>" . $row['station_type'] . "</td>";
+                        echo "<td>" . $row['issue_description'] . "</td>";
 
-                  $ticket_result = $conn->query($ticket_query);
-                  $i = 1;
-                  if ($ticket_result->num_rows > 0) {
-                    while ($row = $ticket_result->fetch_assoc()) {
-                      echo " <tbody>";
-                      echo "<tr>";
-                      echo " <td>" . $i++ . "</td>";
-                      echo "<td>" . $row['ticket_id'] . "</td>";
-                      echo "<td>" . $row['station_id'] . "</td>";
-                      echo "<td>" . $row['station_name'] . "</td>";
-                      echo "<td>" . $row['station_type'] . "</td>";
-                      echo "<td>" . $row['issue_description'] . "</td>";
-
-                      echo "<td>" . $row['issue_type'] . "</td>";
-                      echo "<td>" . $row['priority'] . "</td>";
-                      echo "<td>" . $row['status'] . "</td>";
-                      // echo "<td>" . $row['users_id'] . "</td>";
-                      echo "<td>" . $row['ticket_open'] . "</td>";
-                      echo "<td>" . $row['ticket_close'] . "</td>";
-                      echo "<td>" . $row['comment'] . "</td>";
-                      echo "</tbody>";
+                        echo "<td>" . $row['issue_type'] . "</td>";
+                        echo "<td>" . $row['priority'] . "</td>";
+                        echo "<td>" . $row['status'] . "</td>";
+                        // echo "<td>" . $row['users_id'] . "</td>";
+                        echo "<td>" . $row['ticket_open'] . "</td>";
+                        echo "<td>" . $row['ticket_close'] . "</td>";
+                        echo "<td>" . $row['comment'] . "</td>";
+                        echo "</tr>";
+                      }
+                    } else {
+                      echo "<tr><td colspan='15' class='text-center'>No tickets found</td></tr>";
                     }
-                  }
-                  ?>
 
+                    ?>
+                  </tbody>
                 </table>
               </div>
 

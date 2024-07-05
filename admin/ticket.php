@@ -5,7 +5,7 @@ include "../inc/header.php";
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status 
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -19,6 +19,39 @@ if ($result_user && $result_user->num_rows > 0) {
     $AddTicket = $user['add_ticket_status'];
     $EditTicket = $user['edit_ticket_status'];
     $DeleteTicket = $user['delete_ticket_status'];
+    $listTicketAssign = $user['list_ticket_assign'];
+
+    if ($listTicketAssign == 0) {
+        // User type 1: Select all tickets
+        $ticket_query = "
+            SELECT 
+                t.*, 
+                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM 
+                tbl_ticket t
+            LEFT JOIN 
+                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            GROUP BY 
+                t.ticket_id DESC
+        ";
+    } else {
+        // User type 0: Select tickets assigned to the current user
+        $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
+
+        $ticket_query = "
+            SELECT 
+                t.*, 
+                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM 
+                tbl_ticket t
+            LEFT JOIN 
+                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            WHERE 
+                FIND_IN_SET($user_id, t.users_id)
+            GROUP BY 
+                t.ticket_id DESC
+        ";
+    }
 
     if (!$listTicket) {
         header("location: 404.php");
@@ -28,40 +61,6 @@ if ($result_user && $result_user->num_rows > 0) {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
 
-
-$users_type = $fetch_info['users_type'];
-// Determine user type and adjust query accordingly
-if ($users_type == 1) {
-    // User type 1: Select all tickets
-    $ticket_query = "
-        SELECT 
-            t.*, 
-            REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-        FROM 
-            tbl_ticket t
-        LEFT JOIN 
-            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-        GROUP BY 
-            t.ticket_id DESC
-    ";
-} else {
-    // User type 0: Select tickets assigned to the current user
-    $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
-
-    $ticket_query = "
-        SELECT 
-            t.*, 
-            REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-        FROM 
-            tbl_ticket t
-        LEFT JOIN 
-            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-        WHERE 
-            FIND_IN_SET($user_id, t.users_id)
-        GROUP BY 
-            t.ticket_id DESC
-    ";
-}
 
 
 $ticket_result = $conn->query($ticket_query);
@@ -290,6 +289,9 @@ $ticket_result = $conn->query($ticket_query);
                                                 echo " <td style='display:none;'></td>";
                                             } else {
                                                 echo "<td  class='py-1'>";
+                                                // if ($listTicketAssign == 0) {
+                                                //     echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                // }
                                                 if ($row['ticket_close'] === null) {
 
                                                     // Edit button if user has permission
@@ -300,8 +302,10 @@ $ticket_result = $conn->query($ticket_query);
 
                                                         echo "<a href='delete_ticket.php?id=" . $row['id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
                                                     }
+                                                } else if ($listTicketAssign == 0) {
+                                                    echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
-                                                // Delete button if user has permission
+
 
                                                 echo "</td>";
                                             }

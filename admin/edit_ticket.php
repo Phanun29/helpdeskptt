@@ -6,7 +6,7 @@ include "../inc/header.php";
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status 
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -15,6 +15,8 @@ $result_user = $conn->query($query_user);
 
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
+
+    $listTicketAssign = $user['list_ticket_assign'];
 
     if (!$user['list_ticket_status'] || !$user['edit_ticket_status']) {
         header("Location: 404.php");
@@ -92,11 +94,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $row = $ticket_result->fetch_assoc();
 
             // Check if ticket status is 'Close'
-            if ($row['status'] == 'Close') {
+            if ($row['status'] == 'Close' && $listTicketAssign != 0) {
                 $_SESSION['error_message'] = "Cannot edit a closed ticket.";
-                // header("Location: 404.php");
                 header("Location: ticket.php");
-                exit;
+                exit();
             }
         } else {
             $_SESSION['error_message'] = "Ticket not found.";
