@@ -259,6 +259,7 @@ $ticket_result = $conn->query($ticket_query);
                                         <th>Station ID</th>
                                         <th>Station Name</th>
                                         <th>Station Type</th>
+                                        <th>Province</th>
                                         <th>Description</th>
                                         <th>Image</th>
                                         <th>Issue Type</th>
@@ -289,7 +290,6 @@ $ticket_result = $conn->query($ticket_query);
                                                     }
                                                     if ($DeleteTicket) {
                                                         echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
-                                                        // echo "<a href='delete_ticket.php?id=" . $row['id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
                                                     }
                                                 } else if ($listTicketAssign == 0) {
                                                     echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
@@ -301,7 +301,8 @@ $ticket_result = $conn->query($ticket_query);
                                             echo "<td  class='py-1'>" . $row['station_id'] . "</></td>";
                                             echo "<td  class='py-1'>" . $row['station_name'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['station_type'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['issue_description'] . "</td>";
+                                            echo "<td  class='py-1'>" . $row['province'] . "</td>";
+                                            echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;font-weight: 400;font-style: normal;'>" . $row['issue_description'] . "</td>";
                                             if ($row['issue_image'] == !null) {
                                                 echo "<td  class='py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
                                             } else {
@@ -313,7 +314,7 @@ $ticket_result = $conn->query($ticket_query);
                                             echo "<td  class='py-1'>" . $row['users_name'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['ticket_open'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['ticket_close'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['comment'] . "</td>";
+                                            echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;font-weight: 400;font-style: normal;'>" . $row['comment'] . "</td>";
                                             echo "</tr>";
                                         }
                                     } else {
@@ -322,87 +323,86 @@ $ticket_result = $conn->query($ticket_query);
                                     ?>
                             </table>
                             <!-- Ticket Details Modal -->
+
                             <div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
-                                        <div class="modal-header">
+                                        <div class="modal-header py-1">
                                             <h5 class="modal-title" id="ticketModalLabel">Ticket Details</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <div class="modal-body py-0">
-                                            <table class="table p-0">
+                                            <table class="table p-0 modal-table" style='font-family: "Khmer", sans-serif;font-weight: 400;font-style: normal;'>
                                                 <tr>
                                                     <td class="p-1">Ticket ID:</td>
-                                                    <td class="p-1"><span id="modalTicketId"></span></td>
+                                                    <td class="p-1"><span id="modalTicketId" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Station ID:</td>
-                                                    <td class="p-1"><span id="modalStationId"></span></td>
+                                                    <td class="p-1"><span id="modalStationId" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Station Name:</td>
-                                                    <td class="p-1"><span id="modalStationName"></span></td>
+                                                    <td class="p-1"><span id="modalStationName" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Station Type:</td>
-                                                    <td class="p-1"><span id="modalStationType"></span></td>
+                                                    <td class="p-1"><span id="modalStationType" class="word-wrap"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="p-1">Province:</td>
+                                                    <td class="p-1"><span id="modalProvince" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Description:</td>
-                                                    <td class="p-1"><span id="modalDescription"></span></td>
+                                                    <td class="p-1"><span id="modalDescription" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Issue Type:</td>
-                                                    <td class="p-1"><span id="modalIssueType"></span></td>
+                                                    <td class="p-1"><span id="modalIssueType" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Priority:</td>
-                                                    <td class="p-1"><span id="modalPriority"></span></td>
+                                                    <td class="p-1"><span id="modalPriority" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Status:</td>
-                                                    <td class="p-1"> <span id="modalStatus"></span></td>
+                                                    <td class="p-1"> <span id="modalStatus" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Assign:</td>
-                                                    <td class="p-1"> <span id="modalAssign"></span></td>
+                                                    <td class="p-1"> <span id="modalAssign" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Ticket Open:</td>
-                                                    <td class="p-1"> <span id="modalTicketOpen"></span></td>
+                                                    <td class="p-1"> <span id="modalTicketOpen" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Ticket On Hold:</td>
-                                                    <td class="p-1"> <span id="modalTicketOnHold"></span></td>
+                                                    <td class="p-1"> <span id="modalTicketOnHold" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="p-1">Ticket In Progress</td>
-                                                    <td class="p-1"> <span id="modalTicketInProgress"></span></td>
+                                                    <td class="p-1">Ticket In Progress:</td>
+                                                    <td class="p-1"> <span id="modalTicketInProgress" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="p-1">Ticket Pending Vendor</td>
-                                                    <td class="p-1"> <span id="modalTicketPendingVendor"></span></td>
+                                                    <td class="p-1">Ticket Pending Vendor:</td>
+                                                    <td class="p-1"> <span id="modalTicketPendingVendor" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Ticket Close:</td>
-                                                    <td class="p-1"> <span id="modalTicketClose"></span></td>
+                                                    <td class="p-1"> <span id="modalTicketClose" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Comment:</td>
-                                                    <td> <span id="modalComment"></span></td>
-                                                </tr>
-                                                <tr>
-                                                <tr>
-                                                    <td class="p-1">Image:</td>
-                                                    <td>
-                                                        <img src="" id="modalIssueImage" alt="Issue Image" style="max-width: 200px; max-height: 200px; cursor: pointer; border:1px;" onclick="showImage(this.src)">
-                                                    </td>
+                                                    <td class="p-1"> <span id="modalComment" class="word-wrap"></span></td>
                                                 </tr>
 
-                                                </tr>
                                             </table>
+                                            <p class="p-0">Issue Images</p>
+                                            <div id="modalIssueImages" onclick="showImage(this.src)"></div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -411,6 +411,55 @@ $ticket_result = $conn->query($ticket_query);
                                 </div>
                             </div>
                             <!-- /model ticket details -->
+                            <!--script pop up details ticket -->
+                            <script>
+                                function showTicketDetails(ticket) {
+                                    // Set text content for single fields
+                                    document.getElementById('modalTicketId').textContent = ticket.ticket_id;
+                                    document.getElementById('modalStationId').textContent = ticket.station_id;
+                                    document.getElementById('modalStationName').textContent = ticket.station_name;
+                                    document.getElementById('modalStationType').textContent = ticket.station_type;
+                                    document.getElementById('modalProvince').textContent = ticket.province;
+                                    document.getElementById('modalDescription').textContent = ticket.issue_description;
+                                    document.getElementById('modalIssueType').textContent = ticket.issue_type;
+                                    document.getElementById('modalPriority').textContent = ticket.priority;
+                                    document.getElementById('modalStatus').textContent = ticket.status;
+                                    document.getElementById('modalAssign').textContent = ticket.users_name;
+                                    document.getElementById('modalTicketOpen').textContent = ticket.ticket_open;
+                                    document.getElementById('modalTicketOnHold').textContent = ticket.ticket_on_hold;
+                                    document.getElementById('modalTicketInProgress').textContent = ticket.ticket_in_progress;
+                                    document.getElementById('modalTicketPendingVendor').textContent = ticket.ticket_pending_vendor;
+                                    document.getElementById('modalTicketClose').textContent = ticket.ticket_close;
+                                    document.getElementById('modalComment').textContent = ticket.comment;
+
+                                    // Set image source for main image
+                                    document.getElementById('modalIssueImages').src = ticket.issue_image || '';
+
+                                    // Clear previous images
+                                    const modalIssueImages = document.getElementById('modalIssueImages');
+                                    modalIssueImages.innerHTML = '';
+
+                                    // Display multiple images if available
+                                    if (ticket.issue_image) {
+                                        const images = ticket.issue_image.split(',');
+                                        images.forEach(image => {
+                                            const imgElement = document.createElement('img');
+                                            imgElement.src = image.trim();
+                                            imgElement.style.width = '50px';
+                                            imgElement.style.cursor = 'pointer';
+                                            imgElement.onclick = () => showImage(image.trim());
+                                            modalIssueImages.appendChild(imgElement);
+                                        });
+                                    }
+
+                                    $('#ticketModal').modal('show');
+                                }
+
+                                function showImage(imageUrl) {
+                                    $('#imageToShow').attr('src', imageUrl);
+                                    $('#imageModal').modal('show');
+                                }
+                            </script>
                         </div>
                     </div>
                 </div>
@@ -458,33 +507,6 @@ $ticket_result = $conn->query($ticket_query);
                 "info": true,
                 "autoWidth": true,
                 "responsive": true,
-            });
-        });
-    </script>
-    <!-- filter -->
-    <script>
-        $(document).ready(function() {
-            // Handle filter button click
-            $('#filterForm button[type="button"]').on('click', function() {
-                var formData = $('#filterForm').serialize();
-                $.ajax({
-                    url: 'process.php', // Replace with your PHP script handling filtering
-                    type: 'GET', // or 'POST' depending on your preference
-                    data: formData,
-                    success: function(response) {
-                        $('#ticketTableBody').html(response); // Update table body with filtered data
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
-
-            // Handle reset button click
-            $('#filterResetBtn').on('click', function() {
-                $('#filterForm')[0].reset();
-                // Reset DataTable
-                $('#ticketTable').DataTable().search('').draw();
             });
         });
     </script>
@@ -565,7 +587,7 @@ $ticket_result = $conn->query($ticket_query);
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'testd.php',
+                            url: 'delete_ticket.php',
                             type: 'POST',
                             data: {
                                 id: ticketId
@@ -606,49 +628,6 @@ $ticket_result = $conn->query($ticket_query);
             });
         });
     </script>
-    <!--script pop up details ticket -->
-    <script>
-        function showTicketDetails(ticket) {
-            // Set text content and image source for single image
-            document.getElementById('modalTicketId').textContent = ticket.ticket_id;
-            document.getElementById('modalStationId').textContent = ticket.station_id;
-            document.getElementById('modalStationName').textContent = ticket.station_name;
-            document.getElementById('modalStationType').textContent = ticket.station_type;
-            document.getElementById('modalDescription').textContent = ticket.issue_description;
-            document.getElementById('modalIssueType').textContent = ticket.issue_type;
-            document.getElementById('modalPriority').textContent = ticket.priority;
-            document.getElementById('modalStatus').textContent = ticket.status;
-            document.getElementById('modalAssign').textContent = ticket.users_name;
-            document.getElementById('modalTicketOpen').textContent = ticket.ticket_open;
-            document.getElementById('modalTicketOnHold').textContent = ticket.ticket_on_hold;
-            document.getElementById('modalTicketInProgress').textContent = ticket.ticket_in_progress;
-            document.getElementById('modalTicketPendingVendor').textContent = ticket.ticket_pending_vendor;
-            document.getElementById('modalTicketClose').textContent = ticket.ticket_close;
-            document.getElementById('modalComment').textContent = ticket.comment;
-            document.getElementById('modalIssueImage').src = ticket.issue_image || '';
-
-            // Display multiple images if available
-            const modalIssueImages = document.getElementById('modalIssueImage'); // Corrected ID here
-            if (ticket.issue_images) {
-                const images = ticket.issue_images.split(',');
-                images.forEach(image => {
-                    const imgElement = document.createElement('img');
-                    imgElement.src = image.trim(); // Trim to remove any leading/trailing whitespace
-                    imgElement.style.width = '50px';
-                    imgElement.style.cursor = 'pointer';
-                    imgElement.onclick = () => showImage(image.trim());
-                    modalIssueImages.appendChild(imgElement); // Append to modalIssueImages, corrected from modalIssueImage
-                });
-            }
-
-            $('#ticketModal').modal('show');
-        }
-
-        function showImage(imageUrl) {
-            $('#imageToShow').attr('src', imageUrl);
-            $('#imageModal').modal('show');
-        }
-    </script>
     <!-- Modal for displaying images -->
     <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -676,6 +655,33 @@ $ticket_result = $conn->query($ticket_query);
             </div>
         </div>
     </div>
+    <!-- filter -->
+    <script>
+        $(document).ready(function() {
+            // Handle filter button click
+            $('#filterForm button[type="button"]').on('click', function() {
+                var formData = $('#filterForm').serialize();
+                $.ajax({
+                    url: 'process.php', // Replace with your PHP script handling filtering
+                    type: 'GET', // or 'POST' depending on your preference
+                    data: formData,
+                    success: function(response) {
+                        $('#ticketTableBody').html(response); // Update table body with filtered data
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+
+            // Handle reset button click
+            $('#filterResetBtn').on('click', function() {
+                $('#filterForm')[0].reset();
+                // Reset DataTable
+                $('#example1').DataTable().search('').draw();
+            });
+        });
+    </script>
     <!--script pop up show image -->
     <script>
         function showImage(images) {

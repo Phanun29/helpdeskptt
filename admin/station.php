@@ -97,6 +97,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Station ID</th>
                                         <th>Station Name</th>
                                         <th>Station Type</th>
+                                        <th>Province</th>
                                         <?php if (!$canEditStation && !$canDeleteStation) : ?>
                                             <th style="display:none;"></th>
                                         <?php else : ?>
@@ -117,7 +118,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>{$row['station_id']}</td>";
                                             echo "<td class='py-1'>{$row['station_name']}</td>";
                                             echo "<td class='py-1'>{$row['station_type']}</td>";
-
+                                            echo "<td class='py-1'>{$row['province']}</td>";
                                             if (!$canEditStation && !$canDeleteStation) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {

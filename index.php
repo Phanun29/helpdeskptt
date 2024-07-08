@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <!-- icon -->
     <link rel="icon" href="img/favicon.ico.png">
+    <link rel="manifest" href="manifest.json">
 </head>
 
 <body class="hold-transition login-page">
