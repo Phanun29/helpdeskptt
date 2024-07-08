@@ -52,7 +52,6 @@ if ($result_user && $result_user->num_rows > 0) {
                 t.ticket_id DESC
         ";
     }
-
     if (!$listTicket) {
         header("location: 404.php");
         exit();
@@ -60,8 +59,6 @@ if ($result_user && $result_user->num_rows > 0) {
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
-
-
 
 $ticket_result = $conn->query($ticket_query);
 ?>
@@ -90,10 +87,7 @@ $ticket_result = $conn->query($ticket_query);
 
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
-
                                 <?php
-
-
                                 if (isset($_SESSION['success_message'])) {
                                     echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['success_message']}</strong>
@@ -139,8 +133,6 @@ $ticket_result = $conn->query($ticket_query);
                                     opacity: 1;
                                 }
                             </style>
-
-
                             <div class="card-header">
                                 <?php if (isset($AddTicket) && $AddTicket) : ?>
                                     <a href="add_ticket.php" class="btn btn-primary ml-2">Add Ticket</a>
@@ -235,6 +227,7 @@ $ticket_result = $conn->query($ticket_query);
                                     </div>
                                 </form>
                             </div>
+                            <!-- script dropdown filter -->
                             <script>
                                 document.getElementById('toggleFilterBtn').addEventListener('click', function() {
                                     var filterForm = document.getElementById('filterForm1');
@@ -289,24 +282,18 @@ $ticket_result = $conn->query($ticket_query);
                                                 echo " <td style='display:none;'></td>";
                                             } else {
                                                 echo "<td  class='py-1'>";
-                                                // if ($listTicketAssign == 0) {
-                                                //     echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
-                                                // }
                                                 if ($row['ticket_close'] === null) {
-
                                                     // Edit button if user has permission
                                                     if ($EditTicket) {
                                                         echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                     }
                                                     if ($DeleteTicket) {
-                                                        echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'>Delete</button>";
+                                                        echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                         // echo "<a href='delete_ticket.php?id=" . $row['id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
                                                     }
                                                 } else if ($listTicketAssign == 0) {
                                                     echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
-
-
                                                 echo "</td>";
                                             }
                                             echo "<td  class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($row) . ")'>" . $row['ticket_id'] . "</button></td>";
@@ -320,19 +307,6 @@ $ticket_result = $conn->query($ticket_query);
                                             } else {
                                                 echo "<td class='text-center text-warning'>none</td>";
                                             }
-
-
-                                            // // Handling multiple images
-                                            // if (!empty($row['issue_image'])) {
-                                            //     $images = explode(',', $row['issue_image']);
-                                            //     echo "<td class='py-1'>";
-                                            //     foreach ($images as $image) {
-                                            //         echo "<img src='$image' style='width: 50px; height: auto; cursor: pointer;' onclick='showImage(\"$image\")'>";
-                                            //     }
-                                            //     echo "</td>";
-                                            // } else {
-                                            //     echo "<td class='text-center text-warning'>none</td>";
-                                            // }
                                             echo "<td  class='py-1'>" . $row['issue_type'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['priority'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['status'] . "</td>";
@@ -472,13 +446,13 @@ $ticket_result = $conn->query($ticket_query);
         $(function() {
             $("#example1").DataTable({
                 "buttons": [, "csv", "excel", "pdf"],
-                "lengthChange": true,
+                "lengthChange": false,
                 "autoWidth": true,
 
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
             $('#example2').DataTable({
                 "paging": true,
-                "lengthChange": true,
+                "lengthChange": false,
                 "searching": true,
                 "ordering": true,
                 "info": true,
@@ -536,7 +510,44 @@ $ticket_result = $conn->query($ticket_query);
             background-color: #f1f1f1;
         }
     </style>
-    <script src="../script/station_id_fill.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#station_id').blur(function() {
+                var station_id = $(this).val();
+                fetchStationDetails(station_id);
+            });
+
+            $('#quickForm').on('submit', function(event) {
+                if (!this.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                $(this).addClass('was-validated');
+            });
+        });
+
+        function showSuggestions(str) {
+            if (str == "") {
+                document.getElementById("suggestion_dropdown").innerHTML = "";
+                return;
+            } else {
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("suggestion_dropdown").innerHTML = this.responseText;
+                    }
+                };
+                xmlhttp.open("GET", "get_suggestions.php?q=" + str, true);
+                xmlhttp.send();
+            }
+        }
+
+        function selectSuggestion(station_id) {
+            document.getElementById("station_id").value = station_id;
+            document.getElementById("suggestion_dropdown").innerHTML = "";
+            $('#station_id').blur();
+        }
+    </script>
     <!-- delete -->
     <script>
         $(document).ready(function() {
@@ -595,9 +606,7 @@ $ticket_result = $conn->query($ticket_query);
             });
         });
     </script>
-
-
-    <!-- pop up details ticket -->
+    <!--script pop up details ticket -->
     <script>
         function showTicketDetails(ticket) {
             // Set text content and image source for single image
@@ -667,35 +676,7 @@ $ticket_result = $conn->query($ticket_query);
             </div>
         </div>
     </div>
-
-    <!-- filter -->
-    <script>
-        $(document).ready(function() {
-            // Handle filter button click
-            $('#filterForm button[type="button"]').on('click', function() {
-                var formData = $('#filterForm').serialize();
-                $.ajax({
-                    url: 'process.php', // Replace with your PHP script handling filtering
-                    type: 'GET', // or 'POST' depending on your preference
-                    data: formData,
-                    success: function(response) {
-                        $('#ticketTableBody').html(response); // Update table body with filtered data
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
-
-            // Handle reset button click
-            $('#filterResetBtn').on('click', function() {
-                $('#filterForm')[0].reset();
-                // Reset DataTable
-                $('#example1').DataTable().search('').draw();
-            });
-        });
-    </script>
-    <!-- show image -->
+    <!--script pop up show image -->
     <script>
         function showImage(images) {
             var imageArray = images.split(',');

@@ -39,5 +39,5 @@
 <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 <!-- style -->
 <link rel="stylesheet" href="../css/main.css">
-<!-- multiple -->
+<!-- multiple choice-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">

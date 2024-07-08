@@ -286,11 +286,12 @@ $ticket_result = $conn->query($ticket_query);
 
                                                         echo "<a href='delete_ticket.php?id=" . $row['id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
                                                     }
+                                                } else if ($listTicketAssign == 0) {
+                                                    echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
-                                                // Delete button if user has permission
-
                                                 echo "</td>";
                                             }
+
                                             echo "<td  class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($row) . ")'>" . $row['ticket_id'] . "</button></td>";
 
                                             echo "<td  class='py-1'>" . $row['station_id'] . "</></td>";
