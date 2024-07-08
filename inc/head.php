@@ -40,4 +40,6 @@
 <link rel="stylesheet" href="../css/main.css">
 <!-- multiple choice-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">
+<!-- app -->
 <link rel="manifest" href="../manifest.json">
+<script src="scripts/app.js"></script>

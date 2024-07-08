@@ -448,6 +448,7 @@ if ($result_user && $result_user->num_rows > 0) {
   <script src="../dist/js/demo.js"></script>
   <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
   <script src="../dist/js/pages/dashboard.js"></script>
+  <script src="scripts/app.js"></script>
 </body>
 
 </html>

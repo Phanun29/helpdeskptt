@@ -302,7 +302,7 @@ $ticket_result = $conn->query($ticket_query);
                                             echo "<td  class='py-1'>" . $row['station_name'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['station_type'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['province'] . "</td>";
-                                            echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;font-weight: 400;font-style: normal;'>" . $row['issue_description'] . "</td>";
+                                            echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;'>" . $row['issue_description'] . "</td>";
                                             if ($row['issue_image'] == !null) {
                                                 echo "<td  class='py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
                                             } else {
