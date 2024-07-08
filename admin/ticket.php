@@ -299,8 +299,8 @@ $ticket_result = $conn->query($ticket_query);
                                                         echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                     }
                                                     if ($DeleteTicket) {
-
-                                                        echo "<a href='delete_ticket.php?id=" . $row['id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                        echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'>Delete</button>";
+                                                        // echo "<a href='delete_ticket.php?id=" . $row['id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
                                                     }
                                                 } else if ($listTicketAssign == 0) {
                                                     echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
@@ -436,8 +436,6 @@ $ticket_result = $conn->query($ticket_query);
                                     </div>
                                 </div>
                             </div>
-
-
                             <!-- /model ticket details -->
                         </div>
                     </div>
@@ -446,7 +444,6 @@ $ticket_result = $conn->query($ticket_query);
         </div>
         <?php include "../inc/footer.php"; ?>
     </div>
-
     <!-- jQuery -->
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
@@ -464,12 +461,33 @@ $ticket_result = $conn->query($ticket_query);
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
     <!-- Page specific script -->
+    <script>
+        $(function() {
+            $("#example1").DataTable({
+                "buttons": [, "csv", "excel", "pdf"],
+                "lengthChange": true,
+                "autoWidth": true,
 
+            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+            $('#example2').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": true,
+                "responsive": true,
+            });
+        });
+    </script>
+    <!-- filter -->
     <script>
         $(document).ready(function() {
             // Handle filter button click
@@ -519,17 +537,9 @@ $ticket_result = $conn->query($ticket_query);
         }
     </style>
     <script src="../script/station_id_fill.js"></script>
+    <!-- delete -->
     <script>
         $(document).ready(function() {
-            $('#ticketTable').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                    'csv', 'excel', 'pdf'
-                ],
-                pageLength: 10, // Default number of rows per page
-                lengthMenu: [10, 20, 50, 100] // Options for number of rows per page
-            });
-
             // Handle delete button click
             $(document).on('click', '.delete-btn', function() {
                 var ticketId = $(this).data('id');
@@ -586,25 +596,7 @@ $ticket_result = $conn->query($ticket_query);
         });
     </script>
 
-    <script>
-        $(function() {
-            $("#example1").DataTable({
-                "buttons": [, "csv", "excel", "pdf"],
-                "lengthChange": true,
-                "autoWidth": true,
 
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
-                "paging": true,
-                "lengthChange": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": true,
-                "responsive": true,
-            });
-        });
-    </script>
     <!-- pop up details ticket -->
     <script>
         function showTicketDetails(ticket) {
@@ -703,7 +695,7 @@ $ticket_result = $conn->query($ticket_query);
             });
         });
     </script>
-
+    <!-- show image -->
     <script>
         function showImage(images) {
             var imageArray = images.split(',');

@@ -324,13 +324,20 @@ $ticket_result = $conn->query($ticket_query);
     <script src="../script/station_id_fill.js"></script>
     <script>
         $(document).ready(function() {
-            $('#example1').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                    'csv', 'excel', 'pdf'
-                ],
-                pageLength: 10, // Default number of rows per page
-                lengthMenu: [10, 20, 50, 100] // Options for number of rows per page
+             $("#example1").DataTable({
+                "buttons": [, "csv", "excel", "pdf"],
+                "lengthChange": true,
+                "autoWidth": true,
+
+            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+            $('#example2').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": true,
+                "responsive": true,
             });
 
             // Handle delete button click
