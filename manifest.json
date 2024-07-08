@@ -1,6 +1,6 @@
 {
-    "name": "My HelpdeskApp",
-    "short_name": "helpdeskN",
+    "name": "NHelpdeskApp",
+    "short_name": "helpdeskN1",
     "icons": [
       {
         "src": "/helpdeskptt/icons/icon-512.png",
@@ -13,4 +13,4 @@
     "background_color": "#ffffff",
     "theme_color": "#000000"
   }
-  
+    
