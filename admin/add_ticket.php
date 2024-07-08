@@ -60,6 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
         $station_name = $row['station_name'];
         $station_type = $row['station_type'];
+        $province = $_POST['province'];
 
         // Generate Ticket ID
         $current_year = date("y");
@@ -105,12 +106,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         error_log("Attempting to insert ticket with station_id: $station_id");
 
         // Prepare the SQL query to insert the ticket
-        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, issue_description, issue_image, issue_type, priority,status, ticket_open, ticket_close) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?, ?)";
+        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province,issue_description, issue_image, issue_type, priority,status, ticket_open, ticket_close) 
+                VALUES (?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("sssssssssss", $ticket_id, $station_id, $station_name, $station_type, $issue_description, $issue_image_paths, $issue_type, $priority, $status, $ticket_open, $ticket_close);
+            $stmt->bind_param("ssssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_image_paths, $issue_type, $priority, $status, $ticket_open, $ticket_close);
 
             if ($stmt->execute()) {
                 $_SESSION['success_message'] = "New ticket added successfully";
@@ -185,19 +186,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
                                 <div class="card-body col">
                                     <div class="row">
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_id">Station ID <span class="text-danger">*</span></label>
                                             <input class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" required>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
 
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_name">Station Name</label>
                                             <input type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
                                         </div>
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_type">Station Type</label>
                                             <input type="text" name="station_type" class="form-control" id="station_type" placeholder="Station Type" readonly>
+                                        </div>
+                                        <div class="form-group col-sm-3">
+                                            <label for="province">Province</label>
+                                            <input type="text" name="province" class="form-control" id="province" placeholder="Station Type" readonly>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -222,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="Hardware">Hardware</option>
                                                 <option value="Software">Software</option>
                                                 <option value="Network">Network</option>
-                                                <option value="Dispensor">Dispenser</option>
+                                                <option value="Dispenser">Dispenser</option>
                                                 <option value="Unassigned">Unassigned</option>
                                             </select>
                                         </div>
@@ -240,29 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </select>
                                         </div>
 
-                                        <input type="hidden" name="open" value="open">
-                                        <!-- 
-                                        <div class="form-group col-sm-4">
-                                            <label for="users_id">Assign</label>
-                                            <select name="users_id[]" id="users_id" class="form-control" placeholder="Select" multiple>
 
-                                               
-                                                <?php
-                                                $user_query = "SELECT users_id, users_name FROM tbl_users WHERE status = 1";
-                                                $user_result = $conn->query($user_query);
-
-                                                if (!$user_result) {
-                                                    echo "Error: " . $conn->error;
-                                                } elseif ($user_result->num_rows > 0) {
-                                                    while ($row = $user_result->fetch_assoc()) {
-                                                        echo "<option value='" . $row['users_id'] . "'>" . $row['users_name'] . "</option>";
-                                                    }
-                                                } else {
-                                                    echo "No users found with status 1";
-                                                }
-                                                ?>
-                                            </select>
-                                        </div> -->
 
                                     </div>
 
@@ -283,44 +266,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- DataTables  & Plugins -->
-    <script src="../plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="../plugins/jszip/jszip.min.js"></script>
-    <script src="../plugins/pdfmake/pdfmake.min.js"></script>
-    <script src="../plugins/pdfmake/vfs_fonts.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- select multiple -->
+    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-    <!-- Page specific script -->
-    <script>
-        $(function() {
-            $("#example1").DataTable({
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": [, "csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-            });
-        });
-    </script>
     <!-- select multiple -->
-    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var issueTypeChoices = new Choices('#issue_type', {
@@ -338,11 +290,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             });
         });
     </script>
-
-
     <!-- auto fill station -->
-    <script src="../script/station_id_fill.js">
-
     </script>
     <script>
         $(document).ready(function() {
@@ -372,9 +320,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if (response.success) {
                         $('#station_name').val(response.station_name);
                         $('#station_type').val(response.station_type);
+                        $('#province').val(response.province);
                     } else {
                         $('#station_name').val('');
                         $('#station_type').val('');
+                        $('#province').val('');
                     }
                 }
             });

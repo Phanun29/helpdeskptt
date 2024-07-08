@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_station_id = $_POST['station_id'];
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
+    $province = $_POST['province'];
 
     // Start a transaction
     $conn->begin_transaction();
@@ -62,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // Update the station in tbl_station
-        $sql = "UPDATE tbl_station SET station_id = ?, station_name = ?, station_type = ? WHERE id = ?";
+        $sql = "UPDATE tbl_station SET station_id = ?, station_name = ?, station_type = ?, province=? WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssi", $new_station_id, $station_name, $station_type, $id);
+        $stmt->bind_param("ssssi", $new_station_id, $station_name, $station_type, $province, $id);
         if (!$stmt->execute()) {
             throw new Exception("Error updating station: " . $stmt->error);
         }
@@ -190,6 +191,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <option value="DoDo" <?php echo (isset($station['station_type']) && $station['station_type'] == 'DoDo') ? 'selected' : ''; ?>>DoDo</option>
                                         </select>
                                     </div>
+                                    <?php
+                                    // Example selected value
+                                    $selected_province = isset($station['province']) ? $station['province'] : '';
+
+                                    ?>
+                                    <div class="form-group">
+                                        <label>Province</label>
+                                        <select name="province" class="form-control" style="width: 100%;" required>
+                                            <option value="">-Select-</option>
+                                            <?php
+                                            $provinces = [
+                                                "Phnom Penh", "Siem Reap", "Banteay Meanchey", "Kampong Speu", "Kampong Thom", "Prey Veng",
+                                                "Kampot", "Battambang", "Preah Sihanouk", "Svay Rieng", "Kandal", "Kampong Chhnang",
+                                                "Tboung Khmum", "Kep", "Pursat", "Koh Kong", "Kratie", "Preah Vihear", "Mondul Kiri",
+                                                "Kampong Cham", "Pailin", "Stung Treng", "Oddar Meanchey", "Ratanak Kiri", "Takeo"
+                                            ];
+
+                                            foreach ($provinces as $province) {
+                                                echo '<option value="' . $province . '"' . ($selected_province == $province ? ' selected' : '') . '>' . $province . '</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -213,43 +237,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- DataTables  & Plugins -->
-    <script src="../plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="../plugins/jszip/jszip.min.js"></script>
-    <script src="../plugins/pdfmake/pdfmake.min.js"></script>
-    <script src="../plugins/pdfmake/vfs_fonts.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-    <!-- Page specific script -->
-    <script>
-        $(function() {
-            $("#example1").DataTable({
-                // "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": [, "csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-            });
-        });
-    </script>
+
 </body>
 
 </html>

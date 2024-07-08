@@ -39,9 +39,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
+    $province = $_POST['province'];
 
-    $sql = "INSERT INTO tbl_station (station_id, station_name, station_type) 
-              VALUES ('$station_id', '$station_name', '$station_type')";
+    $sql = "INSERT INTO tbl_station (station_id, station_name, station_type,province) 
+              VALUES ('$station_id', '$station_name', '$station_type','$province')";
 
     if ($conn->query($sql) === TRUE) {
         // Successful insertion
@@ -116,9 +117,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <div class="form-group">
                                         <label>Station Type</label>
                                         <select name="station_type" class="form-control select2bs4" style="width: 100%;" required>
-                                            <option value="">Select</option>
+                                            <option value="">-Select-</option>
                                             <option value="CoCo">CoCo</option>
                                             <option value="DoDo">DoDO</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Province</label>
+                                        <select name="province" class="form-control" style="width: 100%;" required>
+                                            <option value="">-Select-</option>
+                                            <option value="Phnom Penh">Phnom Penh</option>
+                                            <option value="Siem Reap">Siem Reap </option>
+                                            <option value="Banteay Meanchey">Banteay Meanchey </option>
+                                            <option value="Kampong Speu">Kampong Speu </option>
+                                            <option value="Kampong Thom">Kampong Thom </option>
+                                            <option value="Prey Veng">Prey Veng </option>
+                                            <option value="Kampot">Kampot </option>
+                                            <option value="Battambang">Battambang </option>
+                                            <option value="Preah Sihanouk">Preah Sihanouk </option>
+                                            <option value="Svay Rieng">Svay Rieng </option>
+                                            <option value="Kandal">Kandal </option>
+                                            <option value="Kampong Chhnang">Kampong Chhnang </option>
+                                            <option value="Tboung Khmum">Tboung Khmum </option>
+                                            <option value="Kep">Kep </option>
+                                            <option value="Pursat">Pursat </option>
+                                            <option value="Koh Kong">Koh Kong </option>
+                                            <option value="Kratie">Kratie </option>
+                                            <option value="Preah Vihear">Preah Vihear </option>
+                                            <option value="Mondul Kiri">Mondul Kiri </option>
+                                            <option value="Kampong Cham">Kampong Cham </option>
+                                            <option value="Pailin">Pailin </option>
+                                            <option value="Stung Treng">Stung Treng </option>
+                                            <option value="Oddar Meanchey">Oddar Meanchey </option>
+                                            <option value="Ratanak Kiri">Ratanak Kiri </option>
+                                            <option value="Takeo">Takeo </option>
+
                                         </select>
                                     </div>
                                 </div>
@@ -138,44 +171,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- DataTables  & Plugins -->
-    <script src="../plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="../plugins/jszip/jszip.min.js"></script>
-    <script src="../plugins/pdfmake/pdfmake.min.js"></script>
-    <script src="../plugins/pdfmake/vfs_fonts.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-    <!-- Page specific script -->
-    <script>
-        $(function() {
-            $("#example1").DataTable({
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": [, "csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": false,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-            });
-        });
-    </script>
-
-
 
 </body>
 

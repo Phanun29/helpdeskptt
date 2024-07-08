@@ -6,7 +6,7 @@ include "../inc/header.php";
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status,r.list_ticket_assign
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -21,7 +21,6 @@ if ($result_user && $result_user->num_rows > 0) {
     $EditTicket = $user['edit_ticket_status'];
     $DeleteTicket = $user['delete_ticket_status'];
     $listTicketAssign = $user['list_ticket_assign'];
-
     if (!$listTicket) {
         header("location: 404.php");
         exit();
@@ -50,7 +49,6 @@ if ($users_type == 0) {
 } else {
     $ticket_query .= " WHERE 1=1"; // Default condition for further appending
 }
-
 // Add conditions based on submitted form data
 $conditions = [];
 
@@ -125,8 +123,8 @@ if ($ticket_result->num_rows > 0) {
                 if ($DeleteTicket) {
                     echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                 }
-            } else if ($listTicketAssign == 0) {
-                echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+            } elseif ($listTicketAssign == 0) {
+                echo "<button data-id='{$row['id']}' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></button>";
             }
         }
         echo "</td>";
@@ -136,6 +134,7 @@ if ($ticket_result->num_rows > 0) {
         echo "<td class='py-1'>" . $row['station_id'] . "</td>";
         echo "<td class='py-1'>" . $row['station_name'] . "</td>";
         echo "<td class='py-1'>" . $row['station_type'] . "</td>";
+        echo "<td class='py-1'>" . $row['province'] . "</td>";
         echo "<td class='py-1'>" . $row['issue_description'] . "</td>";
         if ($row['issue_image'] == !null) {
             echo "<td  class='py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
