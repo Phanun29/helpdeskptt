@@ -54,13 +54,7 @@ if ($result_user && $result_user->num_rows > 0) {
                             <h1 class="m-0">User</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">Users</li>
-                            </ol> -->
                             <?php
-                            // session_start(); // Start the session at the beginning of your file
-
                             if (isset($_SESSION['success_message'])) {
                                 echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
                                     <strong>{$_SESSION['success_message']}</strong>
@@ -110,7 +104,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Users Name</th>
                                         <th>Email</th>
                                         <th>Company</th>
-                                        <th>Rules</th>
+                                        <th>Users Rules</th>
                                         <th>Status</th>
 
                                         <?php if ($EditUsers == 0 & $DeleteUsers == 0) {

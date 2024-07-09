@@ -35,6 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
+    $province = $_POST['province'];
     $issue_description = $_POST['issue_description'];
     $issue_image = $_FILES['issue_image']['name']; // Assuming you handle file upload separately
     $issue_types = implode(', ', $_POST['issue_type']);
@@ -112,6 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         station_id = ?, 
                         station_name = ?, 
                         station_type = ?, 
+                        province=?,
                         issue_description = ?, 
                         issue_image = ?, 
                         issue_type = ?, 
@@ -133,10 +135,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Bind the parameters
         $stmt->bind_param(
-            'ssssssssssssssi',
+            'sssssssssssssssi',
             $station_id,
             $station_name,
             $station_type,
+            $province,
             $issue_description,
             $issue_image_paths,
             $issue_types,
@@ -218,7 +221,7 @@ $stmt->close();
                             <a href="ticket.php" class="btn btn-primary mx-2">BACK</a>
                             <h1 class="m-0">Update Ticket</h1>
                         </div>
-                        <div class="col-sm-6">                      
+                        <div class="col-sm-6">
                             <?php if (isset($_SESSION['success_message'])) : ?>
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     <strong><?php echo $_SESSION['success_message']; ?></strong>
@@ -253,20 +256,24 @@ $stmt->close();
                             <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
                                 <div class="card-body col">
                                     <div class="row">
-                                        <div class="form-group col-sm-4 ">
+                                        <div class="form-group col-sm-3 ">
                                             <label for="station_input">Station ID <span class="text-danger">*</span></label>
                                             <input value="<?php echo $row['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
 
 
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_name">Station Name</label>
                                             <input value="<?php echo $row['station_name'] ?>" type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
                                         </div>
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_type">Station Type</label>
                                             <input value="<?php echo $row['station_type'] ?>" type="text" name="station_type" class="form-control" id="station_type" placeholder="Station Type" readonly>
+                                        </div>
+                                        <div class="form-group col-sm-3">
+                                            <label for="province">Province</label>
+                                            <input value="<?php echo $row['province'] ?>" type="text" name="province" class="form-control" id="province" placeholder="Station Type" readonly>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -440,9 +447,11 @@ $stmt->close();
                     if (response.success) {
                         $('#station_name').val(response.station_name);
                         $('#station_type').val(response.station_type);
+                        $('#province').val(response.province);
                     } else {
                         $('#station_name').val('');
                         $('#station_type').val('');
+                        $('#province').val('');
                     }
                 }
             });

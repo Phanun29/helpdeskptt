@@ -69,6 +69,12 @@ $ticket_result = $conn->query($ticket_query);
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "../inc/head.php"; ?>
+    <script>
+        // Auto-refresh the page every 30 seconds
+        // setInterval(function() {
+        //     window.location.reload();
+        // }, 10000); // 30000 milliseconds = 30 seconds
+    </script>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -261,7 +267,7 @@ $ticket_result = $conn->query($ticket_query);
                                         <th>Station Type</th>
                                         <th>Province</th>
                                         <th>Description</th>
-                                        <th>Image</th>
+                                        <th>Issue Image</th>
                                         <th>Issue Type</th>
                                         <th>SLA Category</th>
                                         <th>Status</th>
@@ -490,7 +496,36 @@ $ticket_result = $conn->query($ticket_query);
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
+    <!-- Custom PDFMake Khmer Font -->
+    <script>
+        // Load custom Khmer font
+        // pdfMake.fonts = {
+        //     Khmer: {
+        //         normal: 'NotoSansKhmer-Regular.ttf',
+        //         bold: 'NotoSansKhmer-Bold.ttf',
+        //         italics: 'NotoSansKhmer-Italic.ttf',
+        //         bolditalics: 'NotoSansKhmer-BoldItalic.ttf'
+        //     }
+        // };
+
+        // $(function() {
+        //     $("#example1").DataTable({
+        //         "lengthChange": false,
+        //         "autoWidth": false,
+        //         "buttons": [{
+        //                 extend: 'pdfHtml5',
+        //                 text: 'PDF',
+        //                 customize: function(doc) {
+        //                     doc.defaultStyle.font = 'Khmer';
+        //                 }
+        //             },
+        //             "csv", "excel"
+        //         ]
+        //     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+        // });
+    </script>
     <!-- Page specific script -->
+
     <script>
         $(function() {
             $("#example1").DataTable({
@@ -533,21 +568,6 @@ $ticket_result = $conn->query($ticket_query);
         }
     </style>
     <script>
-        $(document).ready(function() {
-            $('#station_id').blur(function() {
-                var station_id = $(this).val();
-                fetchStationDetails(station_id);
-            });
-
-            $('#quickForm').on('submit', function(event) {
-                if (!this.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                $(this).addClass('was-validated');
-            });
-        });
-
         function showSuggestions(str) {
             if (str == "") {
                 document.getElementById("suggestion_dropdown").innerHTML = "";

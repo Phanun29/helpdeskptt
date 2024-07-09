@@ -313,6 +313,7 @@ if ($result_user && $result_user->num_rows > 0) {
                       <th>Station ID</th>
                       <th>Station Name</th>
                       <th>Station Type</th>
+                      <th>Province</th>
                       <th>Description</th>
                       <th>Type</th>
                       <th>SLA Category </th>
@@ -320,6 +321,7 @@ if ($result_user && $result_user->num_rows > 0) {
                       <th>Ticket Open</th>
                       <th>Ticket Close</th>
                       <th>Comment</th>
+
                     </tr>
                   </thead>
                   <tbody>
@@ -334,6 +336,7 @@ if ($result_user && $result_user->num_rows > 0) {
                         echo "<td>" . $row['station_id'] . "</td>";
                         echo "<td>" . $row['station_name'] . "</td>";
                         echo "<td>" . $row['station_type'] . "</td>";
+                        echo "<td>" . $row['province'] . "</td>";
                         echo "<td>" . $row['issue_description'] . "</td>";
 
                         echo "<td>" . $row['issue_type'] . "</td>";

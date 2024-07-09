@@ -22,6 +22,8 @@ if ($result_user && $result_user->num_rows > 0) {
     }
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("Location: station.php");
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -54,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->query("SET foreign_key_checks = 0");
 
         // Update the station_id in tbl_ticket
-        $sql = "UPDATE tbl_ticket SET station_id = ? WHERE station_id = ?";
+        $sql = "UPDATE tbl_ticket SET station_id = ? ,station_name = ?, station_type = ?, province=? WHERE station_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $new_station_id, $old_station_id);
+        $stmt->bind_param("sssss", $new_station_id, $station_name, $station_type, $province, $old_station_id);
         if (!$stmt->execute()) {
             throw new Exception("Error updating tickets: " . $stmt->error);
         }

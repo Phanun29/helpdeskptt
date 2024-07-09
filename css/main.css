@@ -4,10 +4,10 @@ html, body{
 
 @import url('https://fonts.googleapis.com/css2?family=Khmer&display=swap');
 
-td {
+td,textarea {
     font-family: "Khmer", sans-serif;
  
-  }
+}
   
 .col-sm-12 {
     overflow: auto;
