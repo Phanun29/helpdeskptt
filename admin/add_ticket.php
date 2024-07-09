@@ -294,12 +294,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
     <script>
         $(document).ready(function() {
-            $('#station_id').blur(function() {
-                var station_id = $(this).val();
-                fetchStationDetails(station_id);
+            const $stationId = $('#station_id');
+            const $quickForm = $('#quickForm');
+
+            $stationId.on('blur', function() {
+                fetchStationDetails($(this).val());
             });
 
-            $('#quickForm').on('submit', function(event) {
+            $quickForm.on('submit', function(event) {
                 if (!this.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -309,47 +311,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
 
         function fetchStationDetails(station_id) {
-            $.ajax({
-                url: 'get_station_details.php',
-                type: 'POST',
-                data: {
-                    station_id: station_id
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        $('#station_name').val(response.station_name);
-                        $('#station_type').val(response.station_type);
-                        $('#province').val(response.province);
-                    } else {
-                        $('#station_name').val('');
-                        $('#station_type').val('');
-                        $('#province').val('');
-                    }
-                }
-            });
+            $.post('get_station_details.php', {
+                station_id
+            }, function(response) {
+                const {
+                    success,
+                    station_name = '',
+                    station_type = '',
+                    province = ''
+                } = response;
+                $('#station_name').val(station_name);
+                $('#station_type').val(station_type);
+                $('#province').val(province);
+            }, 'json');
         }
 
         function showSuggestions(str) {
-            if (str == "") {
-                document.getElementById("suggestion_dropdown").innerHTML = "";
+            if (str === "") {
+                $("#suggestion_dropdown").empty();
                 return;
-            } else {
-                var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById("suggestion_dropdown").innerHTML = this.responseText;
-                    }
-                };
-                xmlhttp.open("GET", "get_suggestions.php?q=" + str, true);
-                xmlhttp.send();
             }
+            $.get("get_suggestions.php", {
+                q: str
+            }, function(response) {
+                $("#suggestion_dropdown").html(response);
+            });
         }
 
         function selectSuggestion(station_id) {
-            document.getElementById("station_id").value = station_id;
-            document.getElementById("suggestion_dropdown").innerHTML = "";
-            $('#station_id').blur();
+            $("#station_id").val(station_id).blur();
+            $("#suggestion_dropdown").empty();
         }
     </script>
 </body>

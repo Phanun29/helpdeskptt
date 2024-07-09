@@ -245,6 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
 
+
 </body>
 
 </html>

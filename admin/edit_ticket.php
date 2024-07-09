@@ -6,14 +6,17 @@ include "../inc/header.php";
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
-    WHERE u.users_id = $user_id";
+    WHERE u.users_id = ?";
 
-$result_user = $conn->query($query_user);
+$stmt_user = $conn->prepare($query_user);
+$stmt_user->bind_param('i', $user_id);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
 
-if ($result_user && $result_user->num_rows > 0) {
+if ($result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
     $listTicketAssign = $user['list_ticket_assign'];
@@ -24,47 +27,93 @@ if ($result_user && $result_user->num_rows > 0) {
     }
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("Location: 404.php");
+    exit();
 }
 
 // Initialize session for storing messages
-$ticket_id = $_GET['id']; // Assuming you're passing the ticket ID through a GET parameter
+$ticket_id = $_GET['id'] ?? null; // Assuming you're passing the ticket ID through a GET parameter
+
+if (!is_numeric($ticket_id)) {
+    header("Location: 404.php");
+    exit();
+}
 
 // Check if form is submitted
+date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Gather form data
-    $station_id = $_POST['station_id'];
-    $station_name = $_POST['station_name'];
-    $station_type = $_POST['station_type'];
-    $province = $_POST['province'];
-    $issue_description = $_POST['issue_description'];
-    $issue_image = $_FILES['issue_image']['name']; // Assuming you handle file upload separately
-    $issue_types = implode(', ', $_POST['issue_type']);
-    $priority = $_POST['priority'];
-    $status = $_POST['status'];
-    if (isset($_POST['users_id'])) {
-        $users_id = implode(',', $_POST['users_id']);
+    $station_id = $_POST['station_id'] ?? null;
+    $station_name = $_POST['station_name'] ?? null;
+    $station_type = $_POST['station_type'] ?? null;
+    $province = $_POST['province'] ?? null;
+    $issue_description = $_POST['issue_description'] ?? null;
+    $issue_types = isset($_POST['issue_type']) ? implode(', ', $_POST['issue_type']) : '';
+    $priority = $_POST['priority'] ?? null;
+    $status = $_POST['status'] ?? null;
+    $users_id = isset($_POST['users_id']) ? implode(',', $_POST['users_id']) : null;
+    $comment = $_POST['comment'] ?? null;
+
+
+    // Fetch existing ticket details for validation
+    $check_ticket_query = "SELECT status, ticket_on_hold, ticket_in_progress, ticket_pending_vendor, ticket_close FROM tbl_ticket WHERE id = ?";
+    $stmt_check_ticket = $conn->prepare($check_ticket_query);
+    $stmt_check_ticket->bind_param('i', $ticket_id);
+    $stmt_check_ticket->execute();
+    $ticket_result = $stmt_check_ticket->get_result();
+
+    if ($ticket_result->num_rows > 0) {
+        $row = $ticket_result->fetch_assoc();
+
+        // Record previous status and timestamps
+        $prev_status = $row['status'];
+        $prev_on_hold = $row['ticket_on_hold'];
+        $prev_in_progress = $row['ticket_in_progress'];
+        $prev_pending_vendor = $row['ticket_pending_vendor'];
+        $prev_close = $row['ticket_close'];
+
+        // Update timestamp based on status change
+        $ticket_on_hold = $prev_on_hold;
+        $ticket_in_progress = $prev_in_progress;
+        $ticket_pending_vendor = $prev_pending_vendor;
+        $ticket_close = $prev_close;
+
+        switch ($status) {
+            case 'On Hold':
+                if ($prev_status != 'On Hold') {
+                    $ticket_on_hold = date('Y-m-d H:i:s');
+                }
+                break;
+            case 'In Progress':
+                if ($prev_status == 'On Hold') {
+                    $ticket_in_progress = date('Y-m-d H:i:s');
+                }
+                break;
+            case 'Pending Vendor':
+                if ($prev_status == 'In Progress') {
+                    $ticket_pending_vendor = date('Y-m-d H:i:s');
+                }
+                break;
+            case 'Close':
+                if ($prev_status == 'Pending Vendor') {
+                    $ticket_close = date('Y-m-d H:i:s');
+                }
+                break;
+            default:
+                // Handle default case if needed
+                break;
+        }
+
+        // Check if ticket status is 'Close'
+        if ($row['status'] == 'Close' && $listTicketAssign != 0) {
+            $_SESSION['error_message'] = "Cannot edit a closed ticket.";
+            header("Location: ticket.php");
+            exit();
+        }
     } else {
-        $users_id = null; // or handle this case appropriately
-    }
-
-    $comment = $_POST['comment'];
-
-    date_default_timezone_set('Asia/Bangkok');
-
-    // Check if the status 
-    if ($status == 'On Hold') {
-        $ticket_on_hold = date('Y-m-d H:i:s');
-    }
-    if ($status == 'In Progress') {
-        $ticket_in_progress = date('Y-m-d H:i:s');
-    }
-    if ($status == 'Pending Vendor') {
-        $ticket_pending_vendor = date('Y-m-d H:i:s');
-    }
-    if ($status == 'Close') {
-        $ticket_close = date('Y-m-d H:i:s');
-    } else {
-        $ticket_close = NULL;
+        $_SESSION['error_message'] = "Ticket not found.";
+        header("Location: 404.php");
+        exit();
     }
     // Process multiple file uploads
     $uploaded_images = [];
@@ -82,120 +131,103 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     // Convert the array of image paths to a comma-separated string
-    $issue_image_paths = implode(',', $uploaded_images);
-    try {
-        // Check if the ticket exists and is editable
-        $check_ticket_query = "SELECT * FROM tbl_ticket WHERE id = ?";
-        $stmt_check_ticket = $conn->prepare($check_ticket_query);
-        $stmt_check_ticket->bind_param('i', $ticket_id);
-        $stmt_check_ticket->execute();
-        $ticket_result = $stmt_check_ticket->get_result();
+    // $issue_image_paths = implode(',', $uploaded_images);
+    $existing_images = explode(',', $row['issue_image']);
+    $all_images = array_merge($existing_images, $uploaded_images);
+    $issue_image_paths = implode(',', $all_images);
 
-        if ($ticket_result->num_rows > 0) {
-            $row = $ticket_result->fetch_assoc();
+    // Fetch existing ticket details for validation
+    $check_ticket_query = "SELECT status FROM tbl_ticket WHERE id = ?";
+    $stmt_check_ticket = $conn->prepare($check_ticket_query);
+    $stmt_check_ticket->bind_param('i', $ticket_id);
+    $stmt_check_ticket->execute();
+    $ticket_result = $stmt_check_ticket->get_result();
 
-            // Check if ticket status is 'Close'
-            if ($row['status'] == 'Close' && $listTicketAssign != 0) {
-                $_SESSION['error_message'] = "Cannot edit a closed ticket.";
-                header("Location: ticket.php");
-                exit();
-            }
-        } else {
-            $_SESSION['error_message'] = "Ticket not found.";
-            header("Location: 404.php");
-            exit;
+    if ($ticket_result->num_rows > 0) {
+        $row = $ticket_result->fetch_assoc();
+
+        // Check if ticket status is 'Close'
+        if ($row['status'] == 'Close' && $listTicketAssign != 0) {
+            $_SESSION['error_message'] = "Cannot edit a closed ticket.";
+            header("Location: ticket.php");
+            exit();
         }
+    } else {
+        $_SESSION['error_message'] = "Ticket not found.";
+        header("Location: 404.php");
+        exit();
+    }
 
-        $stmt_check_ticket->close();
-
-        // Prepare the update query
-        $update_query = "UPDATE tbl_ticket SET 
+    // Update ticket details
+    $update_query = "UPDATE tbl_ticket SET 
                         station_id = ?, 
                         station_name = ?, 
                         station_type = ?, 
-                        province=?,
+                        province = ?, 
                         issue_description = ?, 
-                        issue_image = ?, 
+                        issue_image=?,
                         issue_type = ?, 
                         priority = ?, 
                         status = ?, 
                         users_id = ?, 
                         comment = ?, 
-                        ticket_on_hold=?,
-                        ticket_in_progress=?,
-                        ticket_pending_vendor=?,
+                        ticket_on_hold = ?, 
+                        ticket_in_progress = ?, 
+                        ticket_pending_vendor = ?, 
                         ticket_close = ?
-                        WHERE id = ?";
+                    WHERE id = ?";
 
-        // Prepare the statement
-        $stmt = $conn->prepare($update_query);
-        if (!$stmt) {
-            throw new Exception("Error preparing statement: " . $conn->error);
-        }
+    $stmt_update = $conn->prepare($update_query);
+    $stmt_update->bind_param(
+        'sssssssssssssssi',
+        $station_id,
+        $station_name,
+        $station_type,
+        $province,
+        $issue_description,
+        $issue_image_paths,
+        $issue_types,
+        $priority,
+        $status,
+        $users_id,
+        $comment,
+        $ticket_on_hold,
+        $ticket_in_progress,
+        $ticket_pending_vendor,
+        $ticket_close,
+        $ticket_id
+    );
 
-        // Bind the parameters
-        $stmt->bind_param(
-            'sssssssssssssssi',
-            $station_id,
-            $station_name,
-            $station_type,
-            $province,
-            $issue_description,
-            $issue_image_paths,
-            $issue_types,
-            $priority,
-            $status,
-            $users_id,
-            $comment,
-            $ticket_on_hold,
-            $ticket_in_progress,
-            $ticket_pending_vendor,
-            $ticket_close,
-            $ticket_id
-        );
-
-        // Execute the update
-        if ($stmt->execute()) {
-            $_SESSION['success_message'] = "Ticket updated successfully";
-        } else {
-            // Check for duplicate entry error
-            if ($conn->errno == 1062) { // MySQL error code for duplicate entry
-                $_SESSION['error_message'] = "Duplicate entry error: The selected users already assigned to this ticket.";
-            } else {
-                throw new Exception("Error updating ticket: " . $stmt->error);
-            }
-        }
-
-        // Close the statement
-        $stmt->close();
-
-        // Redirect to the page or do any additional handling after update
-        header("Location: edit_ticket.php?id=$ticket_id");
-        exit();
-    } catch (Exception $e) {
-        $_SESSION['error_message'] = "Database error: " . $e->getMessage();
-        header("Location: edit_ticket.php?id=$ticket_id");
-        exit();
+    if ($stmt_update->execute()) {
+        $_SESSION['success_message'] = "Ticket updated successfully";
+    } else {
+        $_SESSION['error_message'] = "Error updating ticket: " . $stmt_update->error;
     }
+
+    $stmt_update->close();
+    header("Location: edit_ticket.php?id=$ticket_id");
+    exit();
 }
 
 // Fetch ticket details for display in the form
 $ticket_query = "SELECT * FROM tbl_ticket WHERE id = ?";
-$stmt = $conn->prepare($ticket_query);
-$stmt->bind_param('i', $ticket_id);
-$stmt->execute();
-$ticket_result = $stmt->get_result();
+$stmt_ticket = $conn->prepare($ticket_query);
+$stmt_ticket->bind_param('i', $ticket_id);
+$stmt_ticket->execute();
+$ticket_result = $stmt_ticket->get_result();
 
 if ($ticket_result->num_rows > 0) {
     $row = $ticket_result->fetch_assoc();
 } else {
-    // $_SESSION['error_message'] = "Ticket not found.";
+    $_SESSION['error_message'] = "Ticket not found.";
     header("Location: 404.php");
-    exit;
+    exit();
 }
 
-$stmt->close();
+$stmt_ticket->close();
+$stmt_user->close();
 ?>
+
 
 
 <!DOCTYPE html>
@@ -246,9 +278,7 @@ $stmt->close();
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
                         <div class="card-body p-0 card-primary">
-                            <!-- <div class="card-header">
-                                
-                            </div> -->
+
                             <div class="card-header card-primary">
                                 <h3 class="card-title">Ticket ID: <?= $row['ticket_id']; ?></h3>
                             </div>
@@ -261,7 +291,6 @@ $stmt->close();
                                             <input value="<?php echo $row['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
-
 
                                         <div class="form-group col-sm-3">
                                             <label for="station_name">Station Name</label>
@@ -284,18 +313,24 @@ $stmt->close();
 
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
-                                            <div class="input-group col-12">
-                                                <div class="custom-image">
-                                                    <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
-
-                                                </div>
-                                            </div>
+                                            <?php
+                                            if (!empty($row['issue_image'])) {
+                                                $image_paths = explode(',', $row['issue_image']);
+                                                foreach ($image_paths as $image_path) {
+                                                    echo '<div class="image-container">';
+                                                    echo '<img style="width: 20px;" src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
+                                                    echo '<button type="button" class="btn btn-danger btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">Delete</button>';
+                                                    echo '</div>';
+                                                }
+                                            }
+                                            ?>
+                                            <input type="file" class="form-control" name="issue_image[]" multiple>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type</label>
-                                            <select name="issue_type[]" class="form-control" id="issue_type" placeholder="Select up to 2 tags" multiple>
+                                            <select name="issue_type[]" class="form-control" id="issue_type" placeholder="-Select-" multiple>
                                                 <?php
                                                 $issue_types = ['Hardware', 'Software', 'Network', 'Dispenser', 'Unassigned'];
                                                 $selected_issue_types = explode(', ', $row['issue_type']);
@@ -320,7 +355,7 @@ $stmt->close();
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="status">Status</label>
-                                            <select name="status" id="status" class="form-control select2bs4" style="width: 100%;">
+                                            <select name="status" id="status" class="form-control" style="width: 100%;">
 
                                                 <option value="On Hold" <?php echo ($row['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
                                                 <option value="In Progress" <?php echo ($row['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
@@ -421,12 +456,14 @@ $stmt->close();
     <!-- auto fill station -->
     <script>
         $(document).ready(function() {
-            $('#station_id').blur(function() {
-                var station_id = $(this).val();
-                fetchStationDetails(station_id);
+            const $stationId = $('#station_id');
+            const $quickForm = $('#quickForm');
+
+            $stationId.on('blur', function() {
+                fetchStationDetails($(this).val());
             });
 
-            $('#quickForm').on('submit', function(event) {
+            $quickForm.on('submit', function(event) {
                 if (!this.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -436,47 +473,36 @@ $stmt->close();
         });
 
         function fetchStationDetails(station_id) {
-            $.ajax({
-                url: 'get_station_details.php',
-                type: 'POST',
-                data: {
-                    station_id: station_id
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        $('#station_name').val(response.station_name);
-                        $('#station_type').val(response.station_type);
-                        $('#province').val(response.province);
-                    } else {
-                        $('#station_name').val('');
-                        $('#station_type').val('');
-                        $('#province').val('');
-                    }
-                }
-            });
+            $.post('get_station_details.php', {
+                station_id
+            }, function(response) {
+                const {
+                    success,
+                    station_name = '',
+                    station_type = '',
+                    province = ''
+                } = response;
+                $('#station_name').val(station_name);
+                $('#station_type').val(station_type);
+                $('#province').val(province);
+            }, 'json');
         }
 
         function showSuggestions(str) {
-            if (str == "") {
-                document.getElementById("suggestion_dropdown").innerHTML = "";
+            if (str === "") {
+                $("#suggestion_dropdown").empty();
                 return;
-            } else {
-                var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById("suggestion_dropdown").innerHTML = this.responseText;
-                    }
-                };
-                xmlhttp.open("GET", "get_suggestions.php?q=" + str, true);
-                xmlhttp.send();
             }
+            $.get("get_suggestions.php", {
+                q: str
+            }, function(response) {
+                $("#suggestion_dropdown").html(response);
+            });
         }
 
         function selectSuggestion(station_id) {
-            document.getElementById("station_id").value = station_id;
-            document.getElementById("suggestion_dropdown").innerHTML = "";
-            $('#station_id').blur();
+            $("#station_id").val(station_id).blur();
+            $("#suggestion_dropdown").empty();
         }
     </script>
 

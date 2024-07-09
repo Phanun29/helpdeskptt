@@ -185,7 +185,7 @@ $ticket_result = $conn->query($ticket_query);
                                             <option value="On Hold">On Hold</option>
                                             <option value="In Progress">In Progress</option>
                                             <option value="Pending Vendor">Pending Vendor</option>
-                                            <option value="Close">Closed</option>
+                                            <option value="Close">Close</option>
                                         </select>
                                     </div>
                                     <div class="form-group col-sm-3">

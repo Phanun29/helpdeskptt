@@ -185,7 +185,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
-                                                <label for="rules_id">Permission <span class="text-danger">*</span></label>
+                                                <label for="rules_id">Users Rules <span class="text-danger">*</span></label>
                                                 <select id="rules_id" name="rules_id" class="form-control" required>
                                                     <?php
                                                     $rules_query = "SELECT rules_id, rules_name FROM tbl_users_rules";
