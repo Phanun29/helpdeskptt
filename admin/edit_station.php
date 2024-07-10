@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <ol class="breadcrumb float-sm-right">
                                 <?php
                                 if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2' role='alert'>
                                     <strong>{$_SESSION['success_message']}</strong>
                                     <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
                                 </div>";
@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 }
 
                                 if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2' role='alert'>
                                     <strong>{$_SESSION['error_message']}</strong>
                                     <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
                                 </div>";

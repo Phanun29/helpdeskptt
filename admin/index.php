@@ -34,12 +34,12 @@ if ($result_user && $result_user->num_rows > 0) {
   if ($listTicketAssign == 0) {
     $ticket_query = "$ticket_select $group_by";
     $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket GROUP BY status";
-    $priority_query = "SELECT priority, COUNT(*) as count FROM tbl_ticket GROUP BY priority";
+    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket GROUP BY SLA_category";
     $issue_query = "SELECT issue_type FROM tbl_ticket";
   } else {
     $ticket_query = "$ticket_select WHERE FIND_IN_SET($user_id, t.users_id) $group_by";
     $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY status";
-    $priority_query = "SELECT priority, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY priority";
+    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY SLA_category";
     $issue_query = "SELECT issue_type FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id)";
   }
 
@@ -61,7 +61,7 @@ if ($result_user && $result_user->num_rows > 0) {
   }
 
   // Fetch priority counts and calculate percentages
-  $priority_counts = [
+  $SLA_category_counts = [
     'CAT Hardware' => 0,
     'CAT 1*' => 0,
     'CAT 2*' => 0,
@@ -72,15 +72,15 @@ if ($result_user && $result_user->num_rows > 0) {
   ];
 
   $total_tickets = 0;
-  $result_priority = $conn->query($priority_query);
-  while ($row = $result_priority->fetch_assoc()) {
-    $priority_counts[$row['priority']] = $row['count'];
+  $result_SLA_category = $conn->query($SLA_category_query);
+  while ($row = $result_SLA_category->fetch_assoc()) {
+    $SLA_category_counts[$row['SLA_category']] = $row['count'];
     $total_tickets += $row['count'];
   }
 
-  $priority_percentages = array_map(function ($count) use ($total_tickets) {
+  $SLA_category_percentages = array_map(function ($count) use ($total_tickets) {
     return $total_tickets > 0 ? round(($count / $total_tickets) * 100) : 0;
-  }, $priority_counts);
+  }, $SLA_category_counts);
 
   // Fetch issue counts
   $issue_counts = [
@@ -240,7 +240,7 @@ if ($result_user && $result_user->num_rows > 0) {
               </div>
               <!-- /.section start Summary -->
 
-              <!-- Section Start Priority -->
+              <!-- Section Start SLA_category -->
               <div class="card col-12">
                 <div class="card-header">
                   <h3 class="card-title"><b>SLA Category %</b></h3>
@@ -250,45 +250,45 @@ if ($result_user && $result_user->num_rows > 0) {
                     <div class="row">
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT Hardware']; ?>" data-width="90" data-height="90" data-fgcolor="#3c8dbc" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT Hardware']; ?>" data-width="90" data-height="90" data-fgcolor="#3c8dbc" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT Hardware</div>
                       </div>
 
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT 1*']; ?>" data-width="90" data-height="90" data-fgcolor="#f56954" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 1*']; ?>" data-width="90" data-height="90" data-fgcolor="#f56954" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT 1*</div>
                       </div>
 
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT 2*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 2*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT 2*</div>
                       </div>
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT 3*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 3*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT 3*</div>
                       </div>
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT 4*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT 4*</div>
                       </div>
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT 4 Report*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4 Report*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT 4 Report*</div>
                       </div>
                       <div class="col-6 col-md-3 text-center">
                         <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $priority_percentages['CAT 5*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 5*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                         </div>
                         <div class="knob-label">CAT 5*</div>
                       </div>
@@ -297,7 +297,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 </div>
               </div>
 
-              <!-- /.Section Start Priority -->
+              <!-- /.Section Start SLA_category -->
 
             </div>
             <div class="card">
@@ -340,7 +340,7 @@ if ($result_user && $result_user->num_rows > 0) {
                         echo "<td>" . $row['issue_description'] . "</td>";
 
                         echo "<td>" . $row['issue_type'] . "</td>";
-                        echo "<td>" . $row['priority'] . "</td>";
+                        echo "<td>" . $row['SLA_category'] . "</td>";
                         echo "<td>" . $row['status'] . "</td>";
                         // echo "<td>" . $row['users_id'] . "</td>";
                         echo "<td>" . $row['ticket_open'] . "</td>";

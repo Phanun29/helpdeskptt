@@ -85,16 +85,16 @@ $row = $user_result->fetch_assoc();
                             </ol> -->
                             <!-- Display success/error messages -->
                             <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <div class="alert alert-success alert-dismissible fade show mt-2 mb-0" role="alert">
                                     <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
+                                    <button type="button" class="btn-close" aria-label="Close">&times</button>
                                 </div>
                                 <?php unset($_SESSION['success_message']); ?>
                             <?php endif; ?>
                             <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <div class="alert alert-danger alert-dismissible fade show mt-2 mb-0" role="alert">
                                     <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
+                                    <button type="button" class="btn-close" aria-label="Close">&times</button>
                                 </div>
                                 <?php unset($_SESSION['error_message']); ?>
                             <?php endif; ?>
@@ -189,12 +189,12 @@ $row = $user_result->fetch_assoc();
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-   
+
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
- 
+
 
 
 

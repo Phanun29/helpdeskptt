@@ -142,14 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                         <div class="col-sm-6">
 
                             <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
                                     <strong><?php echo $_SESSION['success_message']; ?></strong>
                                     <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
                                 </div>
                                 <?php unset($_SESSION['success_message']); ?>
                             <?php endif; ?>
                             <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
                                     <strong><?php echo $_SESSION['error_message']; ?></strong>
                                     <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
                                 </div>

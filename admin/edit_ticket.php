@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $province = $_POST['province'] ?? null;
     $issue_description = $_POST['issue_description'] ?? null;
     $issue_types = isset($_POST['issue_type']) ? implode(', ', $_POST['issue_type']) : '';
-    $priority = $_POST['priority'] ?? null;
+    $SLA_category = $_POST['SLA_category'] ?? null;
     $status = $_POST['status'] ?? null;
     $users_id = isset($_POST['users_id']) ? implode(',', $_POST['users_id']) : null;
     $comment = $_POST['comment'] ?? null;
@@ -115,26 +115,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: 404.php");
         exit();
     }
-    // Process multiple file uploads
-    $uploaded_images = [];
+    // Process existing images
+
+    $uploadDir = '../uploads/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    $uploadedFiles = [];
     if (!empty($_FILES['issue_image']['name'][0])) {
-        $target_dir = "../uploads/";
-        foreach ($_FILES['issue_image']['name'] as $key => $image) {
-            $target_file = $target_dir . basename($image);
-            if (move_uploaded_file($_FILES["issue_image"]["tmp_name"][$key], $target_file)) {
-                $uploaded_images[] = $target_file;
+        $allowedTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF]; // Define allowed image types
+        foreach ($_FILES['issue_image']['tmp_name'] as $key => $tmp_name) {
+            if ($_FILES['issue_image']['error'][$key] !== UPLOAD_ERR_OK) {
+                echo "Error uploading file: " . $_FILES['issue_image']['error'][$key];
+                continue; // Skip to the next iteration if there's an error
+            }
+
+            // Process the file normally
+            $file_name = $_FILES['issue_image']['name'][$key];
+            $file_tmp = $_FILES['issue_image']['tmp_name'][$key];
+            $uploadPath = $uploadDir . $file_name;
+
+            // Move the uploaded file to the destination directory
+            if (move_uploaded_file($file_tmp, $uploadPath)) {
+                $uploadedFiles[] = $uploadPath;
+
+                // Check the image type after successful upload
+                $imageType = exif_imagetype($uploadPath);
+                if (!in_array($imageType, $allowedTypes)) {
+                    // Remove the invalid file if it doesn't match the allowed image types
+                    unlink($uploadPath);
+                    echo "Invalid image type for file: " . $_FILES['issue_image']['name'][$key];
+                    continue; // Skip to the next iteration
+                }
             } else {
-                $_SESSION['error_message'] = "Error uploading image: " . $image;
-                header('Location: ' . $_SERVER['REQUEST_URI']);
-                exit();
+                echo "Error uploading file: " . $_FILES['issue_image']['error'][$key];
             }
         }
     }
-    // Convert the array of image paths to a comma-separated string
-    // $issue_image_paths = implode(',', $uploaded_images);
-    $existing_images = explode(',', $row['issue_image']);
-    $all_images = array_merge($existing_images, $uploaded_images);
-    $issue_image_paths = implode(',', $all_images);
+
+    // Fetch existing image paths from the database
+    $sql_fetch_images = "SELECT issue_image FROM tbl_ticket WHERE id = ?";
+    $stmt_fetch_images = $conn->prepare($sql_fetch_images);
+    $stmt_fetch_images->bind_param("i", $ticket_id);
+    $stmt_fetch_images->execute();
+    $stmt_fetch_images->bind_result($existing_images);
+    $stmt_fetch_images->fetch();
+    $stmt_fetch_images->close();
+
+    // Trim whitespace and split existing image paths
+    $existing_images_array = !empty($existing_images) ? array_map('trim', explode(', ', $existing_images)) : [];
+    // Combine existing image paths with newly uploaded ones
+    $issue_image_paths = implode(', ', array_merge($existing_images_array, $uploadedFiles));
+
+
 
     // Fetch existing ticket details for validation
     $check_ticket_query = "SELECT status FROM tbl_ticket WHERE id = ?";
@@ -167,7 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         issue_description = ?, 
                         issue_image=?,
                         issue_type = ?, 
-                        priority = ?, 
+                        SLA_category = ?, 
                         status = ?, 
                         users_id = ?, 
                         comment = ?, 
@@ -187,7 +221,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $issue_description,
         $issue_image_paths,
         $issue_types,
-        $priority,
+        $SLA_category,
         $status,
         $users_id,
         $comment,
@@ -283,11 +317,12 @@ $stmt_user->close();
                                 <h3 class="card-title">Ticket ID: <?= $row['ticket_id']; ?></h3>
                             </div>
 
-                            <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
+                            <!-- <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data"> -->
+                            <form method="POST" id="quickForm" novalidate="novalidate" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . "?id=" . $ticket_id; ?>" enctype="multipart/form-data">
                                 <div class="card-body col">
                                     <div class="row">
                                         <div class="form-group col-sm-3 ">
-                                            <label for="station_input">Station ID <span class="text-danger">*</span></label>
+                                            <label for="station_id">Station ID <span class="text-danger">*</span></label>
                                             <input value="<?php echo $row['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
@@ -306,28 +341,38 @@ $stmt_user->close();
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="form-group col-sm-8">
+                                        <div class="form-group col-sm-12">
                                             <label for="issue_description">Issue Description</label>
                                             <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?php echo htmlspecialchars($row['issue_description']); ?></textarea>
                                         </div>
 
-                                        <div class="form-group col-sm-4">
-                                            <label for="issue_image">Issue Image</label>
+                                        <div class="form-group col-sm-12 row">
+                                            <label for="issue_image" class="col-12">Issue Image</label>
+
+
                                             <?php
                                             if (!empty($row['issue_image'])) {
                                                 $image_paths = explode(',', $row['issue_image']);
                                                 foreach ($image_paths as $image_path) {
-                                                    echo '<div class="image-container">';
-                                                    echo '<img style="width: 20px;" src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
-                                                    echo '<button type="button" class="btn btn-danger btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">Delete</button>';
+                                                    echo '<div class="image-container col-3" style="">';
+                                                    echo '<img style="width:100%;   " src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
+                                                    echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times</button>';
                                                     echo '</div>';
                                                 }
                                             }
+
                                             ?>
-                                            <input type="file" class="form-control" name="issue_image[]" multiple>
+                                            <!-- Display selected new images -->
+                                            <div class="col-12 row mt-3" id="imagePreview">
+
+                                            </div>
+
+                                            <!-- File input for adding new images -->
+                                            <input type="file" class="form-control" name="issue_image[]" id="issue_image" multiple accept="image/*">
+
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class=" row">
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type</label>
                                             <select name="issue_type[]" class="form-control" id="issue_type" placeholder="-Select-" multiple>
@@ -342,15 +387,15 @@ $stmt_user->close();
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
-                                            <label for="priority">SLA Category</label>
-                                            <select name="priority" id="priority" class="form-control select2bs4" style="width: 100%;">
-                                                <option value="CAT Hardware" <?php echo ($row['priority'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-                                                <option value="CAT 1*" <?php echo ($row['priority'] == 'CAT 1*') ? 'selected' : ''; ?>>CAT 1*</option>
-                                                <option value="CAT 2*" <?php echo ($row['priority'] == 'CAT 2*') ? 'selected' : ''; ?>>CAT 2*</option>
-                                                <option value="CAT 3*" <?php echo ($row['priority'] == 'CAT 3*') ? 'selected' : ''; ?>>CAT 3*</option>
-                                                <option value="CAT 4*" <?php echo ($row['priority'] == 'CAT 4*') ? 'selected' : ''; ?>>CAT 4*</option>
-                                                <option value="CAT 4 Report*" <?php echo ($row['priority'] == 'CAT 4 Report*') ? 'selected' : ''; ?>>CAT 4 Report*</option>
-                                                <option value="CAT 5*" <?php echo ($row['priority'] == 'CAT 5*') ? 'selected' : ''; ?>>CAT 5*</option>
+                                            <label for="SLA_category">SLA Category</label>
+                                            <select name="SLA_category" id="SLA_category" class="form-control select2bs4" style="width: 100%;">
+                                                <option value="CAT Hardware" <?php echo ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+                                                <option value="CAT 1*" <?php echo ($row['SLA_category'] == 'CAT 1*') ? 'selected' : ''; ?>>CAT 1*</option>
+                                                <option value="CAT 2*" <?php echo ($row['SLA_category'] == 'CAT 2*') ? 'selected' : ''; ?>>CAT 2*</option>
+                                                <option value="CAT 3*" <?php echo ($row['SLA_category'] == 'CAT 3*') ? 'selected' : ''; ?>>CAT 3*</option>
+                                                <option value="CAT 4*" <?php echo ($row['SLA_category'] == 'CAT 4*') ? 'selected' : ''; ?>>CAT 4*</option>
+                                                <option value="CAT 4 Report*" <?php echo ($row['SLA_category'] == 'CAT 4 Report*') ? 'selected' : ''; ?>>CAT 4 Report*</option>
+                                                <option value="CAT 5*" <?php echo ($row['SLA_category'] == 'CAT 5*') ? 'selected' : ''; ?>>CAT 5*</option>
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
@@ -505,6 +550,172 @@ $stmt_user->close();
             $("#suggestion_dropdown").empty();
         }
     </script>
+    <!-- delete image -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-image').forEach(button => {
+                button.addEventListener('click', function() {
+                    const image = this.getAttribute('data-image');
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'delete_image.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            button.parentElement.remove(); // Remove the image container
+                        }
+                    };
+                    xhr.send('image=' + encodeURIComponent(image) + '&ticket_id=<?php echo $ticket_id; ?>');
+                });
+            });
+        });
+
+        // Display newly added images immediately
+        document.querySelector('input[type="file"]').addEventListener('change', function(event) {
+            const files = event.target.files;
+            const imageContainer = document.querySelector('.form-group img');
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const newImage = document.createElement('img');
+                        newImage.src = e.target.result;
+                        newImage.className = 'issue-image';
+                        imageContainer.appendChild(newImage);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+    </script>
+    <!-- show image -->
+    <!-- <script>
+        function previewImages(event) {
+            var previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = ''; // Clear previous previews
+
+            var files = event.target.files;
+            var selectedFiles = Array.from(files); // Convert FileList to array
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    var imageContainer = document.createElement('div');
+                    imageContainer.className = 'preview-image-container col-3';
+                    imageContainer.style.width = '200px';
+
+                    var image = document.createElement('img');
+                    image.style.width = '100%';
+                    image.className = 'preview-image ';
+                    image.src = e.target.result;
+                    imageContainer.appendChild(image);
+
+                    // Create a div for the button
+                    var buttonDiv = document.createElement('div');
+                    buttonDiv.className = 'button-container d-flex justify-content-center mt-5'; // You can style this container as needed
+                    imageContainer.appendChild(buttonDiv);
+
+                    var removeButton = document.createElement('button');
+                    removeButton.className = 'btn btn-danger remove-image-button';
+                    removeButton.textContent = 'Remove';
+                    removeButton.addEventListener('click', function() {
+                        // Remove the image container when the button is clicked
+                        imageContainer.remove();
+                        // Remove the corresponding file from the selectedFiles array
+                        var index = selectedFiles.indexOf(file);
+                        selectedFiles.splice(index, 1);
+                        // Update the file input element with the updated selected files
+                        var newFileList = new DataTransfer();
+                        selectedFiles.forEach(function(file) {
+                            newFileList.items.add(file);
+                        });
+                        document.getElementById('issue_image').files = newFileList.files;
+                    });
+                    buttonDiv.appendChild(removeButton);
+
+                    previewContainer.appendChild(imageContainer);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script> -->
+    <script>
+        function previewImages(event) {
+            var previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = ''; // Clear previous previews
+
+            var files = event.target.files;
+            var selectedFiles = Array.from(files); // Convert FileList to array
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    var imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-container col-3';
+                    imageContainer.style.width = '200px';
+
+                    var image = document.createElement('img');
+                    image.style.width = '100%';
+                    image.className = 'preview-image';
+                    image.src = e.target.result;
+                    imageContainer.appendChild(image);
+
+                    var closeButton = document.createElement('button');
+                    closeButton.className = 'close-button';
+                    closeButton.innerHTML = '&times;';
+                    closeButton.addEventListener('click', function() {
+                        // Remove the image container when the button is clicked
+                        imageContainer.remove();
+                        // Remove the corresponding file from the selectedFiles array
+                        var index = selectedFiles.indexOf(file);
+                        selectedFiles.splice(index, 1);
+                        // Update the file input element with the updated selected files
+                        var newFileList = new DataTransfer();
+                        selectedFiles.forEach(function(file) {
+                            newFileList.items.add(file);
+                        });
+                        document.getElementById('issue_image').files = newFileList.files;
+                    });
+
+                    imageContainer.appendChild(closeButton);
+                    previewContainer.appendChild(imageContainer);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Bind previewImages function to file input change event
+        document.getElementById('issue_image').addEventListener('change', previewImages);
+    </script>
+    <style>
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+    </style>
+
+
+
 
 </body>
 

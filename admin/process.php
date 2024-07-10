@@ -65,9 +65,9 @@ if (!empty($_GET['issue_type'])) {
     $ticket_query .= " AND t.issue_type LIKE '%$issue_type%'";
 }
 
-if (!empty($_GET['priority'])) {
-    $priority = $conn->real_escape_string($_GET['priority']);
-    $ticket_query .= " AND t.priority = '$priority'";
+if (!empty($_GET['SLA_category'])) {
+    $SLA_category = $conn->real_escape_string($_GET['SLA_category']);
+    $ticket_query .= " AND t.SLA_category = '$SLA_category'";
 }
 
 if (!empty($_GET['status'])) {
@@ -100,7 +100,7 @@ if (!empty($_GET['ticket_close_to'])) {
     $ticket_query .= " AND t.ticket_close <= '$ticket_close_to'";
 }
 
-// Add more conditions for other filters like issue_type, priority, status, etc.
+// Add more conditions for other filters like issue_type, SLA_category, status, etc.
 
 $ticket_query .= "
     GROUP BY 
@@ -150,7 +150,7 @@ if ($ticket_result->num_rows > 0) {
             echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
         }
         // echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
-        echo "<td class='py-1'>" . $row['priority'] . "</td>";
+        echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
         echo "<td class='py-1'>" . $row['status'] . "</td>";
         echo "<td class='py-1'>" . $row['users_name'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";

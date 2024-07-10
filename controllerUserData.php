@@ -109,7 +109,7 @@ if (isset($_POST['check'])) {
         if ($stmt->execute()) {
             $_SESSION['users_name'] = $fetch_data['users_name']; // Ensure the session variable is set correctly
             $_SESSION['email'] = $email;
-            header('location: Backend/index.php');
+            header('location: admin/index.php');
             exit();
         } else {
             $errors['otp-error'] = "Failed while updating code!";

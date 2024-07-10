@@ -180,7 +180,7 @@ $ticket_result = $conn->query($ticket_query);
                                                 echo "<td class='text-center text-warning'>none</td>";
                                             }
                                             echo "<td  class='py-1'>" . $row['issue_type'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['priority'] . "</td>";
+                                            echo "<td  class='py-1'>" . $row['SLA_category'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['status'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['users_name'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['ticket_open'] . "</td>";
@@ -235,8 +235,8 @@ $ticket_result = $conn->query($ticket_query);
                                                     <td class="p-1"><span id="modalIssueType" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="p-1">Priority:</td>
-                                                    <td class="p-1"><span id="modalPriority" class="word-wrap"></span></td>
+                                                    <td class="p-1">SLA_category:</td>
+                                                    <td class="p-1"><span id="modalSLA_category" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Status:</td>
@@ -293,7 +293,7 @@ $ticket_result = $conn->query($ticket_query);
                                     document.getElementById('modalProvince').textContent = ticket.province;
                                     document.getElementById('modalDescription').textContent = ticket.issue_description;
                                     document.getElementById('modalIssueType').textContent = ticket.issue_type;
-                                    document.getElementById('modalPriority').textContent = ticket.priority;
+                                    document.getElementById('modalSLA_category').textContent = ticket.SLA_category;
                                     document.getElementById('modalStatus').textContent = ticket.status;
                                     document.getElementById('modalAssign').textContent = ticket.users_name;
                                     document.getElementById('modalTicketOpen').textContent = ticket.ticket_open;

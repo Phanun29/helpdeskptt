@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $issue_description = $_POST['issue_description'];
     $issue_type = implode(', ', $_POST['issue_type']); // Convert array to string without spaces
-    $priority = $_POST['priority'];
+    $SLA_category = $_POST['SLA_category'];
     $status = 'Open';
     date_default_timezone_set('Asia/Bangkok');
 
@@ -106,12 +106,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         error_log("Attempting to insert ticket with station_id: $station_id");
 
         // Prepare the SQL query to insert the ticket
-        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province,issue_description, issue_image, issue_type, priority,status, ticket_open, ticket_close) 
+        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province,issue_description, issue_image, issue_type, SLA_category,status, ticket_open, ticket_close) 
                 VALUES (?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("ssssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_image_paths, $issue_type, $priority, $status, $ticket_open, $ticket_close);
+            $stmt->bind_param("ssssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_image_paths, $issue_type, $SLA_category, $status, $ticket_open, $ticket_close);
 
             if ($stmt->execute()) {
                 $_SESSION['success_message'] = "New ticket added successfully";
@@ -232,8 +232,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
-                                            <label for="priority">SLA Category</label>
-                                            <select name="priority" id="priority" class="form-control">
+                                            <label for="SLA_category">SLA Category</label>
+                                            <select name="SLA_category" id="SLA_category" class="form-control">
                                                 <option value="">-Select-</option>
                                                 <option value="CAT Hardware">CAT Hardware</option>
                                                 <option value="CAT 1*">CAT 1*</option>
