@@ -158,198 +158,191 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
 
                                     <div class="row card-footer ">
-
-                                        <div class="col-sm-12 row">
-
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="add_user">Add User</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="add_user" id="add_user">
-                                                </div>
-
-
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="add_user">Add User</label>
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="edit_user">Edit User</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="edit_user" id="edit_user">
-                                                </div>
-
-
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="add_user" id="add_user">
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="delete_user">Delete User</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="delete_user" id="delete_user">
-                                                </div>
 
 
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="edit_user">Edit User</label>
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="list_user">List User</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="list_user" id="list_user">
-                                                </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="edit_user" id="edit_user">
+                                            </div>
 
 
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="delete_user">Delete User</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="delete_user" id="delete_user">
+                                            </div>
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_user">List User</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_user" id="list_user">
                                             </div>
                                         </div>
+
                                     </div>
                                     <!-- Permissions: Tickets -->
                                     <div class="col-12">
-                                        <h6>TICKET</h6>
+                                        <h6>TICKETS</h6>
                                     </div>
                                     <div class="row card-footer">
-                                        <div class="row col-12">
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="add_ticket">Add Ticket</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="add_ticket" id="add_ticket">
-                                                </div>
-
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="add_ticket">Add Ticket</label>
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="edit_ticket">Edit Ticket</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="edit_ticket" id="edit_ticket">
-                                                </div>
-
-
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="add_ticket" id="add_ticket">
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="delete_ticket">Delete Ticket</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="delete_ticket" id="delete_ticket">
-                                                </div>
 
-
-                                            </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="list_ticket">List Ticket</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="list_ticket" id="list_ticket">
-                                                </div>
-
-                                            </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="list_ticket_assign">List Ticket Assign</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="list_ticket_assign" id="list_ticket_assign">
-                                                </div>
-
-                                            </div>
                                         </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="edit_ticket">Edit Ticket</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="edit_ticket" id="edit_ticket">
+                                            </div>
+
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="delete_ticket">Delete Ticket</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="delete_ticket" id="delete_ticket">
+                                            </div>
+
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_ticket">List Ticket</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_ticket" id="list_ticket">
+                                            </div>
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_ticket_assign">List Ticket Assign</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_ticket_assign" id="list_ticket_assign">
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                     <!-- Permissions: Stations -->
                                     <div class="col-12">
-                                        <h6>STATION</h6>
+                                        <h6>STATIONS</h6>
                                     </div>
                                     <div class="row card-footer">
-                                        <div class="row col-12">
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="add_station">Add Station</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="add_station" id="add_station">
-                                                </div>
 
-
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="add_station">Add Station</label>
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="edit_station">Edit Station</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="edit_station" id="edit_station">
-                                                </div>
-
-
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="add_station" id="add_station">
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="delete_station">Delete Station</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="delete_station" id="delete_station">
-                                                </div>
 
 
-                                            </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="list_station">List Station</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="list_station" id="list_station">
-                                                </div>
-
-
-                                            </div>
                                         </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="edit_station">Edit Station</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="edit_station" id="edit_station">
+                                            </div>
+
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="delete_station">Delete Station</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="delete_station" id="delete_station">
+                                            </div>
+
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_station">List Station</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_station" id="list_station">
+                                            </div>
+
+
+                                        </div>
+
                                     </div>
                                     <!-- Permissions: User Rules -->
                                     <div class="col-12">
                                         <h6>USERS RULES</h6>
                                     </div>
                                     <div class="row card-footer">
-                                        <div class="row col-12">
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="add_user_rules">Add User Rules</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="add_user_rules" id="add_user_rules">
-                                                </div>
 
-
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="add_user_rules">Add User Rules</label>
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="edit_user_rules">Edit User Rules</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="edit_user_rules" id="edit_user_rules">
-                                                </div>
-
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="add_user_rules" id="add_user_rules">
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="delete_user_rules">Delete User Rules</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="delete_user_rules" id="delete_user_rules">
-                                                </div>
 
 
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="edit_user_rules">Edit User Rules</label>
                                             </div>
-                                            <div class="col-sm-3 row">
-                                                <div class="col-6">
-                                                    <label for="list_user_rules">List User Rules</label>
-                                                </div>
-                                                <div class="col-6">
-                                                    <input type="checkbox" name="permissions[]" value="list_user_rules" id="list_user_rules">
-                                                </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="edit_user_rules" id="edit_user_rules">
+                                            </div>
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="delete_user_rules">Delete User Rules</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="delete_user_rules" id="delete_user_rules">
+                                            </div>
+
+
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_user_rules">List User Rules</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_user_rules" id="list_user_rules">
                                             </div>
                                         </div>
+
                                     </div>
                                     <div class="">
                                         <button type="submit" name="submit" class="btn btn-primary">Submit</button>

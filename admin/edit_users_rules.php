@@ -182,80 +182,86 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
 
                                     <!-- Permissions: Users -->
-                                    <div class="row">
+                                    <div class="col-12">
+                                        <h6>USERS</h6>
+                                    </div>
+                                    <div class="row card-footer">
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="add_user">Add User</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="add_user" id="add_user" <?php echo $row['add_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="edit_user">Edit User</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="edit_user" id="edit_user" <?php echo $row['edit_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="delete_user">Delete User</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="delete_user" id="delete_user" <?php echo $row['delete_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="list_user">List User</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="list_user" id="list_user" <?php echo $row['list_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Permissions: Tickets -->
-                                    <div class="row">
+                                    <div class="col-12">
+                                        <h6>TICKETS</h6>
+                                    </div>
+                                    <div class="row card-footer">
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="add_ticket">Add Ticket</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="add_ticket" id="add_ticket" <?php echo $row['add_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="edit_ticket">Edit Ticket</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="edit_ticket" id="edit_ticket" <?php echo $row['edit_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="delete_ticket">Delete Ticket</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="delete_ticket" id="delete_ticket" <?php echo $row['delete_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="list_ticket">List Ticket</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="list_ticket" id="list_ticket" <?php echo $row['list_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="list_ticket_assign">List Ticket Assign</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="list_ticket_assign" id="list_ticket_assign" value="delete_user" id="delete_user" <?php echo $row['list_ticket_assign'] ? 'checked' : ''; ?>>
                                             </div>
 
@@ -263,78 +269,83 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     </div>
 
                                     <!-- Permissions: Stations -->
-                                    <div class="row">
+                                    <div class="col-12">
+                                        <h6>STATIONS</h6>
+                                    </div>
+                                    <div class="row card-footer">
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="add_station">Add Station</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="add_station" id="add_station" <?php echo $row['add_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="edit_station">Edit Station</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="edit_station" id="edit_station" <?php echo $row['edit_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="delete_station">Delete Station</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="delete_station" id="delete_station" <?php echo $row['delete_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="list_station">List Station</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="list_station" id="list_station" <?php echo $row['list_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Permissions: User Rules -->
-                                    <div class="row">
+                                    <div class="col-12">
+                                        <h6>USERS RULES</h6>
+                                    </div>
+                                    <div class="row card-footer">
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="add_user_rules">Add User Rules</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="add_user_rules" id="add_user_rules" <?php echo $row['add_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="edit_user_rules">Edit User Rules</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="edit_user_rules" id="edit_user_rules" <?php echo $row['edit_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="delete_user_rules">Delete User Rules</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="delete_user_rules" id="delete_user_rules" <?php echo $row['delete_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
-                                            <div class="col-6">
+                                            <div class="col-8">
                                                 <label for="list_user_rules">List User Rules</label>
                                             </div>
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="list_user_rules" id="list_user_rules" <?php echo $row['list_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="card-footer">
+                                    <div class="">
                                         <button type="submit" name="submit" class="btn btn-primary">Update</button>
                                     </div>
                                 </div>
@@ -346,18 +357,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         </div>
         <?php include "../inc/footer.php"; ?>
     </div>
-
     <!-- jQuery -->
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-   
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-
-
 
 
 </body>

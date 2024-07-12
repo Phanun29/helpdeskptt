@@ -1,57 +1,45 @@
 <?php
 include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
+
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
-    FROM tbl_users u 
-    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
-    WHERE u.users_id = $user_id";
-
-$result_user = $conn->query($query_user);
+        SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
+        FROM tbl_users u
+        JOIN tbl_users_rules r ON u.rules_id = r.rules_id
+        WHERE u.users_id = ?";
+$stmt_user = $conn->prepare($query_user);
+$stmt_user->bind_param("i", $user_id);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
 
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-
     $listTicket = $user['list_ticket_status'];
     $AddTicket = $user['add_ticket_status'];
     $EditTicket = $user['edit_ticket_status'];
     $DeleteTicket = $user['delete_ticket_status'];
     $listTicketAssign = $user['list_ticket_assign'];
 
-    if ($listTicketAssign == 0) {
-        // User type 1: Select all tickets
-        $ticket_query = "
-            SELECT 
-                t.*, 
-                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-            FROM 
-                tbl_ticket t
-            LEFT JOIN 
-                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-            GROUP BY 
-                t.ticket_id DESC
-        ";
-    } else {
-        // User type 0: Select tickets assigned to the current user
-        $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
-
-        $ticket_query = "
-            SELECT 
-                t.*, 
-                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-            FROM 
-                tbl_ticket t
-            LEFT JOIN 
-                tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-            WHERE 
-                FIND_IN_SET($user_id, t.users_id)
-            GROUP BY 
-                t.ticket_id DESC
-        ";
+    $ticket_query = ($listTicketAssign == 0) ?
+        "SELECT t.*, REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM tbl_ticket t
+            LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            GROUP BY t.ticket_id DESC" :
+        "SELECT t.*, REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
+            FROM tbl_ticket t
+            LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            WHERE FIND_IN_SET(?, t.users_id)
+            GROUP BY t.ticket_id DESC";
+    $stmt_ticket = $conn->prepare($ticket_query);
+    if ($listTicketAssign != 0) {
+        $stmt_ticket->bind_param("i", $user_id);
     }
+    $stmt_ticket->execute();
+    $ticket_result = $stmt_ticket->get_result();
+
     if (!$listTicket) {
         header("location: 404.php");
         exit();
@@ -60,7 +48,6 @@ if ($result_user && $result_user->num_rows > 0) {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
 
-$ticket_result = $conn->query($ticket_query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -69,12 +56,12 @@ $ticket_result = $conn->query($ticket_query);
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "../inc/head.php"; ?>
-    <script>
-        // Auto-refresh the page every 30 seconds
-        // setInterval(function() {
-        //     window.location.reload();
-        // }, 10000); // 30000 milliseconds = 30 seconds
-    </script>
+    <style>
+        @font-face {
+            font-family: 'KhmerFont';
+            src: url('path/to/khmer-font.ttf') format('truetype');
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -95,22 +82,22 @@ $ticket_result = $conn->query($ticket_query);
                             <ol class="breadcrumb float-sm-right">
                                 <?php
                                 if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
                                     unset($_SESSION['success_message']); // Clear the message after displaying
                                 }
 
                                 if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
                                     unset($_SESSION['error_message']); // Clear the message after displaying
                                 }
                                 ?>
@@ -125,8 +112,8 @@ $ticket_result = $conn->query($ticket_query);
                 <div class="container-fluid">
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
-
                         <div class="card-body p-0" style="overflow: hidden;">
+                            <!-- style for show filter form -->
                             <style>
                                 #filterForm1 {
                                     display: none;
@@ -143,6 +130,11 @@ $ticket_result = $conn->query($ticket_query);
                                 <?php if (isset($AddTicket) && $AddTicket) : ?>
                                     <a href="add_ticket.php" class="btn btn-primary ml-2">Add Ticket</a>
                                 <?php endif; ?>
+                                <div class="dt-buttons btn-group flex-wrap">
+                                    <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToCSV()" type="button"><span>CSV</span></button>
+                                    <button class="btn btn-secondary buttons-pdf buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToPDF()" type="button"><span>PDF</span></button>
+                                    <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToExcel()" type="button"><span>Excel</span></button>
+                                </div>
                                 <button type="button" class="btn btn-secondary" id="toggleFilterBtn">Filter</button>
                             </div>
 
@@ -156,7 +148,7 @@ $ticket_result = $conn->query($ticket_query);
                                     <div class="form-group col-sm-3">
                                         <label for="issue_type">Issue Type</label>
                                         <select class="form-control" name="issue_type" id="issue_type">
-                                            <option value="">Issue Type</option>
+                                            <option value="">All</option>
                                             <option value="Hardware">Hardware</option>
                                             <option value="Software">Software</option>
                                             <option value="Network">Network</option>
@@ -167,7 +159,7 @@ $ticket_result = $conn->query($ticket_query);
                                     <div class="form-group col-sm-3">
                                         <label for="SLA_category">SLA Catego</label>
                                         <select name="SLA_category" id="SLA_category" class="form-control">
-                                            <option value="">SLA_category</option>
+                                            <option value="">All</option>
                                             <option value="CAT Hardware">CAT Hardware</option>
                                             <option value="CAT 1*">CAT 1*</option>
                                             <option value="CAT 2*">CAT 2*</option>
@@ -180,7 +172,7 @@ $ticket_result = $conn->query($ticket_query);
                                     <div class="form-group col-sm-3">
                                         <label for="status">Status</label>
                                         <select name="status" id="status" class="form-control" style="width: 100%;">
-                                            <option value="">Status</option>
+                                            <option value="">All</option>
                                             <option value="Open">Open</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="In Progress">In Progress</option>
@@ -191,7 +183,7 @@ $ticket_result = $conn->query($ticket_query);
                                     <div class="form-group col-sm-3">
                                         <label for="users_id">Assign</label>
                                         <select name="users_id" id="users_id" class="form-control">
-                                            <option value="">Assign</option>
+                                            <option value="">All</option>
                                             <?php
                                             $user_query1 = "SELECT users_id, users_name FROM tbl_users WHERE status = 1";
                                             $user_result1 = $conn->query($user_query1);
@@ -233,23 +225,7 @@ $ticket_result = $conn->query($ticket_query);
                                     </div>
                                 </form>
                             </div>
-                            <!-- script dropdown filter -->
-                            <script>
-                                document.getElementById('toggleFilterBtn').addEventListener('click', function() {
-                                    var filterForm = document.getElementById('filterForm1');
-                                    if (filterForm.classList.contains('show')) {
-                                        filterForm.classList.remove('show');
-                                        setTimeout(function() {
-                                            filterForm.style.display = 'none';
-                                        }, 500); // Match the transition duration
-                                    } else {
-                                        filterForm.style.display = 'block';
-                                        setTimeout(function() {
-                                            filterForm.classList.add('show');
-                                        }, 10); // Slight delay to trigger transition
-                                    }
-                                });
-                            </script>
+
                             <br>
                             <table id="example1" class="table table-hover text-nowrap">
                                 <thead>
@@ -259,7 +235,7 @@ $ticket_result = $conn->query($ticket_query);
 
                                             echo "<th style='display:none;'></th>";
                                         } else {
-                                            echo " <th>Option</th>";
+                                            echo " <th class='export-ignore'>Option</th>";
                                         } ?>
                                         <th>Ticket ID</th>
                                         <th>Station ID</th>
@@ -267,7 +243,7 @@ $ticket_result = $conn->query($ticket_query);
                                         <th>Station Type</th>
                                         <th>Province</th>
                                         <th>Description</th>
-                                        <th>Issue Image</th>
+                                        <th class="export-ignore">Issue Image</th>
                                         <th>Issue Type</th>
                                         <th>SLA Category</th>
                                         <th>Status</th>
@@ -288,11 +264,16 @@ $ticket_result = $conn->query($ticket_query);
                                             if ($EditTicket == 0 &  $DeleteTicket == 0) {
                                                 echo " <td style='display:none;'></td>";
                                             } else {
-                                                echo "<td  class='py-1'>";
+                                                echo "<td  class='export-ignore py-1'>";
                                                 if ($row['ticket_close'] === null) {
                                                     // Edit button if user has permission
                                                     if ($EditTicket) {
-                                                        echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                        // Include the current URL as a query parameter when generating the edit button
+                                                        $currentUrl = urlencode($_SERVER['REQUEST_URI']);
+                                                        echo "<a href='edit_ticket.php?id=" . $row['id'] . "&redirect=" . $currentUrl . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+
+                                                        //echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                        // echo "<button data-id='{$row['id']}' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></button>";
                                                     }
                                                     if ($DeleteTicket) {
                                                         echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
@@ -310,9 +291,9 @@ $ticket_result = $conn->query($ticket_query);
                                             echo "<td  class='py-1'>" . $row['province'] . "</td>";
                                             echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;'>" . $row['issue_description'] . "</td>";
                                             if ($row['issue_image'] == !null) {
-                                                echo "<td  class='py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
+                                                echo "<td  class=' export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
                                             } else {
-                                                echo "<td class='text-center text-warning'>none</td>";
+                                                echo "<td class='export-ignore text-center text-warning'>none</td>";
                                             }
                                             echo "<td  class='py-1'>" . $row['issue_type'] . "</td>";
                                             echo "<td  class='py-1'>" . $row['SLA_category'] . "</td>";
@@ -327,6 +308,7 @@ $ticket_result = $conn->query($ticket_query);
                                         echo "<tr><td colspan='15' class='text-center'>No tickets found</td></tr>";
                                     }
                                     ?>
+                                </tbody>
                             </table>
                             <!-- Ticket Details Modal -->
 
@@ -417,55 +399,34 @@ $ticket_result = $conn->query($ticket_query);
                                 </div>
                             </div>
                             <!-- /model ticket details -->
-                            <!--script pop up details ticket -->
-                            <script>
-                                function showTicketDetails(ticket) {
-                                    // Set text content for single fields
-                                    document.getElementById('modalTicketId').textContent = ticket.ticket_id;
-                                    document.getElementById('modalStationId').textContent = ticket.station_id;
-                                    document.getElementById('modalStationName').textContent = ticket.station_name;
-                                    document.getElementById('modalStationType').textContent = ticket.station_type;
-                                    document.getElementById('modalProvince').textContent = ticket.province;
-                                    document.getElementById('modalDescription').textContent = ticket.issue_description;
-                                    document.getElementById('modalIssueType').textContent = ticket.issue_type;
-                                    document.getElementById('modalSLA_category').textContent = ticket.SLA_category;
-                                    document.getElementById('modalStatus').textContent = ticket.status;
-                                    document.getElementById('modalAssign').textContent = ticket.users_name;
-                                    document.getElementById('modalTicketOpen').textContent = ticket.ticket_open;
-                                    document.getElementById('modalTicketOnHold').textContent = ticket.ticket_on_hold;
-                                    document.getElementById('modalTicketInProgress').textContent = ticket.ticket_in_progress;
-                                    document.getElementById('modalTicketPendingVendor').textContent = ticket.ticket_pending_vendor;
-                                    document.getElementById('modalTicketClose').textContent = ticket.ticket_close;
-                                    document.getElementById('modalComment').textContent = ticket.comment;
+                            <!-- Modal for displaying images -->
+                            <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="imageModalLabel">Image Viewer</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="">
+                                                <div class="text-center">
+                                                    <img style="width:600px;" id="modalImage" class="img-fluid">
+                                                </div>
 
-                                    // Set image source for main image
-                                    document.getElementById('modalIssueImages').src = ticket.issue_image || '';
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <span id="imageIndex"></span> / <span id="totalImages"></span> <!-- Display image index and total -->
+                                            <button type="button" class="btn btn-secondary" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+                                            <button type="button" class="btn btn-secondary " id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    // Clear previous images
-                                    const modalIssueImages = document.getElementById('modalIssueImages');
-                                    modalIssueImages.innerHTML = '';
-
-                                    // Display multiple images if available
-                                    if (ticket.issue_image) {
-                                        const images = ticket.issue_image.split(',');
-                                        images.forEach(image => {
-                                            const imgElement = document.createElement('img');
-                                            imgElement.src = image.trim();
-                                            imgElement.style.width = '50px';
-                                            imgElement.style.cursor = 'pointer';
-                                            imgElement.onclick = () => showImage(image.trim());
-                                            modalIssueImages.appendChild(imgElement);
-                                        });
-                                    }
-
-                                    $('#ticketModal').modal('show');
-                                }
-
-                                function showImage(imageUrl) {
-                                    $('#imageToShow').attr('src', imageUrl);
-                                    $('#imageModal').modal('show');
-                                }
-                            </script>
                         </div>
                     </div>
                 </div>
@@ -488,7 +449,6 @@ $ticket_result = $conn->query($ticket_query);
     <script src="../plugins/pdfmake/pdfmake.min.js"></script>
     <script src="../plugins/pdfmake/vfs_fonts.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
     <!-- sweet alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -496,41 +456,12 @@ $ticket_result = $conn->query($ticket_query);
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-    <!-- Custom PDFMake Khmer Font -->
-    <script>
-        // Load custom Khmer font
-        // pdfMake.fonts = {
-        //     Khmer: {
-        //         normal: 'NotoSansKhmer-Regular.ttf',
-        //         bold: 'NotoSansKhmer-Bold.ttf',
-        //         italics: 'NotoSansKhmer-Italic.ttf',
-        //         bolditalics: 'NotoSansKhmer-BoldItalic.ttf'
-        //     }
-        // };
-
-        // $(function() {
-        //     $("#example1").DataTable({
-        //         "lengthChange": false,
-        //         "autoWidth": false,
-        //         "buttons": [{
-        //                 extend: 'pdfHtml5',
-        //                 text: 'PDF',
-        //                 customize: function(doc) {
-        //                     doc.defaultStyle.font = 'Khmer';
-        //                 }
-        //             },
-        //             "csv", "excel"
-        //         ]
-        //     }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-        // });
-    </script>
     <!-- Page specific script -->
-
     <script>
         $(function() {
             $("#example1").DataTable({
-                "buttons": [, "csv", "excel", "pdf"],
-                "lengthChange": false,
+                // "buttons": [, "csv", "excel", "pdf"],
+                "lengthChange": true,
                 "autoWidth": true,
 
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
@@ -545,136 +476,15 @@ $ticket_result = $conn->query($ticket_query);
             });
         });
     </script>
-    <!-- auto fill station -->
-    <style>
-        .dropdown-content {
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-        }
+    <!-- script pop up ticket details -->
+    <script src="../scripts/pop_up_ticket_details.js"></script>
+    <!-- script pop up image  -->
+    <script src="../scripts/pop_up_images.js"></script>
+    <!-- script delete ticket -->
+    <script src="../scripts/delete_edit_ticket.js"></script>
+    <!-- auto fill station id -->
+    <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
 
-        .dropdown-content p {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            cursor: pointer;
-        }
-
-        .dropdown-content p:hover {
-            background-color: #f1f1f1;
-        }
-    </style>
-    <script>
-        function showSuggestions(str) {
-            if (str == "") {
-                document.getElementById("suggestion_dropdown").innerHTML = "";
-                return;
-            } else {
-                var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById("suggestion_dropdown").innerHTML = this.responseText;
-                    }
-                };
-                xmlhttp.open("GET", "get_suggestions.php?q=" + str, true);
-                xmlhttp.send();
-            }
-        }
-
-        function selectSuggestion(station_id) {
-            document.getElementById("station_id").value = station_id;
-            document.getElementById("suggestion_dropdown").innerHTML = "";
-            $('#station_id').blur();
-        }
-    </script>
-    <!-- delete -->
-    <script>
-        $(document).ready(function() {
-            // Handle delete button click
-            $(document).on('click', '.delete-btn', function() {
-                var ticketId = $(this).data('id');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'You will not be able to recover this ticket!',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: 'delete_ticket.php',
-                            type: 'POST',
-                            data: {
-                                id: ticketId
-                            },
-                            success: function(response) {
-                                if (response === 'success') {
-                                    $('#ticket-' + ticketId).remove();
-                                    Swal.fire(
-                                        'Deleted!',
-                                        'Your ticket has been deleted.',
-                                        'success'
-                                    );
-                                } else if (response === 'closed') {
-                                    Swal.fire(
-                                        'Error!',
-                                        'Closed tickets cannot be deleted.',
-                                        'error'
-                                    );
-                                } else {
-                                    Swal.fire(
-                                        'Error!',
-                                        'Failed to delete ticket.',
-                                        'error'
-                                    );
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Handle edit button click
-            $(document).on('click', '.edit-btn', function() {
-                var ticketId = $(this).data('id');
-                // Redirect or load edit form page, passing ticketId
-                window.location.href = 'edit_ticket.php?id=' + ticketId;
-                // alert('Edit button clicked for ticket ID: ' + ticketId);
-            });
-        });
-    </script>
-    <!-- Modal for displaying images -->
-    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imageModalLabel">Image Viewer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="">
-                        <div class="text-center">
-                            <img style="width:600px;" id="modalImage" class="img-fluid">
-                        </div>
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <span id="imageIndex"></span> / <span id="totalImages"></span> <!-- Display image index and total -->
-                    <button type="button" class="btn btn-secondary" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
-                    <button type="button" class="btn btn-secondary " id="nextBtn"><i class="fas fa-chevron-right"></i></button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- filter -->
     <script>
         $(document).ready(function() {
@@ -702,37 +512,29 @@ $ticket_result = $conn->query($ticket_query);
             });
         });
     </script>
-    <!--script pop up show image -->
+    <!-- script dropdown filter -->
     <script>
-        function showImage(images) {
-            var imageArray = images.split(',');
-            var imageModal = $('#imageModal');
-            var modalImage = document.getElementById('modalImage');
-            var currentImageIndex = 0;
-
-            function showCurrentImage() {
-                modalImage.src = imageArray[currentImageIndex];
-                $('#imageIndex').text(currentImageIndex + 1); // Display current image index
-                $('#totalImages').text(imageArray.length); // Display total number of images
+        document.getElementById('toggleFilterBtn').addEventListener('click', function() {
+            var filterForm = document.getElementById('filterForm1');
+            if (filterForm.classList.contains('show')) {
+                filterForm.classList.remove('show');
+                setTimeout(function() {
+                    filterForm.style.display = 'none';
+                }, 500); // Match the transition duration
+            } else {
+                filterForm.style.display = 'block';
+                setTimeout(function() {
+                    filterForm.classList.add('show');
+                }, 10); // Slight delay to trigger transition
             }
-
-            // Initial image display
-            showCurrentImage();
-
-            // Navigation buttons
-            $('#nextBtn').click(function() {
-                currentImageIndex = (currentImageIndex + 1) % imageArray.length;
-                showCurrentImage();
-            });
-
-            $('#prevBtn').click(function() {
-                currentImageIndex = (currentImageIndex - 1 + imageArray.length) % imageArray.length;
-                showCurrentImage();
-            });
-
-            imageModal.modal('show');
-        }
+        });
     </script>
+    <!-- export -->
+    <!-- Include jsPDF and jsPDF AutoTable libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
+    <script src="../scripts/export.js"></script>
+
 </body>
 
 </html>

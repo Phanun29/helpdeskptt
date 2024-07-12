@@ -86,7 +86,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
 }
 // Define the current page URL
-$current_page = basename($_SERVER['PHP_SELF']);
+$current_menu = basename($_SERVER['PHP_SELF']);
 ?>
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-info ">
@@ -106,7 +106,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
          with font-awesome or any other icon font library -->
                 <li class="nav-item menu-open">
                     <!-- <a href="index.php" class="nav-link active"> -->
-                    <a href="index.php" <?php if ($current_page === 'index.php') echo 'class="nav-link active"';
+                    <a href="index.php" <?php if ($current_menu === 'index.php') echo 'class="nav-link active"';
                                         else echo 'class="nav-link"'; ?>>
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
@@ -118,7 +118,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 if ($listTicket) { ?>
                     <li class="nav-item">
                         <!-- <a href="ticket.php" class="nav-link"> -->
-                        <a href="ticket.php" <?php if ($current_page === 'ticket.php') echo 'class="nav-link active"';
+                        <a href="ticket.php" <?php if ($current_menu === 'ticket.php') echo 'class="nav-link active"';
                                                 else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon  fa-solid fa-ticket"></i>
                             <p>
@@ -132,7 +132,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 if ($listStation) { ?>
                     <li class="nav-item">
                         <!-- <a href="station.php" class="nav-link"> -->
-                        <a href="station.php" <?php if ($current_page === 'station.php') echo 'class="nav-link active"';
+                        <a href="station.php" <?php if ($current_menu === 'station.php') echo 'class="nav-link active"';
                                                 else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa-solid fa-gas-pump"></i>
                             <p>
@@ -146,7 +146,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 if ($listUsers) { ?>
                     <li class="nav-item">
                         <!-- <a href="users.php" class="nav-link"> -->
-                        <a href="users.php" <?php if ($current_page === 'users.php') echo 'class="nav-link active"';
+                        <a href="users.php" <?php if ($current_menu === 'users.php') echo 'class="nav-link active"';
                                             else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa-solid fa-users"></i>
                             <p>
@@ -160,7 +160,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 if ($listUsersRules) { ?>
                     <li class="nav-item">
                         <!-- <a href="permission.php" class="nav-link"> -->
-                        <a href="users_rules.php" <?php if ($current_page === 'users_rules.php') echo 'class="nav-link active"';
+                        <a href="users_rules.php" <?php if ($current_menu === 'users_rules.php') echo 'class="nav-link active"';
                                                     else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fas fa-users-cog"></i>
                             <p>
@@ -174,7 +174,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 ?>
                 <li class="nav-item">
                     <!-- <a href="permission.php" class="nav-link"> -->
-                    <a href="report.php" <?php if ($current_page === 'report.php') echo 'class="nav-link active"';
+                    <a href="report.php" <?php if ($current_menu === 'report.php') echo 'class="nav-link active"';
                                             else echo 'class="nav-link"'; ?>>
                         <i class="nav-icon fa fa-file"></i>
                         <p>

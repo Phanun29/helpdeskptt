@@ -37,7 +37,7 @@
 <!-- box icon -->
 <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 <!-- style -->
-<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="../styles/main.css">
 <!-- multiple choice-->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">
 <!-- app -->

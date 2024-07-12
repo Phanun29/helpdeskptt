@@ -60,7 +60,7 @@ if ($result_user && $result_user->num_rows > 0) {
     $status_counts[$row['status']] = $row['count'];
   }
 
-  // Fetch priority counts and calculate percentages
+  // Fetch SLA_category counts and calculate percentages
   $SLA_category_counts = [
     'CAT Hardware' => 0,
     'CAT 1*' => 0,

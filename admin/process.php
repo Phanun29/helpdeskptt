@@ -1,10 +1,7 @@
 <?php
 include "config.php";
-
 include "../inc/header.php";
-
 $user_id = $fetch_info['users_id']; // Example user ID
-
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
     FROM tbl_users u 
@@ -29,10 +26,6 @@ if ($result_user && $result_user->num_rows > 0) {
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
-// Ensure your database connection is included
-$users_type = $fetch_info['users_type'];
-$user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
-
 // Base ticket query
 $ticket_query = "
     SELECT 
@@ -45,7 +38,7 @@ $ticket_query = "
 ";
 
 // Adjust query based on user type
-if ($users_type == 0) {
+if ($listTicketAssign == 1) {
     $ticket_query .= " WHERE FIND_IN_SET($user_id, t.users_id)";
 } else {
     $ticket_query .= " WHERE 1=1"; // Default condition for further appending
@@ -101,7 +94,6 @@ if (!empty($_GET['ticket_close_to'])) {
 }
 
 // Add more conditions for other filters like issue_type, SLA_category, status, etc.
-
 $ticket_query .= "
     GROUP BY 
         t.ticket_id DESC";
@@ -116,7 +108,7 @@ if ($ticket_result->num_rows > 0) {
         echo "<td class='py-1'>" . $i++ . "</td>";
 
         // Conditionally display edit/delete buttons based on permissions
-        echo "<td class='py-1'>";
+        echo "<td class='export-ignore py-1'>";
         if ($EditTicket || $DeleteTicket) {
             if ($row['ticket_close'] === null) {
                 // Edit button if user has permission
@@ -131,7 +123,6 @@ if ($ticket_result->num_rows > 0) {
             }
         }
         echo "</td>";
-
         // Output other table columns based on $row data
         echo "<td class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($row) . ")'>" . $row['ticket_id'] . "</button></td>";
         echo "<td class='py-1'>" . $row['station_id'] . "</td>";
@@ -140,9 +131,9 @@ if ($ticket_result->num_rows > 0) {
         echo "<td class='py-1'>" . $row['province'] . "</td>";
         echo "<td class='py-1'>" . $row['issue_description'] . "</td>";
         if ($row['issue_image'] == !null) {
-            echo "<td  class='py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
+            echo "<td  class='export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
         } else {
-            echo "<td class='text-center text-warning'>none</td>";
+            echo "<td class='export-ignore text-center text-warning'>none</td>";
         }
         if ($issue_type == !null) {
             echo "<td class='py-1'>" . $issue_type . "</td>";

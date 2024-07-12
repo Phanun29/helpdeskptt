@@ -204,22 +204,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <label for="province">Province</label>
                                             <input type="text" name="province" class="form-control" id="province" placeholder="Station Type" readonly>
                                         </div>
-                                    </div>
-                                    <div class="row">
+
                                         <div class="form-group col-sm-8">
                                             <label for="issue_description">Issue Description <span class="text-danger">*</span></label>
                                             <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description" required></textarea>
                                         </div>
+
+
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
-                                            <div class="input-group col-12">
-                                                <div class="custom-image">
-                                                    <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
-                                                </div>
-                                            </div>
+
+
+                                            <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
+
                                         </div>
-                                    </div>
-                                    <div class="row">
+                                        <!-- Display selected new images -->
+                                        <div class="col-12 row mt-3" id="imagePreview">
+
+                                        </div>
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type <span class="text-danger">*</span></label>
                                             <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>
@@ -244,9 +246,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="CAT 5*">CAT 5*</option>
                                             </select>
                                         </div>
-
-
-
                                     </div>
 
                                     <div class="">
@@ -291,57 +290,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
     </script>
     <!-- auto fill station -->
-    </script>
+    <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
+    <!-- show image -->
     <script>
-        $(document).ready(function() {
-            const $stationId = $('#station_id');
-            const $quickForm = $('#quickForm');
+        function previewImages(event) {
+            var previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = ''; // Clear previous previews
 
-            $stationId.on('blur', function() {
-                fetchStationDetails($(this).val());
-            });
+            var files = event.target.files;
+            var selectedFiles = Array.from(files); // Convert FileList to array
 
-            $quickForm.on('submit', function(event) {
-                if (!this.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                $(this).addClass('was-validated');
-            });
-        });
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
 
-        function fetchStationDetails(station_id) {
-            $.post('get_station_details.php', {
-                station_id
-            }, function(response) {
-                const {
-                    success,
-                    station_name = '',
-                    station_type = '',
-                    province = ''
-                } = response;
-                $('#station_name').val(station_name);
-                $('#station_type').val(station_type);
-                $('#province').val(province);
-            }, 'json');
-        }
+                var reader = new FileReader();
 
-        function showSuggestions(str) {
-            if (str === "") {
-                $("#suggestion_dropdown").empty();
-                return;
+                reader.onload = function(e) {
+                    var imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-container col-3';
+                    imageContainer.style.width = '200px';
+
+                    var image = document.createElement('img');
+                    image.style.width = '100%';
+                    image.className = 'preview-image';
+                    image.src = e.target.result;
+                    imageContainer.appendChild(image);
+
+                    var closeButton = document.createElement('button');
+                    closeButton.className = 'close-button';
+                    closeButton.innerHTML = '&times;';
+                    closeButton.addEventListener('click', function() {
+                        // Remove the image container when the button is clicked
+                        imageContainer.remove();
+                        // Remove the corresponding file from the selectedFiles array
+                        var index = selectedFiles.indexOf(file);
+                        selectedFiles.splice(index, 1);
+                        // Update the file input element with the updated selected files
+                        var newFileList = new DataTransfer();
+                        selectedFiles.forEach(function(file) {
+                            newFileList.items.add(file);
+                        });
+                        document.getElementById('issue_image').files = newFileList.files;
+                    });
+
+                    imageContainer.appendChild(closeButton);
+                    previewContainer.appendChild(imageContainer);
+                };
+                reader.readAsDataURL(file);
             }
-            $.get("get_suggestions.php", {
-                q: str
-            }, function(response) {
-                $("#suggestion_dropdown").html(response);
-            });
         }
 
-        function selectSuggestion(station_id) {
-            $("#station_id").val(station_id).blur();
-            $("#suggestion_dropdown").empty();
-        }
+        // Bind previewImages function to file input change event
+        document.getElementById('issue_image').addEventListener('change', previewImages);
     </script>
 </body>
 

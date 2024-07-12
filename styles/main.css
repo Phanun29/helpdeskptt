@@ -1,5 +1,74 @@
-body {
-    /* font-family: Arial, sans-serif; */
-    text-align: center;
-    margin-top: 50px;
+html, body{
+  scroll-behavior: smooth;
+}
+
+/* tabel  */
+td,textarea {
+  font-family: "Khmer", sans-serif;
+}
+
+.col-sm-12 {
+  overflow: auto;
+}
+
+#example1_wrapper>.row:first-child {
+  margin: 0 10px;
+}
+/* tabel  */
+
+/* suggestion_dropdown station id */
+.dropdown-content {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+.dropdown-content p {
+  color: black;
+  padding: 8px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  margin: 0;
+}
+.dropdown-content p:hover {
+  background-color: #f1f1f1;
+}
+/* suggestion_dropdown  station id*/
+
+/* image ticket */
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* image ticket */
+/* table ticket */
+#example1_filter{
+  text-align: right;
+}
+#table_ticket{
+  overflow: auto;
+}
+@media (max-width: 767px) {
+  #example1_filter{
+      text-align: left;
   }
+
+}

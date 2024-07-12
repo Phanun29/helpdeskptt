@@ -4,7 +4,6 @@ include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
@@ -18,7 +17,6 @@ $result_user = $stmt_user->get_result();
 
 if ($result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-
     $listTicketAssign = $user['list_ticket_assign'];
 
     if (!$user['list_ticket_status'] || !$user['edit_ticket_status']) {
@@ -33,12 +31,11 @@ if ($result_user->num_rows > 0) {
 
 // Initialize session for storing messages
 $ticket_id = $_GET['id'] ?? null; // Assuming you're passing the ticket ID through a GET parameter
-
+$redirect = $_GET['redirect'] ?? 'ticket.php';
 if (!is_numeric($ticket_id)) {
     header("Location: 404.php");
     exit();
 }
-
 // Check if form is submitted
 date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -53,7 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $status = $_POST['status'] ?? null;
     $users_id = isset($_POST['users_id']) ? implode(',', $_POST['users_id']) : null;
     $comment = $_POST['comment'] ?? null;
-
 
     // Fetch existing ticket details for validation
     $check_ticket_query = "SELECT status, ticket_on_hold, ticket_in_progress, ticket_pending_vendor, ticket_close FROM tbl_ticket WHERE id = ?";
@@ -284,7 +280,10 @@ $stmt_user->close();
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6 row">
-                            <a href="ticket.php" class="btn btn-primary mx-2">BACK</a>
+                            <div>
+                                <a href="ticket.php" class="btn btn-primary mx-2">BACK</a>
+                            </div>
+
                             <h1 class="m-0">Update Ticket</h1>
                         </div>
                         <div class="col-sm-6">
@@ -319,6 +318,7 @@ $stmt_user->close();
 
                             <!-- <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data"> -->
                             <form method="POST" id="quickForm" novalidate="novalidate" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . "?id=" . $ticket_id; ?>" enctype="multipart/form-data">
+                                <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
                                 <div class="card-body col">
                                     <div class="row">
                                         <div class="form-group col-sm-3 ">
@@ -588,59 +588,6 @@ $stmt_user->close();
         });
     </script>
     <!-- show image -->
-    <!-- <script>
-        function previewImages(event) {
-            var previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = ''; // Clear previous previews
-
-            var files = event.target.files;
-            var selectedFiles = Array.from(files); // Convert FileList to array
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-
-                var reader = new FileReader();
-
-                reader.onload = function(e) {
-                    var imageContainer = document.createElement('div');
-                    imageContainer.className = 'preview-image-container col-3';
-                    imageContainer.style.width = '200px';
-
-                    var image = document.createElement('img');
-                    image.style.width = '100%';
-                    image.className = 'preview-image ';
-                    image.src = e.target.result;
-                    imageContainer.appendChild(image);
-
-                    // Create a div for the button
-                    var buttonDiv = document.createElement('div');
-                    buttonDiv.className = 'button-container d-flex justify-content-center mt-5'; // You can style this container as needed
-                    imageContainer.appendChild(buttonDiv);
-
-                    var removeButton = document.createElement('button');
-                    removeButton.className = 'btn btn-danger remove-image-button';
-                    removeButton.textContent = 'Remove';
-                    removeButton.addEventListener('click', function() {
-                        // Remove the image container when the button is clicked
-                        imageContainer.remove();
-                        // Remove the corresponding file from the selectedFiles array
-                        var index = selectedFiles.indexOf(file);
-                        selectedFiles.splice(index, 1);
-                        // Update the file input element with the updated selected files
-                        var newFileList = new DataTransfer();
-                        selectedFiles.forEach(function(file) {
-                            newFileList.items.add(file);
-                        });
-                        document.getElementById('issue_image').files = newFileList.files;
-                    });
-                    buttonDiv.appendChild(removeButton);
-
-                    previewContainer.appendChild(imageContainer);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-    </script> -->
     <script>
         function previewImages(event) {
             var previewContainer = document.getElementById('imagePreview');
@@ -693,25 +640,7 @@ $stmt_user->close();
         document.getElementById('issue_image').addEventListener('change', previewImages);
     </script>
     <style>
-        .image-container {
-            position: relative;
-            display: inline-block;
-        }
 
-        .close-button {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            text-align: center;
-            cursor: pointer;
-            z-index: 10;
-        }
     </style>
 
 
