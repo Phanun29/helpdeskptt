@@ -80,8 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -99,25 +98,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <h1 class="m-0">Add Users</h1>
                         </div>
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">Ticket</li>
-                            </ol> -->
-                            <!-- Display success/error messages -->
-                            <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['success_message']); ?>
-                            <?php endif; ?>
-                            <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['error_message']); ?>
-                            <?php endif; ?>
+                            <ol class="breadcrumb float-sm-right">
+                                <?php
+                                if (isset($_SESSION['success_message'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message']); // Clear the message after displaying
+                                }
+
+                                if (isset($_SESSION['error_message'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message']); // Clear the message after displaying
+                                }
+                                ?>
+                            </ol>
                         </div>
                     </div>
                 </div>

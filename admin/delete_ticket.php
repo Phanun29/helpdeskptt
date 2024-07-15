@@ -25,6 +25,7 @@ if ($stmt = $conn->prepare($query)) {
     $stmt->fetch();
     $stmt->close();
 } else {
+    error_log('Error preparing statement: ' . $conn->error);
     echo 'error';
     exit();
 }
@@ -47,15 +48,19 @@ if ($stmt = $conn->prepare($query)) {
                 $path = trim($path); // Ensure there are no leading/trailing spaces
                 if (file_exists($path)) {
                     unlink($path);
+                } else {
+                    error_log('File does not exist: ' . $path);
                 }
             }
         }
         echo 'success';
     } else {
+        error_log('Error executing delete: ' . $stmt->error);
         echo 'fail';
     }
     $stmt->close();
 } else {
+    error_log('Error preparing delete statement: ' . $conn->error);
     echo 'error';
 }
 

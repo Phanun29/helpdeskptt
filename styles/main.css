@@ -39,26 +39,32 @@ td,textarea {
 
 /* image ticket */
 .image-container {
+  width: 200px;
+
+  float: left;
   position: relative;
-  display: inline-block;
+}
+
+.preview-image {
+  width: 100%;
+  height: auto;
 }
 
 .close-button {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: red;
-  color: white;
+  top: 0px;
+  right: 3px;
+  background: none;
   border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  text-align: center;
+  color: red;
+  font-size: 30px;
   cursor: pointer;
-  z-index: 10;
 }
 
-/* image ticket */
+/* /image ticket */
+
+
+
 /* table ticket */
 #example1_filter{
   text-align: right;
@@ -71,4 +77,13 @@ td,textarea {
       text-align: left;
   }
 
+}
+@media screen and (max-width: 767px) {
+  #button_export.dt-buttons {
+    /* width: 40%;
+    margin-bottom:0; */
+  }
+  #add_ticket{
+    margin-bottom: .5em;
+  }
 }

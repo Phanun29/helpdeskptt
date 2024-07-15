@@ -13,7 +13,7 @@ if (!isset($fetch_info['users_id'])) {
 $user_id = $fetch_info['users_id']; // Example user ID
 
 // Default values for pagination
-$records_per_page = isset($_GET['length']) ? intval($_GET['length']) : 20;
+$records_per_page = isset($_GET['length']) ? intval($_GET['length']) : 10;
 $current_page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($current_page - 1) * $records_per_page;
 
@@ -74,8 +74,7 @@ if ($result_user && $result_user->num_rows > 0) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
     <?php include "../inc/head.php"; ?>
 </head>
 

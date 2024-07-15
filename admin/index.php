@@ -28,18 +28,18 @@ if ($result_user && $result_user->num_rows > 0) {
             tbl_ticket t
         LEFT JOIN 
             tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)";
-  $group_by = "GROUP BY t.ticket_id DESC";
+  $group_by = "GROUP BY t.ticket_id DESC LIMIT 20";
 
   // Set query based on user type
   if ($listTicketAssign == 0) {
     $ticket_query = "$ticket_select $group_by";
-    $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket GROUP BY status";
-    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket GROUP BY SLA_category";
+    $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket GROUP BY status ";
+    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket WHERE SLA_category IS NOT NULL GROUP BY SLA_category";
     $issue_query = "SELECT issue_type FROM tbl_ticket";
   } else {
     $ticket_query = "$ticket_select WHERE FIND_IN_SET($user_id, t.users_id) $group_by";
     $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY status";
-    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY SLA_category";
+    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket WHERE SLA_category IS NOT NULL AND FIND_IN_SET($user_id, users_id) GROUP BY SLA_category";
     $issue_query = "SELECT issue_type FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id)";
   }
 
@@ -114,12 +114,12 @@ if ($result_user && $result_user->num_rows > 0) {
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <?php include "../inc/head.php" ?>
 
 
@@ -148,7 +148,6 @@ if ($result_user && $result_user->num_rows > 0) {
         </div><!-- /.container-fluid -->
       </div>
       <!-- /.content-header -->
-
       <!-- Main content -->
       <section class="content">
         <div class="container-fluid">

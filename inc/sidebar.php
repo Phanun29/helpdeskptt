@@ -118,7 +118,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listTicket) { ?>
                     <li class="nav-item">
                         <!-- <a href="ticket.php" class="nav-link"> -->
-                        <a href="ticket.php" <?php if ($current_menu === 'ticket.php') echo 'class="nav-link active"';
+                        <a href="ticket.php" <?php if ($current_menu === 'ticket.php' || $current_menu === 'add_ticket.php' || $current_menu === 'edit_ticket.php') echo 'class="nav-link active"';
                                                 else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon  fa-solid fa-ticket"></i>
                             <p>
@@ -132,7 +132,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listStation) { ?>
                     <li class="nav-item">
                         <!-- <a href="station.php" class="nav-link"> -->
-                        <a href="station.php" <?php if ($current_menu === 'station.php') echo 'class="nav-link active"';
+                        <a href="station.php" <?php if ($current_menu === 'station.php'  || $current_menu === 'add_station.php' || $current_menu === 'edit_station.php') echo 'class="nav-link active"';
                                                 else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa-solid fa-gas-pump"></i>
                             <p>
@@ -146,7 +146,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listUsers) { ?>
                     <li class="nav-item">
                         <!-- <a href="users.php" class="nav-link"> -->
-                        <a href="users.php" <?php if ($current_menu === 'users.php') echo 'class="nav-link active"';
+                        <a href="users.php" <?php if ($current_menu === 'users.php' || $current_menu === 'add_users.php' || $current_menu === 'edit_users.php') echo 'class="nav-link active"';
                                             else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa-solid fa-users"></i>
                             <p>
@@ -160,7 +160,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listUsersRules) { ?>
                     <li class="nav-item">
                         <!-- <a href="permission.php" class="nav-link"> -->
-                        <a href="users_rules.php" <?php if ($current_menu === 'users_rules.php') echo 'class="nav-link active"';
+                        <a href="users_rules.php" <?php if ($current_menu === 'users_rules.php' || $current_menu === 'add_users_rules.php' || $current_menu === 'edit_users_rules.php') echo 'class="nav-link active"';
                                                     else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fas fa-users-cog"></i>
                             <p>
@@ -183,7 +183,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="../logout.php" class="nav-link ">
+                    <a href="#" class="nav-link" data-toggle="modal" data-target="#logoutModal">
                         <i class="nav-icon fa-solid fa-right-from-bracket"></i>
                         <p>
                             Logout
@@ -197,3 +197,24 @@ $current_menu = basename($_SERVER['PHP_SELF']);
     </div>
     <!-- /.sidebar -->
 </aside>
+
+<!-- Logout Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to logout?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="../logout.php" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>

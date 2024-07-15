@@ -40,15 +40,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $issue_description = $_POST['issue_description'];
     $issue_type = implode(', ', $_POST['issue_type']); // Convert array to string without spaces
-    $SLA_category = $_POST['SLA_category'];
+    // $SLA_category = $_POST['SLA_category'] ?? null;
+    if (isset($_POST['SLA_category'])) {
+        $SLA_category = $_POST['SLA_category'];
+    } else {
+        $SLA_category = null;
+    }
+
     $status = 'Open';
+    $user_create_ticket = $fetch_info['users_id'];
     date_default_timezone_set('Asia/Bangkok');
 
     $ticket_open = date('Y-m-d H:i:s');
-    $ticket_close = null; // Assuming you allow ticket_close to be null
 
     // Validate station_id
-    $station_check_query = "SELECT station_name, station_type FROM tbl_station WHERE station_id = ?";
+    $station_check_query = "SELECT station_name, station_type ,province FROM tbl_station WHERE station_id = ?";
     $stmt = $conn->prepare($station_check_query);
     $stmt->bind_param("s", $station_id);
     $stmt->execute();
@@ -74,10 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Extract the sequential number from the last ticket ID
         $last_seq_number = intval(substr($last_ticket_id, -6));
-
         // If the last ticket ID exists, increment the sequential number, otherwise set it to 1
         $new_seq_number = ($last_seq_number !== null) ? $last_seq_number + 1 : 1;
-
         // Pad the sequential number with leading zeros
         $padded_seq_number = str_pad($new_seq_number, 6, "0", STR_PAD_LEFT);
 
@@ -106,12 +110,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         error_log("Attempting to insert ticket with station_id: $station_id");
 
         // Prepare the SQL query to insert the ticket
-        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province,issue_description, issue_image, issue_type, SLA_category,status, ticket_open, ticket_close) 
-                VALUES (?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province,issue_description, issue_image, issue_type, SLA_category,status,user_create_ticket, ticket_open) 
+                VALUES (?, ?, ?, ?, ?,?, ?,?, ?,  ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("ssssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_image_paths, $issue_type, $SLA_category, $status, $ticket_open, $ticket_close);
+            $stmt->bind_param("ssssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_image_paths, $issue_type, $SLA_category, $status, $user_create_ticket, $ticket_open);
 
             if ($stmt->execute()) {
                 $_SESSION['success_message'] = "New ticket added successfully";
@@ -133,8 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -152,21 +155,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <h1 class="m-0">Add Ticket</h1>
                         </div>
                         <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <?php
+                                if (isset($_SESSION['success_message'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message']); // Clear the message after displaying
+                                }
 
-                            <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['success_message']); ?>
-                            <?php endif; ?>
-                            <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['error_message']); ?>
-                            <?php endif; ?>
+                                if (isset($_SESSION['error_message'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message']); // Clear the message after displaying
+                                }
+                                ?>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -191,7 +202,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <input class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" required>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
-
                                         <div class="form-group col-sm-3">
                                             <label for="station_name">Station Name</label>
                                             <input type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
@@ -213,8 +223,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
-
-
                                             <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
 
                                         </div>
@@ -222,6 +230,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-12 row mt-3" id="imagePreview">
 
                                         </div>
+                                        
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type <span class="text-danger">*</span></label>
                                             <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>
@@ -246,6 +255,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="CAT 5*">CAT 5*</option>
                                             </select>
                                         </div>
+
+
                                     </div>
 
                                     <div class="">
@@ -277,72 +288,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             var issueTypeChoices = new Choices('#issue_type', {
                 removeItemButton: true,
                 maxItemCount: 5,
-                searchResultLimit: 3,
-                renderChoiceLimit: 3
+                searchResultLimit: 5,
+                renderChoiceLimit: 5
             });
 
             var usersIdChoices = new Choices('#users_id', {
                 removeItemButton: true,
                 maxItemCount: 5,
-                searchResultLimit: 3,
-                renderChoiceLimit: 3
+                searchResultLimit: 5,
+                renderChoiceLimit: 5
             });
         });
     </script>
     <!-- auto fill station -->
     <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
-    <!-- show image -->
-    <script>
-        function previewImages(event) {
-            var previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = ''; // Clear previous previews
 
-            var files = event.target.files;
-            var selectedFiles = Array.from(files); // Convert FileList to array
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-
-                var reader = new FileReader();
-
-                reader.onload = function(e) {
-                    var imageContainer = document.createElement('div');
-                    imageContainer.className = 'image-container col-3';
-                    imageContainer.style.width = '200px';
-
-                    var image = document.createElement('img');
-                    image.style.width = '100%';
-                    image.className = 'preview-image';
-                    image.src = e.target.result;
-                    imageContainer.appendChild(image);
-
-                    var closeButton = document.createElement('button');
-                    closeButton.className = 'close-button';
-                    closeButton.innerHTML = '&times;';
-                    closeButton.addEventListener('click', function() {
-                        // Remove the image container when the button is clicked
-                        imageContainer.remove();
-                        // Remove the corresponding file from the selectedFiles array
-                        var index = selectedFiles.indexOf(file);
-                        selectedFiles.splice(index, 1);
-                        // Update the file input element with the updated selected files
-                        var newFileList = new DataTransfer();
-                        selectedFiles.forEach(function(file) {
-                            newFileList.items.add(file);
-                        });
-                        document.getElementById('issue_image').files = newFileList.files;
-                    });
-
-                    imageContainer.appendChild(closeButton);
-                    previewContainer.appendChild(imageContainer);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Bind previewImages function to file input change event
-        document.getElementById('issue_image').addEventListener('change', previewImages);
-    </script>
+    <!-- previewImages -->
+    <script src="../scripts/previewImages.js"></script>
 </body>
 
 </html>

@@ -35,8 +35,6 @@ if ($result_user && $result_user->num_rows > 0) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <?php include "../inc/head.php" ?>
 
@@ -59,29 +57,29 @@ if ($result_user && $result_user->num_rows > 0) {
                             <h1 class="m-0">Users Rules</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <?php
+                                if (isset($_SESSION['success_message'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message']); // Clear the message after displaying
+                                }
 
-                            <?php
-
-                            if (isset($_SESSION['success_message'])) {
-                                echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                unset($_SESSION['success_message']); // Clear the message after displaying
-                            }
-
-                            if (isset($_SESSION['error_message'])) {
-                                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                     <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                unset($_SESSION['error_message']); // Clear the message after displaying
-                            }
-                            ?>
+                                if (isset($_SESSION['error_message'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message']); // Clear the message after displaying
+                                }
+                                ?>
+                            </ol>
                         </div>
                         <!-- /.col -->
                     </div><!-- /.row -->

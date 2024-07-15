@@ -33,8 +33,7 @@ if ($result_user && $result_user->num_rows > 0) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php" ?>
 </head>
 
@@ -42,7 +41,6 @@ if ($result_user && $result_user->num_rows > 0) {
     <div class="wrapper">
         <?php include "../inc/nav.php" ?>
         <?php include "../inc/sidebar.php" ?>
-
         <div class="content-wrapper">
             <div class="content-header">
                 <div class="container-fluid">
@@ -54,24 +52,23 @@ if ($result_user && $result_user->num_rows > 0) {
                             <ol class="breadcrumb float-sm-right">
                                 <?php
                                 if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                       
-                                   <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                    unset($_SESSION['success_message']);
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message']); // Clear the message after displaying
                                 }
 
                                 if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                    unset($_SESSION['error_message']);
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message']); // Clear the message after displaying
                                 }
                                 ?>
                             </ol>
@@ -113,7 +110,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                     if ($station_result->num_rows > 0) {
                                         while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr>";
+                                            echo "<tr id='stationId-{$row['id']}'>"; // Ensure each row has a unique ID
                                             echo "<td class='py-1'>{$i}</td>";
                                             echo "<td class='py-1'>{$row['station_id']}</td>";
                                             echo "<td class='py-1'>{$row['station_name']}</td>";
@@ -127,7 +124,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                                     echo "<a href='edit_station.php?id={$row['id']}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 if ($canDeleteStation) {
-                                                    echo "<a href='delete_station.php?id={$row['id']}' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
@@ -135,11 +132,12 @@ if ($result_user && $result_user->num_rows > 0) {
                                             $i++;
                                         }
                                     } else {
-                                        echo "<tr><td class='text-center' colspan='5'>Don't have Station!</td></tr>";
+                                        echo "<tr><td class='text-center' colspan='5'>No stations found!</td></tr>";
                                     }
                                     ?>
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>
@@ -162,6 +160,8 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
@@ -184,6 +184,57 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
+    <script>
+        $(document).ready(function() {
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function() {
+                var stationId = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this station!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'delete_station.php',
+                            type: 'POST',
+                            data: {
+                                id: stationId
+                            },
+                            success: function(response) {
+                                console.log('Response:', response); // Debugging: Log the response
+                                if (response === 'success') {
+                                    console.log('Removing row with ID: #stationId-' + stationId); // Log the row being removed
+                                    $('#stationId-' + stationId).remove(); // Remove the row with matching ID
+                                    Swal.fire('Deleted!', 'Your station has been deleted.', 'success');
+                                } else if (response === 'closed') {
+                                    Swal.fire('Error!', 'Closed station cannot be deleted.', 'error');
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete station.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                                Swal.fire('Error!', 'An error occurred while deleting the station.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle edit button click
+            $(document).on('click', '.edit-btn', function() {
+                var ticketId = $(this).data('id');
+                // Redirect or load edit form page, passing ticketId
+                window.location.href = 'edit_ticket.php?id=' + ticketId;
+            });
+        });
+    </script>
+
 </body>
 
 </html>

@@ -264,8 +264,7 @@ $stmt_user->close();
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -287,20 +286,29 @@ $stmt_user->close();
                             <h1 class="m-0">Update Ticket</h1>
                         </div>
                         <div class="col-sm-6">
-                            <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['success_message']); ?>
-                            <?php endif; ?>
-                            <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['error_message']); ?>
-                            <?php endif; ?>
+                            <ol class="breadcrumb float-sm-right">
+                                <?php
+                                if (isset($_SESSION['success_message'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message']); // Clear the message after displaying
+                                }
+
+                                if (isset($_SESSION['error_message'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message']); // Clear the message after displaying
+                                }
+                                ?>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -354,7 +362,7 @@ $stmt_user->close();
                                             if (!empty($row['issue_image'])) {
                                                 $image_paths = explode(',', $row['issue_image']);
                                                 foreach ($image_paths as $image_path) {
-                                                    echo '<div class="image-container col-3" style="">';
+                                                    echo '<div class="image-container col-4 col-md-2" style="">';
                                                     echo '<img style="width:100%;   " src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
                                                     echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times</button>';
                                                     echo '</div>';
@@ -366,9 +374,11 @@ $stmt_user->close();
                                             <div class="col-12 row mt-3" id="imagePreview">
 
                                             </div>
+                                            <div class="form-group col-sm-4">
+                                                <label for="issue_image">Issue Image</label>
+                                                <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
 
-                                            <!-- File input for adding new images -->
-                                            <input type="file" class="form-control" name="issue_image[]" id="issue_image" multiple accept="image/*">
+                                            </div>
 
                                         </div>
                                     </div>
@@ -587,60 +597,11 @@ $stmt_user->close();
             }
         });
     </script>
-    <!-- show image -->
-    <script>
-        function previewImages(event) {
-            var previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = ''; // Clear previous previews
+    <!-- preview image -->
+    <script src="../scripts/previewImages.js">
 
-            var files = event.target.files;
-            var selectedFiles = Array.from(files); // Convert FileList to array
-
-            for (var i = 0; i < files.length; i++) {
-                var file = files[i];
-
-                var reader = new FileReader();
-
-                reader.onload = function(e) {
-                    var imageContainer = document.createElement('div');
-                    imageContainer.className = 'image-container col-3';
-                    imageContainer.style.width = '200px';
-
-                    var image = document.createElement('img');
-                    image.style.width = '100%';
-                    image.className = 'preview-image';
-                    image.src = e.target.result;
-                    imageContainer.appendChild(image);
-
-                    var closeButton = document.createElement('button');
-                    closeButton.className = 'close-button';
-                    closeButton.innerHTML = '&times;';
-                    closeButton.addEventListener('click', function() {
-                        // Remove the image container when the button is clicked
-                        imageContainer.remove();
-                        // Remove the corresponding file from the selectedFiles array
-                        var index = selectedFiles.indexOf(file);
-                        selectedFiles.splice(index, 1);
-                        // Update the file input element with the updated selected files
-                        var newFileList = new DataTransfer();
-                        selectedFiles.forEach(function(file) {
-                            newFileList.items.add(file);
-                        });
-                        document.getElementById('issue_image').files = newFileList.files;
-                    });
-
-                    imageContainer.appendChild(closeButton);
-                    previewContainer.appendChild(imageContainer);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Bind previewImages function to file input change event
-        document.getElementById('issue_image').addEventListener('change', previewImages);
     </script>
     <style>
-
     </style>
 
 

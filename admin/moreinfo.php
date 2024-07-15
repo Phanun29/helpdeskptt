@@ -65,8 +65,7 @@ $ticket_result = $conn->query($ticket_query);
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  
     <?php include "../inc/head.php"; ?>
 </head>
 

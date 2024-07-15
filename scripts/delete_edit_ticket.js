@@ -1,4 +1,3 @@
-
 $(document).ready(function () {
     // Handle delete button click
     $(document).on('click', '.delete-btn', function () {
@@ -16,30 +15,22 @@ $(document).ready(function () {
                 $.ajax({
                     url: 'delete_ticket.php',
                     type: 'POST',
-                    data: {
-                        id: ticketId
-                    },
+                    data: { id: ticketId },
                     success: function (response) {
+                        console.log('Response:', response); // Debugging: Log the response
                         if (response === 'success') {
-                            $('#ticket-' + ticketId).remove();
-                            Swal.fire(
-                                'Deleted!',
-                                'Your ticket has been deleted.',
-                                'success'
-                            );
+                            console.log('Removing row with ID: #ticket-' + ticketId); // Log the row being removed
+                            $('#ticket-' + ticketId).remove(); // Ensure the ID selector matches your HTML
+                            Swal.fire('Deleted!', 'Your ticket has been deleted.', 'success');
                         } else if (response === 'closed') {
-                            Swal.fire(
-                                'Error!',
-                                'Closed tickets cannot be deleted.',
-                                'error'
-                            );
+                            Swal.fire('Error!', 'Closed tickets cannot be deleted.', 'error');
                         } else {
-                            Swal.fire(
-                                'Error!',
-                                'Failed to delete ticket.',
-                                'error'
-                            );
+                            Swal.fire('Error!', 'Failed to delete ticket.', 'error');
                         }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                        Swal.fire('Error!', 'An error occurred while deleting the ticket.', 'error');
                     }
                 });
             }
@@ -51,6 +42,5 @@ $(document).ready(function () {
         var ticketId = $(this).data('id');
         // Redirect or load edit form page, passing ticketId
         window.location.href = 'edit_ticket.php?id=' + ticketId;
-        // alert('Edit button clicked for ticket ID: ' + ticketId);
     });
 });

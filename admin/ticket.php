@@ -53,8 +53,7 @@ if ($result_user && $result_user->num_rows > 0) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php"; ?>
     <style>
         @font-face {
@@ -128,9 +127,9 @@ if ($result_user && $result_user->num_rows > 0) {
                             </style>
                             <div class="card-header">
                                 <?php if (isset($AddTicket) && $AddTicket) : ?>
-                                    <a href="add_ticket.php" class="btn btn-primary ml-2">Add Ticket</a>
+                                    <a id="add_ticket" href="add_ticket.php" class="btn btn-primary ">Add Ticket</a>
                                 <?php endif; ?>
-                                <div class="dt-buttons btn-group flex-wrap">
+                                <div id="button_export" class="dt-buttons btn-group flex-wrap">
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToCSV()" type="button"><span>CSV</span></button>
                                     <button class="btn btn-secondary buttons-pdf buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToPDF()" type="button"><span>PDF</span></button>
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToExcel()" type="button"><span>Excel</span></button>
@@ -258,50 +257,43 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $i = 1;
                                     if ($ticket_result->num_rows > 0) {
                                         while ($row = $ticket_result->fetch_assoc()) {
-                                            echo "<tr>";
-                                            echo "<td  class='py-2'>" . $i++ . "</td>";
-                                            //condition for button edit and delete
-                                            if ($EditTicket == 0 &  $DeleteTicket == 0) {
-                                                echo " <td style='display:none;'></td>";
+                                            echo "<tr id='ticket-" . $row['id'] . "'>";
+                                            echo "<td class='py-2'>" . $i++ . "</td>";
+                                            if ($EditTicket == 0 & $DeleteTicket == 0) {
+                                                echo "<td style='display:none;'></td>";
                                             } else {
-                                                echo "<td  class='export-ignore py-1'>";
+                                                echo "<td class='export-ignore py-1'>";
                                                 if ($row['ticket_close'] === null) {
-                                                    // Edit button if user has permission
                                                     if ($EditTicket) {
-                                                        // Include the current URL as a query parameter when generating the edit button
                                                         $currentUrl = urlencode($_SERVER['REQUEST_URI']);
                                                         echo "<a href='edit_ticket.php?id=" . $row['id'] . "&redirect=" . $currentUrl . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
-
-                                                        //echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
-                                                        // echo "<button data-id='{$row['id']}' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></button>";
                                                     }
                                                     if ($DeleteTicket) {
-                                                        echo "<button data-id='{$row['id']}' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
+                                                        echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                     }
                                                 } else if ($listTicketAssign == 0) {
                                                     echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 echo "</td>";
                                             }
-                                            echo "<td  class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($row) . ")'>" . $row['ticket_id'] . "</button></td>";
-
-                                            echo "<td  class='py-1'>" . $row['station_id'] . "</></td>";
-                                            echo "<td  class='py-1'>" . $row['station_name'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['station_type'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['province'] . "</td>";
-                                            echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;'>" . $row['issue_description'] . "</td>";
-                                            if ($row['issue_image'] == !null) {
-                                                echo "<td  class=' export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
+                                            echo "<td class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($row) . ")'>" . $row['ticket_id'] . "</button></td>";
+                                            echo "<td class='py-1'>" . $row['station_id'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['station_name'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['station_type'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['province'] . "</td>";
+                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif;'>" . $row['issue_description'] . "</td>";
+                                            if ($row['issue_image'] != null) {
+                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
                                             } else {
                                                 echo "<td class='export-ignore text-center text-warning'>none</td>";
                                             }
-                                            echo "<td  class='py-1'>" . $row['issue_type'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['SLA_category'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['status'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['users_name'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['ticket_open'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['ticket_close'] . "</td>";
-                                            echo "<td  class='py-1' style='font-family: 'Khmer', sans-serif;font-weight: 400;font-style: normal;'>" . $row['comment'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['status'] . "</td>";
+                                            echo "<td class='py-1'>" . $row['users_name'] . "</td>";
+                                            echo "<td class='py-1'>" . date("d M, Y", strtotime($row['ticket_open'])) . "</td>";
+                                            echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
+                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif; font-weight: 400; font-style: normal;'>" . $row['comment'] . "</td>";
                                             echo "</tr>";
                                         }
                                     } else {
@@ -309,7 +301,31 @@ if ($result_user && $result_user->num_rows > 0) {
                                     }
                                     ?>
                                 </tbody>
+
                             </table>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="delete_modal" data-bs-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm</h5>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="container-fluid">
+                                                <form action="" id="delete-author-frm">
+                                                    <input type="hidden" name="id">
+                                                    <p>Are you sure to delete <b><span id="name"></span></b> from the list?</p>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-danger" form="delete-author-frm">Yes</button>
+                                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">No</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /Delete Modal -->
                             <!-- Ticket Details Modal -->
 
                             <div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel" aria-hidden="true">
