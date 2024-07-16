@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     }
 
     //Redirect to the same page to avoid form resubmission on refresh
-    header("Location: " . $_SERVER['PHP_SELF']);
+    header("Location: users_rules.php ");
     exit();
 }
 
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
 
                         <div class="card-body p-0 ">
                             <div class="card-header">
-                                <a href="users_rules.php" class="btn btn-primary ml-2">BACK</a>
+                                <a href="users_rules.php" class="btn btn-primary">BACK</a>
                             </div>
                             <form method="POST" action="">
                                 <div class="card-body">
@@ -348,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                         </div>
 
                                     </div>
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" name="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>

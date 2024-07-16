@@ -60,7 +60,7 @@ if ($result_user && $result_user->num_rows > 0) {
                             <ol class="breadcrumb float-sm-right">
                                 <?php
                                 if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                    echo "<div class='alert alert-success alert-dismissible fade show  mb-0' role='alert'>
                                         <strong>{$_SESSION['success_message']}</strong>
                                         <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
                                             <span aria-hidden='true'>&times;</span>
@@ -70,7 +70,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                 }
 
                                 if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
+                                    echo "<div class='alert alert-danger alert-dismissible fade show  mb-0' role='alert'>
                                         <strong>{$_SESSION['error_message']}</strong>
                                         <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
                                             <span aria-hidden='true'>&times;</span>
@@ -98,22 +98,23 @@ if ($result_user && $result_user->num_rows > 0) {
 
                             <?php if (isset($AddUserRules) && $AddUserRules) : ?>
                                 <div class="card-header">
-                                    <a href="add_users_rules.php" class="btn btn-primary ml-2">Add Users Rules</a>
+                                    <a href="add_users_rules.php" id="add_ticket" class="btn btn-primary ">Add Users Rules</a>
                                 </div>
                             <?php endif; ?>
                             <br>
 
-                            <table id="example1" class="table table-hover text-nowrap">
+                            <table id="example1"  class="table_users_rules table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Rules Name</th>
                                         <?php if ($EditUserRules == 0 & $DeleteUserRules == 0) {
 
                                             echo "<th style='display:none;'></th>";
                                         } else {
-                                            echo " <th>Option</th>";
+                                            echo " <th>Action</th>";
                                         } ?>
+                                        <th>Rules Name</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -125,8 +126,6 @@ if ($result_user && $result_user->num_rows > 0) {
                                         while ($row = $station_result->fetch_assoc()) {
                                             echo "<tr>";
                                             echo "<td  class='py-1'>" . $i++ . "</td>";
-                                            echo "<td  class='py-1'>" . $row['rules_name'] . "</td>";
-
                                             if ($EditUserRules == 0 &  $DeleteUserRules == 0) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
@@ -141,6 +140,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 }
                                                 echo "</td>";
                                             }
+                                            echo "<td  class='py-1'>" . $row['rules_name'] . "</td>";
+
+
                                             echo "</tr>";
                                         }
                                     } else {
@@ -206,6 +208,8 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
+       <!-- auto close alert -->
+       <script src="../scripts/auto_close_alert.js"></script>
 </body>
 
 </html>

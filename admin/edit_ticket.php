@@ -355,7 +355,7 @@ $stmt_user->close();
                                         </div>
 
                                         <div class="form-group col-sm-12 row">
-                                            <label for="issue_image" class="col-12">Issue Image</label>
+                                            <!-- <label for="issue_image" class="col-12">Issue Image</label> -->
 
 
                                             <?php

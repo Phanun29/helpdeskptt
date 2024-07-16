@@ -52,12 +52,33 @@
                         </div>
                     </div>
                     <div class="input-group ">
-                        <input class="form-control" type="password" name="password" placeholder="Password" required>
+                        <input class="form-control" type="password" name="password" id="password" placeholder="Password" required>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
                             </div>
                         </div>
+
+                        <script>
+                            function togglePasswordVisibility() {
+                                var passwordInput = document.getElementById("password");
+                                var togglePasswordIcon = document.getElementById("togglePasswordIcon");
+
+                                if (passwordInput.type === "password") {
+                                    passwordInput.type = "text";
+
+                                } else {
+                                    passwordInput.type = "password";
+                                }
+                            }
+                        </script>
+
+                    </div>
+                    <div class="input-group mt-1">
+                        <input type="checkbox" id="showpassword" value="" onclick="togglePasswordVisibility()">
+                        <p class="m-0">
+                            Show Password
+                        </p>
                     </div>
                     <div class="row">
                         <div class="col-8">

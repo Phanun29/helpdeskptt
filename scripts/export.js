@@ -42,7 +42,7 @@ function exportToCSV() {
     var link = document.createElement("a");
     var url = URL.createObjectURL(blob);
     link.href = url;
-    link.download = "table.csv";
+    link.download = "ticket.csv";
 
     // Append anchor to document body and trigger download
     document.body.appendChild(link);
@@ -109,7 +109,7 @@ function exportToExcel() {
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
-    a.download = "data_corn.xls";
+    a.download = "ticket.xls";
     document.body.appendChild(a);
     a.click();
 
@@ -168,5 +168,5 @@ function exportToPDF() {
     });
 
     // Save PDF
-    doc.save("table.pdf");
+    doc.save("ticket.pdf");
 }

@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['error_message'] = "Error preparing statement: " . $conn->error;
         }
     }
-    header('Location: ' . $_SERVER['REQUEST_URI']);
+    header('Location: ticket.php ' );
     exit();
 }
 
@@ -191,7 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                         <div class="card-body p-0 ">
                             <div class="card-header">
-                                <a href="ticket.php" class="btn btn-primary ml-2">BACK</a>
+                                <a href="ticket.php" class="btn btn-primary ">BACK</a>
                             </div>
 
                             <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
@@ -259,7 +259,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                     </div>
 
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" name="Submit" value="Submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>

@@ -105,14 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     );
 
     if ($stmt->execute()) {
-        $_SESSION['success_message'] = "Permission updated successfully!";
+        $_SESSION['success_message'] = "User Rules updated successfully!";
     } else {
         $_SESSION['error_message'] = "Error: " . $stmt->error;
     }
     $stmt->close();
 
     // Redirect to the same page to avoid form resubmission on refresh
-    header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $rules_id);
+    header("Location: users_rules.php ");
     exit();
 }
 ?>
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
 <html lang="en">
 
 <head>
-   
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -352,7 +352,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" name="submit" class="btn btn-primary">Update</button>
                                     </div>
                                 </div>

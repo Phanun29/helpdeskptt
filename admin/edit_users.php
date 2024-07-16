@@ -39,14 +39,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $update_query = "UPDATE tbl_users SET users_name = '$users_name', email = '$email', status = '$status', rules_id = '$rules_id' ,company ='$company' WHERE users_id = $user_id";
 
     if ($conn->query($update_query) === TRUE) {
-        $_SESSION['success_message'] = "User details updated successfully.";
+        $_SESSION['success_message'] = "User updated successfully.";
     } else {
-        $_SESSION['error_message'] = "Error updating user details: " . $conn->error;
+        $_SESSION['error_message'] = "Error updating user : " . $conn->error;
     }
 
     // Redirect back to users.php
-    // header("Location: users.php");
-    // exit();
+    header("Location: users.php");
+    exit();
 }
 
 // Fetch user data based on user ID
@@ -60,7 +60,7 @@ $row = $user_result->fetch_assoc();
 <html lang="en">
 
 <head>
-   
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -175,7 +175,7 @@ $row = $user_result->fetch_assoc();
                                         </div>
                                     </div>
 
-                                    <div class="card-footer">
+                                    <div class="mt-3">
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </div>
                                 </div>

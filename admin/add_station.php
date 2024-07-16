@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($conn->query($sql) === TRUE) {
         // Successful insertion
         $_SESSION['success_message'] = "New station created successfully";
-        header('Location: ' . $_SERVER['REQUEST_URI']);
+        header('Location: station.php ' );
         exit();
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
@@ -118,59 +118,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </div>
 
                             <form method="POST">
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="exampleInputStatioID">Station ID <span class="text-danger">*</span></label>
-                                        <input type="text" name="station_id" class="form-control" id="exampleInputStatioID" placeholder="Station ID" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="exampleInputStatioName">Station Name <span class="text-danger">*</span></label>
-                                        <input type="text" name="station_name" class="form-control" id="exampleInputStatioName" placeholder="Station Name" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Station Type <span class="text-danger">*</span></label>
-                                        <select name="station_type" class="form-control select2bs4" style="width: 100%;" required>
-                                            <option value="">-Select-</option>
-                                            <option value="COCO">COCO</option>
-                                            <option value="DODO">DODO</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Province <span class="text-danger">*</span></label>
-                                        <select name="province" class="form-control" style="width: 100%;" required>
-                                            <option value="">-Select-</option>
-                                            <option value="Phnom Penh">Phnom Penh</option>
-                                            <option value="Siem Reap">Siem Reap </option>
-                                            <option value="Banteay Meanchey">Banteay Meanchey </option>
-                                            <option value="Kampong Speu">Kampong Speu </option>
-                                            <option value="Kampong Thom">Kampong Thom </option>
-                                            <option value="Prey Veng">Prey Veng </option>
-                                            <option value="Kampot">Kampot </option>
-                                            <option value="Battambang">Battambang </option>
-                                            <option value="Preah Sihanouk">Preah Sihanouk </option>
-                                            <option value="Svay Rieng">Svay Rieng </option>
-                                            <option value="Kandal">Kandal </option>
-                                            <option value="Kampong Chhnang">Kampong Chhnang </option>
-                                            <option value="Tboung Khmum">Tboung Khmum </option>
-                                            <option value="Kep">Kep </option>
-                                            <option value="Pursat">Pursat </option>
-                                            <option value="Koh Kong">Koh Kong </option>
-                                            <option value="Kratie">Kratie </option>
-                                            <option value="Preah Vihear">Preah Vihear </option>
-                                            <option value="Mondul Kiri">Mondul Kiri </option>
-                                            <option value="Kampong Cham">Kampong Cham </option>
-                                            <option value="Pailin">Pailin </option>
-                                            <option value="Stung Treng">Stung Treng </option>
-                                            <option value="Oddar Meanchey">Oddar Meanchey </option>
-                                            <option value="Ratanak Kiri">Ratanak Kiri </option>
-                                            <option value="Takeo">Takeo </option>
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="form-group col-12 col-md-6">
+                                            <label for="exampleInputStatioID">Station ID <span class="text-danger">*</span></label>
+                                            <input type="text" name="station_id" class="form-control" id="exampleInputStatioID" placeholder="Station ID" required>
+                                        </div>
+                                        <div class="form-group col-12 col-md-6">
+                                            <label for="exampleInputStatioName">Station Name <span class="text-danger">*</span></label>
+                                            <input type="text" name="station_name" class="form-control" id="exampleInputStatioName" placeholder="Station Name" required>
+                                        </div>
+                                        <div class="form-group col-12 col-md-6">
+                                            <label>Station Type <span class="text-danger">*</span></label>
+                                            <select name="station_type" class="form-control select2bs4" style="width: 100%;" required>
+                                                <option value="">-Select-</option>
+                                                <option value="COCO">COCO</option>
+                                                <option value="DODO">DODO</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-12 col-md-6">
+                                            <label>Province <span class="text-danger">*</span></label>
+                                            <select name="province" class="form-control" style="width: 100%;" required>
+                                                <option value="">-Select-</option>
+                                                <option value="Phnom Penh">Phnom Penh</option>
+                                                <option value="Siem Reap">Siem Reap </option>
+                                                <option value="Banteay Meanchey">Banteay Meanchey </option>
+                                                <option value="Kampong Speu">Kampong Speu </option>
+                                                <option value="Kampong Thom">Kampong Thom </option>
+                                                <option value="Prey Veng">Prey Veng </option>
+                                                <option value="Kampot">Kampot </option>
+                                                <option value="Battambang">Battambang </option>
+                                                <option value="Preah Sihanouk">Preah Sihanouk </option>
+                                                <option value="Svay Rieng">Svay Rieng </option>
+                                                <option value="Kandal">Kandal </option>
+                                                <option value="Kampong Chhnang">Kampong Chhnang </option>
+                                                <option value="Tboung Khmum">Tboung Khmum </option>
+                                                <option value="Kep">Kep </option>
+                                                <option value="Pursat">Pursat </option>
+                                                <option value="Koh Kong">Koh Kong </option>
+                                                <option value="Kratie">Kratie </option>
+                                                <option value="Preah Vihear">Preah Vihear </option>
+                                                <option value="Mondul Kiri">Mondul Kiri </option>
+                                                <option value="Kampong Cham">Kampong Cham </option>
+                                                <option value="Pailin">Pailin </option>
+                                                <option value="Stung Treng">Stung Treng </option>
+                                                <option value="Oddar Meanchey">Oddar Meanchey </option>
+                                                <option value="Ratanak Kiri">Ratanak Kiri </option>
+                                                <option value="Takeo">Takeo </option>
 
-                                        </select>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </div>
+
+
                             </form>
                         </div>
                     </div>

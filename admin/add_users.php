@@ -70,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Redirect to the same page to display messages
-    header('Location: ' . $_SERVER['REQUEST_URI']);
+    header('Location: users.php');
     exit();
 }
 
@@ -205,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                     </div>
 
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>

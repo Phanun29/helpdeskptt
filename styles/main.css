@@ -72,6 +72,14 @@ td,textarea {
 #table_ticket{
   overflow: auto;
 }
+
+
+.table_users_rules{
+  width: 60%;
+}
+.form-group{
+  margin-bottom: 0;
+}
 @media (max-width: 767px) {
   #example1_filter{
       text-align: left;
@@ -86,4 +94,8 @@ td,textarea {
   #add_ticket{
     margin-bottom: .5em;
   }
+  .table_users_rules{
+    width: 100%;
+  }
 }
+

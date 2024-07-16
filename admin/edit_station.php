@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Set success message and redirect
         $_SESSION['success_message'] = "Station updated successfully.";
-        header("Location: edit_station.php?id=$id");
+        header("Location: station.php");
         exit();
     } catch (Exception $e) {
         // Rollback the transaction on error
@@ -175,54 +175,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <!-- /.card-header -->
                         <div class="card-body p-0 ">
                             <div class="card-header">
-                                <a href="station.php" class="btn btn-primary ml-2">BACK</a>
+                                <a href="station.php" class="btn btn-primary ">BACK</a>
                             </div>
 
                             <form method="POST">
                                 <input type="hidden" name="id" value="<?php echo isset($station['id']) ? $station['id'] : ''; ?>">
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="exampleInputStatioID">Station ID</label>
-                                        <input type="text" class="form-control" id="station_id" name="station_id" value="<?php echo isset($station['station_id']) ? $station['station_id'] : ''; ?>" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="exampleInputStatioName">Station Name</label>
-                                        <input type="text" class="form-control" id="station_name" name="station_name" value="<?= isset($station['station_name']) ? $station['station_name'] : ''; ?>" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="station_type">Station Type</label>
-                                        <select name="station_type" id="station_type" class="form-control select2bs4" style="width: 100%;" required>
-                                            <option value="COCO" <?php echo (isset($station['station_type']) && $station['station_type'] == 'COCO') ? 'selected' : ''; ?>>COCO</option>
-                                            <option value="DODO" <?php echo (isset($station['station_type']) && $station['station_type'] == 'DODO') ? 'selected' : ''; ?>>DODO</option>
-                                        </select>
-                                    </div>
-                                    <?php
-                                    // Example selected value
-                                    $selected_province = isset($station['province']) ? $station['province'] : '';
+                                <div class="card-body ">
+                                    <div class="row">
+                                        <div class="form-group col-12 col-md-6">
+                                            <label for="exampleInputStatioID">Station ID</label>
+                                            <input type="text" class="form-control" id="station_id" name="station_id" value="<?php echo isset($station['station_id']) ? $station['station_id'] : ''; ?>" required>
+                                        </div>
+                                        <div class="form-group col-12 col-md-6">
+                                            <label for="exampleInputStatioName">Station Name</label>
+                                            <input type="text" class="form-control" id="station_name" name="station_name" value="<?= isset($station['station_name']) ? $station['station_name'] : ''; ?>" required>
+                                        </div>
+                                        <div class="form-group col-12 col-md-6">
+                                            <label for="station_type">Station Type</label>
+                                            <select name="station_type" id="station_type" class="form-control select2bs4" style="width: 100%;" required>
+                                                <option value="COCO" <?php echo (isset($station['station_type']) && $station['station_type'] == 'COCO') ? 'selected' : ''; ?>>COCO</option>
+                                                <option value="DODO" <?php echo (isset($station['station_type']) && $station['station_type'] == 'DODO') ? 'selected' : ''; ?>>DODO</option>
+                                            </select>
+                                        </div>
+                                        <?php
+                                        // Example selected value
+                                        $selected_province = isset($station['province']) ? $station['province'] : '';
 
-                                    ?>
-                                    <div class="form-group">
-                                        <label>Province</label>
-                                        <select name="province" class="form-control" style="width: 100%;" required>
-                                            <option value="">-Select-</option>
-                                            <?php
-                                            $provinces = [
-                                                "Phnom Penh", "Siem Reap", "Banteay Meanchey", "Kampong Speu", "Kampong Thom", "Prey Veng",
-                                                "Kampot", "Battambang", "Preah Sihanouk", "Svay Rieng", "Kandal", "Kampong Chhnang",
-                                                "Tboung Khmum", "Kep", "Pursat", "Koh Kong", "Kratie", "Preah Vihear", "Mondul Kiri",
-                                                "Kampong Cham", "Pailin", "Stung Treng", "Oddar Meanchey", "Ratanak Kiri", "Takeo"
-                                            ];
+                                        ?>
+                                        <div class="form-group col-12 col-md-6">
+                                            <label>Province</label>
+                                            <select name="province" class="form-control" style="width: 100%;" required>
+                                                <option value="">-Select-</option>
+                                                <?php
+                                                $provinces = [
+                                                    "Phnom Penh", "Siem Reap", "Banteay Meanchey", "Kampong Speu", "Kampong Thom", "Prey Veng",
+                                                    "Kampot", "Battambang", "Preah Sihanouk", "Svay Rieng", "Kandal", "Kampong Chhnang",
+                                                    "Tboung Khmum", "Kep", "Pursat", "Koh Kong", "Kratie", "Preah Vihear", "Mondul Kiri",
+                                                    "Kampong Cham", "Pailin", "Stung Treng", "Oddar Meanchey", "Ratanak Kiri", "Takeo"
+                                                ];
 
-                                            foreach ($provinces as $province) {
-                                                echo '<option value="' . $province . '"' . ($selected_province == $province ? ' selected' : '') . '>' . $province . '</option>';
-                                            }
-                                            ?>
-                                        </select>
+                                                foreach ($provinces as $province) {
+                                                    echo '<option value="' . $province . '"' . ($selected_province == $province ? ' selected' : '') . '>' . $province . '</option>';
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </div>
+
                             </form>
                         </div>
                         <!-- /.card-body -->

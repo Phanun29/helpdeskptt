@@ -81,25 +81,28 @@ if ($result_user && $result_user->num_rows > 0) {
                             <ol class="breadcrumb float-sm-right">
                                 <?php
                                 if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['success_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
+                                    echo "<div class='alert alert-success alert-dismissible fade show mb-0' role='alert'>
+                                    <strong>{$_SESSION['success_message']}</strong>
+                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                        <span aria-hidden='true'>&times;</span>
+                                    </button>
+                                </div>";
                                     unset($_SESSION['success_message']); // Clear the message after displaying
                                 }
 
                                 if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['error_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mb-0' role='alert'>
+                                    <strong>{$_SESSION['error_message']}</strong>
+                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                        <span aria-hidden='true'>&times;</span>
+                                    </button>
+                                </div>";
                                     unset($_SESSION['error_message']); // Clear the message after displaying
                                 }
                                 ?>
+
+
+
                             </ol>
                         </div>
                     </div>
@@ -139,12 +142,44 @@ if ($result_user && $result_user->num_rows > 0) {
 
                             <div class="card-header" id="filterForm1" style="display: none;">
                                 <form id="filterForm" class="row">
-                                    <div class="form-group col-sm-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="station_id">Station ID</label>
                                         <input class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)">
                                         <div id="suggestion_dropdown" class="dropdown-content"></div>
                                     </div>
-                                    <div class="form-group col-sm-3">
+                                    <div class="form-group col-6 col-md-3">
+                                        <label for="province">Province</label>
+                                        <select id="province" name="province" class="form-control" style="width: 100%;" required>
+                                            <option value="">All</option>
+                                            <option value="Phnom Penh">Phnom Penh</option>
+                                            <option value="Siem Reap">Siem Reap </option>
+                                            <option value="Banteay Meanchey">Banteay Meanchey </option>
+                                            <option value="Kampong Speu">Kampong Speu </option>
+                                            <option value="Kampong Thom">Kampong Thom </option>
+                                            <option value="Prey Veng">Prey Veng </option>
+                                            <option value="Kampot">Kampot </option>
+                                            <option value="Battambang">Battambang </option>
+                                            <option value="Preah Sihanouk">Preah Sihanouk </option>
+                                            <option value="Svay Rieng">Svay Rieng </option>
+                                            <option value="Kandal">Kandal </option>
+                                            <option value="Kampong Chhnang">Kampong Chhnang </option>
+                                            <option value="Tboung Khmum">Tboung Khmum </option>
+                                            <option value="Kep">Kep </option>
+                                            <option value="Pursat">Pursat </option>
+                                            <option value="Koh Kong">Koh Kong </option>
+                                            <option value="Kratie">Kratie </option>
+                                            <option value="Preah Vihear">Preah Vihear </option>
+                                            <option value="Mondul Kiri">Mondul Kiri </option>
+                                            <option value="Kampong Cham">Kampong Cham </option>
+                                            <option value="Pailin">Pailin </option>
+                                            <option value="Stung Treng">Stung Treng </option>
+                                            <option value="Oddar Meanchey">Oddar Meanchey </option>
+                                            <option value="Ratanak Kiri">Ratanak Kiri </option>
+                                            <option value="Takeo">Takeo </option>
+
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="issue_type">Issue Type</label>
                                         <select class="form-control" name="issue_type" id="issue_type">
                                             <option value="">All</option>
@@ -155,7 +190,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             <option value="Unassigned">Unassigned</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="SLA_category">SLA Catego</label>
                                         <select name="SLA_category" id="SLA_category" class="form-control">
                                             <option value="">All</option>
@@ -168,7 +203,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             <option value="CAT 5*">CAT 5*</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="status">Status</label>
                                         <select name="status" id="status" class="form-control" style="width: 100%;">
                                             <option value="">All</option>
@@ -179,7 +214,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             <option value="Close">Close</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="users_id">Assign</label>
                                         <select name="users_id" id="users_id" class="form-control">
                                             <option value="">All</option>
@@ -202,21 +237,21 @@ if ($result_user && $result_user->num_rows > 0) {
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="ticket_open_from">Ticket Open From</label>
                                         <input type="date" name="ticket_open_from" id="ticket_open_from" class="form-control">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="ticket_open_to">Ticket Open To</label>
                                         <input type="date" name="ticket_open_to" id="ticket_open_to" class="form-control">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="ticket_close_from">Ticket Close From</label>
                                         <input type="date" name="ticket_close_from" id="ticket_close_from" class="form-control">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-6 col-md-3">
                                         <label for="ticket_close_to">Ticket Close To</label>
-                                        <input type="date" name="ticket_close_to" id="ticket_close_to" class="form-control">
+                                        <input type="date" name="ticket_close_to" id="ticket_close_to" class="form-control" placeholder="select">
                                     </div>
                                     <div class="form-group col-md-12">
                                         <button type="button" class="btn btn-primary">Filter <i class="fa-solid fa-filter"></i></button>
@@ -226,7 +261,7 @@ if ($result_user && $result_user->num_rows > 0) {
                             </div>
 
                             <br>
-                            <table id="example1" class="table table-hover text-nowrap">
+                            <table id="example1" class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -234,7 +269,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                             echo "<th style='display:none;'></th>";
                                         } else {
-                                            echo " <th class='export-ignore'>Option</th>";
+                                            echo " <th class='export-ignore'>Action</th>";
                                         } ?>
                                         <th>Ticket ID</th>
                                         <th>Station ID</th>
@@ -291,8 +326,12 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
                                             echo "<td class='py-1'>" . $row['status'] . "</td>";
                                             echo "<td class='py-1'>" . $row['users_name'] . "</td>";
-                                            echo "<td class='py-1'>" . date("d M, Y", strtotime($row['ticket_open'])) . "</td>";
-                                            echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
+                                            echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_open'])) . "</td>";
+                                            if ($row['ticket_close'] != null) {
+                                                echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_close'])) . "</td>";
+                                            } else {
+                                                echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
+                                            }
                                             echo "<td class='py-1' style='font-family: Khmer, sans-serif; font-weight: 400; font-style: normal;'>" . $row['comment'] . "</td>";
                                             echo "</tr>";
                                         }
@@ -303,29 +342,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                 </tbody>
 
                             </table>
-                            <!-- Delete Modal -->
-                            <div class="modal fade" id="delete_modal" data-bs-backdrop="static">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirm</h5>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="container-fluid">
-                                                <form action="" id="delete-author-frm">
-                                                    <input type="hidden" name="id">
-                                                    <p>Are you sure to delete <b><span id="name"></span></b> from the list?</p>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-danger" form="delete-author-frm">Yes</button>
-                                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">No</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- /Delete Modal -->
+
+
                             <!-- Ticket Details Modal -->
 
                             <div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel" aria-hidden="true">
@@ -550,6 +568,8 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
     <script src="../scripts/export.js"></script>
+    <!-- auto close alert -->
+    <script src="../scripts/auto_close_alert.js"></script>
 
 </body>
 

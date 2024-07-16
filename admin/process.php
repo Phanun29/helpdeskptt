@@ -53,6 +53,10 @@ if (!empty($_GET['station_id'])) {
     $ticket_query .= " AND t.station_id = '$station_id'";
 }
 
+if (!empty($_GET['province'])) {
+    $province = $conn->real_escape_string($_GET['province']);
+    $ticket_query .= " AND t.province = '$province'";
+}
 if (!empty($_GET['issue_type'])) {
     $issue_type = $conn->real_escape_string($_GET['issue_type']);
     $ticket_query .= " AND t.issue_type LIKE '%$issue_type%'";
@@ -143,6 +147,11 @@ if ($ticket_result->num_rows > 0) {
         // echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
         echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
         echo "<td class='py-1'>" . $row['status'] . "</td>";
+        // if ($users_id == !null) {
+        //     echo "<td class='py-1'>" . $users_id . "</td>";
+        // } else {
+        //     echo "<td class='py-1'>" . $row['users_name'] . "</td>";
+        // }
         echo "<td class='py-1'>" . $row['users_name'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
