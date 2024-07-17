@@ -253,7 +253,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <label for="ticket_close_to">Ticket Close To</label>
                                         <input type="date" name="ticket_close_to" id="ticket_close_to" class="form-control" placeholder="select">
                                     </div>
-                                    <div class="form-group col-md-12">
+                                    <div class="form-group col-md-12 mt-2">
                                         <button type="button" class="btn btn-primary">Filter <i class="fa-solid fa-filter"></i></button>
                                         <button type="reset" class="btn btn-danger" id="filterResetBtn">Clear</button>
                                     </div>
@@ -340,9 +340,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                     }
                                     ?>
                                 </tbody>
-
                             </table>
-
 
                             <!-- Ticket Details Modal -->
 

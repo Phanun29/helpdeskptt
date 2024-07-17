@@ -34,8 +34,6 @@ if ($result_user && $result_user->num_rows > 0) {
 }
 
 
-
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $issue_description = $_POST['issue_description'];
@@ -88,14 +86,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Construct the new ticket ID
         $ticket_id = "POS$current_year$current_month$padded_seq_number";
 
+        // // Process multiple file uploads
+        // $uploaded_images = [];
+        // if (!empty($_FILES['issue_image']['name'][0])) {
+        //     $target_dir = "../uploads/";
+        //     foreach ($_FILES['issue_image']['name'] as $key => $image) {
+        //         $target_file = $target_dir . basename($image);
+        //         if (move_uploaded_file($_FILES["issue_image"]["tmp_name"][$key], $target_file)) {
+        //             $uploaded_images[] = $target_file;
+        //         } else {
+        //             $_SESSION['error_message'] = "Error uploading image: " . $image;
+        //             header('Location: ' . $_SERVER['REQUEST_URI']);
+        //             exit();
+        //         }
+        //     }
+        // }
+        // // Convert the array of image paths to a comma-separated string
+        // $issue_image_paths = implode(',', $uploaded_images);
+
+        // Process multiple file uploads
         // Process multiple file uploads
         $uploaded_images = [];
         if (!empty($_FILES['issue_image']['name'][0])) {
             $target_dir = "../uploads/";
             foreach ($_FILES['issue_image']['name'] as $key => $image) {
-                $target_file = $target_dir . basename($image);
+                // Generate a unique name for the image
+                $image_extension = pathinfo($image, PATHINFO_EXTENSION);
+                $unique_name = uniqid() . '.' . $image_extension;
+                $target_file = $target_dir . $unique_name;
+
                 if (move_uploaded_file($_FILES["issue_image"]["tmp_name"][$key], $target_file)) {
-                    $uploaded_images[] = $target_file;
+                    $uploaded_images[] = $target_file; // Save the full path
                 } else {
                     $_SESSION['error_message'] = "Error uploading image: " . $image;
                     header('Location: ' . $_SERVER['REQUEST_URI']);
@@ -103,7 +124,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
         }
+
         // Convert the array of image paths to a comma-separated string
+        $issue_image_paths = implode(',', $uploaded_images);
+
+        // Convert the array of image names to a comma-separated string
         $issue_image_paths = implode(',', $uploaded_images);
 
         // Debugging: Check station_id before inserting
@@ -127,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['error_message'] = "Error preparing statement: " . $conn->error;
         }
     }
-    header('Location: ticket.php ' );
+    header('Location: ticket.php ');
     exit();
 }
 
@@ -230,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-12 row mt-3" id="imagePreview">
 
                                         </div>
-                                        
+
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type <span class="text-danger">*</span></label>
                                             <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>

@@ -102,18 +102,16 @@ if ($result_user && $result_user->num_rows > 0) {
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <?php if ($EditUsers == 0 & $DeleteUsers == 0) {
-                                            echo "<th style='display:none;'></th>";
-                                        } else {
-                                            echo " <th>Option</th>";
-                                        } ?>
+                                        <?php if ($EditUsers == 0 && $DeleteUsers == 0) : ?>
+                                            <th style='display:none;'></th>
+                                        <?php else : ?>
+                                            <th>Option</th>
+                                        <?php endif; ?>
                                         <th>Users Name</th>
                                         <th>Email</th>
                                         <th>Company</th>
                                         <th>Users Rules</th>
                                         <th>Status</th>
-
-
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -127,19 +125,19 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $i = 1;
                                     if ($user_result->num_rows > 0) {
                                         while ($row = $user_result->fetch_assoc()) {
-                                            echo "<tr>";
+                                            echo "<tr id='user-" . $row['users_id'] . "'>";
                                             echo "<td class='py-1'>" . $i++ . "</td>";
-                                            if ($EditUsers == 0 &  $EditUsers == 0) {
-                                                echo " <td style='display:none;'></td>";
+                                            if ($EditUsers == 0 && $DeleteUsers == 0) {
+                                                echo "<td style='display:none;'></td>";
                                             } else {
                                                 echo "<td class='py-1'>";
                                                 // Edit button if user has permission
                                                 if ($EditUsers) {
-                                                    echo "<a href='edit_users.php?id=" . $row['users_id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                    echo "<a href='edit_users.php?id=" . $row['users_id'] . "' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 // Delete button if user has permission
                                                 if ($DeleteUsers) {
-                                                    echo "<a href='delete_users.php?id=" . $row['users_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    echo "<button data-id='" . $row['users_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
@@ -147,21 +145,17 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $row['email'] . "</td>";
                                             echo "<td class='py-1'>" . $row['company'] . "</td>";
                                             echo "<td class='py-1'>" . $row['rules_name'] . "</td>"; // Display rules_name instead of rules_id
-                                            if ($row['status'] === '1') {
-                                                echo "<td class='py-1'>active</td>";
-                                            } else {
-                                                echo "<td class='py-1'>Inactive</td>";
-                                            }
+                                            echo "<td class='py-1'>" . ($row['status'] === '1' ? 'active' : 'Inactive') . "</td>";
 
                                             echo "</tr>";
                                         }
                                     } else {
-                                        echo "<tr><td class='text-center' colspan='6'>No users found!</td></tr>";
+                                        echo "<tr><td class='text-center' colspan='7'>No users found!</td></tr>";
                                     }
                                     ?>
                                 </tbody>
-
                             </table>
+
 
                         </div>
                         <!-- /.card-body -->
@@ -194,6 +188,8 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
@@ -219,8 +215,59 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
-       <!-- auto close alert -->
-       <script src="../scripts/auto_close_alert.js"></script>
+    <!-- auto close alert -->
+    <script src="../scripts/auto_close_alert.js"></script>
+
+    <!-- delete user -->
+    <script>
+        $(document).ready(function() {
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function() {
+                var userId = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this user!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'delete_users.php', // Adjust URL to your delete script
+                            type: 'POST',
+                            data: {
+                                id: userId
+                            },
+                            success: function(response) {
+                                console.log('Response:', response); // Debugging: Log the response
+                                if (response === 'success') {
+                                    console.log('Removing row with ID: #user-' + userId); // Log the row being removed
+                                    $('#user-' + userId).remove(); // Remove the row from the table
+                                    Swal.fire('Deleted!', 'Your user has been deleted.', 'success');
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete user.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                                Swal.fire('Error!', 'An error occurred while deleting the user.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle edit button click
+            $(document).on('click', '.edit-btn', function() {
+                var userId = $(this).data('id');
+                // Redirect or load edit form page, passing userId
+                window.location.href = 'edit_users.php?id=' + userId;
+            });
+        });
+    </script>
+
 </body>
 
 </html>

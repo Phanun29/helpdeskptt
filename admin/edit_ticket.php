@@ -130,7 +130,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Process the file normally
             $file_name = $_FILES['issue_image']['name'][$key];
             $file_tmp = $_FILES['issue_image']['tmp_name'][$key];
-            $uploadPath = $uploadDir . $file_name;
+
+
+            $image_extension = pathinfo($file_name, PATHINFO_EXTENSION);
+            $unique_name = uniqid() . '.' . $image_extension;
+            // $target_file = $target_dir . $unique_name;
+
+            $uploadPath = $uploadDir . $unique_name;
 
             // Move the uploaded file to the destination directory
             if (move_uploaded_file($file_tmp, $uploadPath)) {
@@ -354,10 +360,7 @@ $stmt_user->close();
                                             <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?php echo htmlspecialchars($row['issue_description']); ?></textarea>
                                         </div>
 
-                                        <div class="form-group col-sm-12 row">
-                                            <!-- <label for="issue_image" class="col-12">Issue Image</label> -->
-
-
+                                        <div class="form-group col-sm-12 row mt-2">
                                             <?php
                                             if (!empty($row['issue_image'])) {
                                                 $image_paths = explode(',', $row['issue_image']);
@@ -368,20 +371,20 @@ $stmt_user->close();
                                                     echo '</div>';
                                                 }
                                             }
-
                                             ?>
-                                            <!-- Display selected new images -->
+                                          
                                             <div class="col-12 row mt-3" id="imagePreview">
-
                                             </div>
                                             <div class="form-group col-sm-4">
                                                 <label for="issue_image">Issue Image</label>
                                                 <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
-
                                             </div>
-
                                         </div>
                                     </div>
+
+                                    
+
+
                                     <div class=" row">
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type</label>
@@ -507,25 +510,8 @@ $stmt_user->close();
             background-color: #f1f1f1;
         }
     </style>
-
-    <!-- auto fill station -->
     <script>
-        $(document).ready(function() {
-            const $stationId = $('#station_id');
-            const $quickForm = $('#quickForm');
-
-            $stationId.on('blur', function() {
-                fetchStationDetails($(this).val());
-            });
-
-            $quickForm.on('submit', function(event) {
-                if (!this.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                $(this).addClass('was-validated');
-            });
-        });
+       
 
         function fetchStationDetails(station_id) {
             $.post('get_station_details.php', {

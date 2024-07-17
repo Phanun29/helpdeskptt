@@ -186,6 +186,7 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
+    <!-- delete station -->
     <script>
         $(document).ready(function() {
             // Handle delete button click
