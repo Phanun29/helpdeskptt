@@ -24,15 +24,20 @@ if ($result_user && $result_user->num_rows > 0) {
     $listTicketAssign = $user['list_ticket_assign'];
 
     $ticket_query = ($listTicketAssign == 0) ?
-        "SELECT t.*, REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-            FROM tbl_ticket t
-            LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-            GROUP BY t.ticket_id DESC" :
-        "SELECT t.*, REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
-            FROM tbl_ticket t
-            LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-            WHERE FIND_IN_SET(?, t.users_id)
-            GROUP BY t.ticket_id DESC";
+        "SELECT t.*, REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+                 GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
+         FROM tbl_ticket t
+         LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+         LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+         GROUP BY t.ticket_id DESC" :
+        "SELECT t.*, REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+                 GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
+         FROM tbl_ticket t
+         LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+         LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+         WHERE FIND_IN_SET(?, t.users_id)
+         GROUP BY t.ticket_id DESC";
+
     $stmt_ticket = $conn->prepare($ticket_query);
     if ($listTicketAssign != 0) {
         $stmt_ticket->bind_param("i", $user_id);
@@ -283,6 +288,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Status</th>
                                         <th>Assign</th>
                                         <th>Ticket Open</th>
+                                        <th>Ticket on Hold</th>
+                                        <th>Ticket In Progress</th>
+                                        <th>Ticket Pending Vender</th>
                                         <th>Ticket Close</th>
                                         <th>Comment</th>
                                     </tr>
@@ -298,10 +306,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
                                                 echo "<td class='export-ignore py-1'>";
-                                                if ($row['ticket_close'] === null) {
+                                                if ($row['status'] != "Close") {
                                                     if ($EditTicket) {
-                                                        $currentUrl = urlencode($_SERVER['REQUEST_URI']);
-                                                        echo "<a href='edit_ticket.php?id=" . $row['id'] . "&redirect=" . $currentUrl . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                        echo "<a href='edit_ticket.php?id=" . $row['id']  . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                     }
                                                     if ($DeleteTicket) {
                                                         echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
@@ -317,8 +324,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $row['station_type'] . "</td>";
                                             echo "<td class='py-1'>" . $row['province'] . "</td>";
                                             echo "<td class='py-1' style='font-family: Khmer, sans-serif;'>" . $row['issue_description'] . "</td>";
-                                            if ($row['issue_image'] != null) {
-                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['issue_image'] . "\")'>Click to View</button></td>";
+                                            $image_paths = explode(',', $row['image_paths']);
+                                            if ($row['image_paths'] != null) {
+                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['image_paths'] . "\")'>Click to View</button></td>";
                                             } else {
                                                 echo "<td class='export-ignore text-center text-warning'>none</td>";
                                             }
@@ -327,6 +335,22 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $row['status'] . "</td>";
                                             echo "<td class='py-1'>" . $row['users_name'] . "</td>";
                                             echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_open'])) . "</td>";
+
+                                            if ($row['ticket_on_hold'] != null) {
+                                                echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_on_hold'])) . "</td>";
+                                            } else {
+                                                echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
+                                            }
+                                            if ($row['ticket_in_progress'] != null) {
+                                                echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_in_progress'])) . "</td>";
+                                            } else {
+                                                echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
+                                            }
+                                            if ($row['ticket_pending_vendor'] != null) {
+                                                echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_pending_vendor'])) . "</td>";
+                                            } else {
+                                                echo "<td class='py-1'>" . $row['ticket_pending_vendor'] . "</td>";
+                                            }
                                             if ($row['ticket_close'] != null) {
                                                 echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_close'])) . "</td>";
                                             } else {
@@ -413,7 +437,9 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Ticket Close:</td>
+
                                                     <td class="p-1"> <span id="modalTicketClose" class="word-wrap"></span></td>
+
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Comment:</td>

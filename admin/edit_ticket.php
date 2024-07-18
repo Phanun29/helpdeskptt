@@ -4,6 +4,7 @@ include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
+
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
@@ -31,7 +32,7 @@ if ($result_user->num_rows > 0) {
 
 // Initialize session for storing messages
 $ticket_id = $_GET['id'] ?? null; // Assuming you're passing the ticket ID through a GET parameter
-$redirect = $_GET['redirect'] ?? 'ticket.php';
+
 if (!is_numeric($ticket_id)) {
     header("Location: 404.php");
     exit();
@@ -40,6 +41,7 @@ if (!is_numeric($ticket_id)) {
 date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Gather form data
+    $ticket_id = $_GET['id'] ?? null; // Ensure to sanitize and validate $ticket_id
     $station_id = $_POST['station_id'] ?? null;
     $station_name = $_POST['station_name'] ?? null;
     $station_type = $_POST['station_type'] ?? null;
@@ -52,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $comment = $_POST['comment'] ?? null;
 
     // Fetch existing ticket details for validation
-    $check_ticket_query = "SELECT status, ticket_on_hold, ticket_in_progress, ticket_pending_vendor, ticket_close FROM tbl_ticket WHERE id = ?";
+    $check_ticket_query = "SELECT status, ticket_on_hold, ticket_in_progress, ticket_pending_vendor, ticket_close, issue_image FROM tbl_ticket WHERE id = ?";
     $stmt_check_ticket = $conn->prepare($check_ticket_query);
     $stmt_check_ticket->bind_param('i', $ticket_id);
     $stmt_check_ticket->execute();
@@ -61,12 +63,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($ticket_result->num_rows > 0) {
         $row = $ticket_result->fetch_assoc();
 
+
         // Record previous status and timestamps
         $prev_status = $row['status'];
         $prev_on_hold = $row['ticket_on_hold'];
         $prev_in_progress = $row['ticket_in_progress'];
         $prev_pending_vendor = $row['ticket_pending_vendor'];
         $prev_close = $row['ticket_close'];
+        $prev_issue_images = $row['issue_image'];
 
         // Update timestamp based on status change
         $ticket_on_hold = $prev_on_hold;
@@ -111,97 +115,144 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: 404.php");
         exit();
     }
-    // Process existing images
 
+    // Process existing images
     $uploadDir = '../uploads/';
     if (!file_exists($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
     $uploadedFiles = [];
-    if (!empty($_FILES['issue_image']['name'][0])) {
-        $allowedTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF]; // Define allowed image types
-        foreach ($_FILES['issue_image']['tmp_name'] as $key => $tmp_name) {
-            if ($_FILES['issue_image']['error'][$key] !== UPLOAD_ERR_OK) {
-                echo "Error uploading file: " . $_FILES['issue_image']['error'][$key];
-                continue; // Skip to the next iteration if there's an error
-            }
+    $deletedFiles = [];
 
-            // Process the file normally
-            $file_name = $_FILES['issue_image']['name'][$key];
-            $file_tmp = $_FILES['issue_image']['tmp_name'][$key];
+    // Handle deleted images
+    if (!empty($_POST['delete_images'])) {
+        foreach ($_POST['delete_images'] as $deleted_image) {
+            // Validate and delete image file
+            if (!empty($deleted_image) && file_exists($deleted_image)) {
+                unlink($deleted_image);
 
+                // Remove from database record
+                $existing_images_array = !empty($prev_issue_images) ? array_map('trim', explode(', ', $prev_issue_images)) : [];
+                $existing_images_array = array_diff($existing_images_array, [$deleted_image]);
+                $prev_issue_images = implode(', ', $existing_images_array);
 
-            $image_extension = pathinfo($file_name, PATHINFO_EXTENSION);
-            $unique_name = uniqid() . '.' . $image_extension;
-            // $target_file = $target_dir . $unique_name;
-
-            $uploadPath = $uploadDir . $unique_name;
-
-            // Move the uploaded file to the destination directory
-            if (move_uploaded_file($file_tmp, $uploadPath)) {
-                $uploadedFiles[] = $uploadPath;
-
-                // Check the image type after successful upload
-                $imageType = exif_imagetype($uploadPath);
-                if (!in_array($imageType, $allowedTypes)) {
-                    // Remove the invalid file if it doesn't match the allowed image types
-                    unlink($uploadPath);
-                    echo "Invalid image type for file: " . $_FILES['issue_image']['name'][$key];
-                    continue; // Skip to the next iteration
+                // Delete from tbl_ticket_images
+                $delete_image_query = "DELETE FROM tbl_ticket_images WHERE image_path = ?";
+                $stmt_delete_image = $conn->prepare($delete_image_query);
+                if ($stmt_delete_image) {
+                    $stmt_delete_image->bind_param("s", $deleted_image);
+                    if (!$stmt_delete_image->execute()) {
+                        echo "Error deleting image record: " . $stmt_delete_image->error;
+                    }
+                    $stmt_delete_image->close();
+                } else {
+                    echo "Error preparing delete statement: " . $conn->error;
                 }
-            } else {
-                echo "Error uploading file: " . $_FILES['issue_image']['error'][$key];
             }
         }
     }
 
-    // Fetch existing image paths from the database
-    $sql_fetch_images = "SELECT issue_image FROM tbl_ticket WHERE id = ?";
-    $stmt_fetch_images = $conn->prepare($sql_fetch_images);
-    $stmt_fetch_images->bind_param("i", $ticket_id);
-    $stmt_fetch_images->execute();
-    $stmt_fetch_images->bind_result($existing_images);
-    $stmt_fetch_images->fetch();
-    $stmt_fetch_images->close();
 
-    // Trim whitespace and split existing image paths
-    $existing_images_array = !empty($existing_images) ? array_map('trim', explode(', ', $existing_images)) : [];
-    // Combine existing image paths with newly uploaded ones
-    $issue_image_paths = implode(', ', array_merge($existing_images_array, $uploadedFiles));
-
-
-
-    // Fetch existing ticket details for validation
-    $check_ticket_query = "SELECT status FROM tbl_ticket WHERE id = ?";
+    // Check if ticket_id exists in tbl_ticket
+    $check_ticket_query = "SELECT users_id FROM tbl_ticket WHERE id = ?";
     $stmt_check_ticket = $conn->prepare($check_ticket_query);
     $stmt_check_ticket->bind_param('i', $ticket_id);
     $stmt_check_ticket->execute();
     $ticket_result = $stmt_check_ticket->get_result();
 
     if ($ticket_result->num_rows > 0) {
-        $row = $ticket_result->fetch_assoc();
+        // Existing ticket found, proceed with updating and image handling
 
-        // Check if ticket status is 'Close'
-        if ($row['status'] == 'Close' && $listTicketAssign != 0) {
-            $_SESSION['error_message'] = "Cannot edit a closed ticket.";
+        // Fetch existing ticket details
+        $row = $ticket_result->fetch_assoc();
+        $assigned_users = explode(',', $row['users_id']);
+        $assigned_users = array_map('trim', $assigned_users); // Trim any whitespace
+
+        // Check if the current user is one of the assigned users or if listTicketAssign is 0
+        if (!in_array($user_id, $assigned_users) && $listTicketAssign != 0) {
+            $_SESSION['error_message'] = "You cannot edit this ticket.";
             header("Location: ticket.php");
             exit();
         }
+    }
+
+
+    // Check if ticket_id exists in tbl_ticket
+    $check_ticket_query = "SELECT ticket_id FROM tbl_ticket WHERE id = ?";
+    $stmt_check_ticket = $conn->prepare($check_ticket_query);
+    $stmt_check_ticket->bind_param('i', $ticket_id);
+    $stmt_check_ticket->execute();
+    $ticket_result = $stmt_check_ticket->get_result();
+
+    if ($ticket_result->num_rows > 0) {
+        // Existing ticket found, proceed with updating and image handling
+
+        // Fetch existing ticket details
+        $row = $ticket_result->fetch_assoc();
+        $existing_ticket_id = $row['ticket_id'];
+
+        // Handle uploaded images
+        if (!empty($_FILES['issue_image']['name'][0])) {
+            $allowedTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF]; // Define allowed image types
+            foreach ($_FILES['issue_image']['tmp_name'] as $key => $tmp_name) {
+                if ($_FILES['issue_image']['error'][$key] !== UPLOAD_ERR_OK) {
+                    echo "Error uploading file: " . $_FILES['issue_image']['error'][$key];
+                    continue; // Skip to the next iteration if there's an error
+                }
+
+                // Process the file normally
+                $file_name = $_FILES['issue_image']['name'][$key];
+                $file_tmp = $_FILES['issue_image']['tmp_name'][$key];
+
+                // Check the image type before moving the uploaded file
+                $imageType = exif_imagetype($file_tmp);
+                if (!in_array($imageType, $allowedTypes)) {
+                    echo "Invalid image type for file: " . $file_name;
+                    continue; // Skip to the next iteration if the file type is not allowed
+                }
+
+                $image_extension = pathinfo($file_name, PATHINFO_EXTENSION);
+                $unique_name = uniqid() . '.' . $image_extension;
+                $uploadPath = $uploadDir . $unique_name;
+
+                // Move the uploaded file to the destination directory
+                if (move_uploaded_file($file_tmp, $uploadPath)) {
+                    // Insert image path into tbl_ticket_images
+                    $image_insert_query = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES (?, ?)";
+                    $stmt_image = $conn->prepare($image_insert_query);
+                    if ($stmt_image) {
+                        $stmt_image->bind_param("ss", $existing_ticket_id, $uploadPath);
+                        if ($stmt_image->execute()) {
+                            // Success message or further processing
+                        } else {
+                            echo "Error inserting image path: " . $stmt_image->error;
+                        }
+                        $stmt_image->close();
+                    } else {
+                        echo "Error preparing image insert statement: " . $conn->error;
+                    }
+                } else {
+                    echo "Error moving uploaded file: " . $file_name;
+                }
+            }
+        }
     } else {
+        // Ticket not found, handle this case (redirect or error message)
         $_SESSION['error_message'] = "Ticket not found.";
         header("Location: 404.php");
         exit();
     }
 
-    // Update ticket details
+
+    // Update ticket details in the database
     $update_query = "UPDATE tbl_ticket SET 
                         station_id = ?, 
                         station_name = ?, 
                         station_type = ?, 
                         province = ?, 
                         issue_description = ?, 
-                        issue_image=?,
+                      
                         issue_type = ?, 
                         SLA_category = ?, 
                         status = ?, 
@@ -215,13 +266,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt_update = $conn->prepare($update_query);
     $stmt_update->bind_param(
-        'sssssssssssssssi',
+        'ssssssssssssssi',
         $station_id,
         $station_name,
         $station_type,
         $province,
         $issue_description,
-        $issue_image_paths,
+
         $issue_types,
         $SLA_category,
         $status,
@@ -241,28 +292,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $stmt_update->close();
-    header("Location: edit_ticket.php?id=$ticket_id");
+    //  header("Location: edit_ticket.php?id=$ticket_id");
+    header("Location: ticket.php");
     exit();
 }
 
+
 // Fetch ticket details for display in the form
-$ticket_query = "SELECT * FROM tbl_ticket WHERE id = ?";
+$ticket_id = $_GET['id'] ?? null; // Ensure to sanitize and validate $ticket_id
+$ticket_query = "SELECT t.*, GROUP_CONCAT(ti.image_path SEPARATOR ',') AS image_paths 
+                 FROM tbl_ticket t
+                 LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+                 WHERE t.id = ?
+                 GROUP BY t.ticket_id";
+
 $stmt_ticket = $conn->prepare($ticket_query);
-$stmt_ticket->bind_param('i', $ticket_id);
+$stmt_ticket->bind_param('s', $ticket_id);
 $stmt_ticket->execute();
 $ticket_result = $stmt_ticket->get_result();
 
 if ($ticket_result->num_rows > 0) {
     $row = $ticket_result->fetch_assoc();
+    // Extract image paths from the result
+    $image_paths = !empty($row['image_paths']) ? explode(',', $row['image_paths']) : [];
 } else {
     $_SESSION['error_message'] = "Ticket not found.";
     header("Location: 404.php");
     exit();
 }
 
+
 $stmt_ticket->close();
-$stmt_user->close();
+// $conn->close();
 ?>
+
 
 
 
@@ -330,7 +393,7 @@ $stmt_user->close();
                                 <h3 class="card-title">Ticket ID: <?= $row['ticket_id']; ?></h3>
                             </div>
 
-                            <!-- <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data"> -->
+
                             <form method="POST" id="quickForm" novalidate="novalidate" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . "?id=" . $ticket_id; ?>" enctype="multipart/form-data">
                                 <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
                                 <div class="card-body col">
@@ -355,34 +418,52 @@ $stmt_user->close();
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="form-group col-sm-12">
+                                        <div class="form-group col-sm-8">
                                             <label for="issue_description">Issue Description</label>
                                             <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?php echo htmlspecialchars($row['issue_description']); ?></textarea>
                                         </div>
-
+                                        <div class="form-group col-sm-4">
+                                            <label for="issue_image">Issue Image</label>
+                                            <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
+                                        </div>
                                         <div class="form-group col-sm-12 row mt-2">
                                             <?php
-                                            if (!empty($row['issue_image'])) {
-                                                $image_paths = explode(',', $row['issue_image']);
+                                            if (!empty($image_paths)) {
                                                 foreach ($image_paths as $image_path) {
                                                     echo '<div class="image-container col-4 col-md-2" style="">';
-                                                    echo '<img style="width:100%;   " src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
+                                                    echo '<img style="width:100%;" src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
                                                     echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times</button>';
                                                     echo '</div>';
                                                 }
                                             }
                                             ?>
-                                          
+
                                             <div class="col-12 row mt-3" id="imagePreview">
-                                            </div>
-                                            <div class="form-group col-sm-4">
-                                                <label for="issue_image">Issue Image</label>
-                                                <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
                                             </div>
                                         </div>
                                     </div>
 
-                                    
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            // Attach click event to delete buttons
+                                            document.querySelectorAll('.delete-image').forEach(item => {
+                                                item.addEventListener('click', function() {
+                                                    const imageToDelete = this.dataset.image;
+
+                                                    // If you want to visually remove the image immediately
+                                                    this.closest('.image-container').remove();
+
+                                                    // If you want to mark the image for deletion on form submit
+                                                    const input = document.createElement('input');
+                                                    input.type = 'hidden';
+                                                    input.name = 'delete_images[]'; // Use an array to collect deleted image paths
+                                                    input.value = imageToDelete;
+                                                    document.getElementById('quickForm').appendChild(input);
+                                                });
+                                            });
+                                        });
+                                    </script>
+
 
 
                                     <div class=" row">
@@ -448,7 +529,7 @@ $stmt_user->close();
                                             <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Comment"><?php echo htmlspecialchars($row['comment']); ?></textarea>
                                         </div>
                                     </div>
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" name="Submit" value="Submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
@@ -510,8 +591,24 @@ $stmt_user->close();
             background-color: #f1f1f1;
         }
     </style>
+
     <script>
-       
+        $(document).ready(function() {
+            const $stationId = $('#station_id');
+            const $quickForm = $('#quickForm');
+
+            $stationId.on('blur', function() {
+                fetchStationDetails($(this).val());
+            });
+
+            $quickForm.on('submit', function(event) {
+                if (!this.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                $(this).addClass('was-validated');
+            });
+        });
 
         function fetchStationDetails(station_id) {
             $.post('get_station_details.php', {
@@ -547,7 +644,7 @@ $stmt_user->close();
         }
     </script>
     <!-- delete image -->
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.delete-image').forEach(button => {
                 button.addEventListener('click', function() {
@@ -582,7 +679,7 @@ $stmt_user->close();
                 });
             }
         });
-    </script>
+    </script> -->
     <!-- preview image -->
     <script src="../scripts/previewImages.js">
 

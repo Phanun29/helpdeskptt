@@ -15,52 +15,82 @@ if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
 }
 
 $id = $_POST['id'];
+$uploadDir = '../uploads/'; // Ensure this is defined in the scope
 
-// Prepare the SQL statement to retrieve the issue_image path and status
-$query = "SELECT issue_image, status FROM tbl_ticket WHERE id = ?";
+// Initialize variables
+$imagePaths = []; // Array to store image paths
+
+// Prepare the SQL statement to retrieve issue_image paths from tbl_ticket_images
+$query = "SELECT image_path FROM tbl_ticket_images WHERE ticket_id = ?";
 if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("i", $id);
     $stmt->execute();
-    $stmt->bind_result($issue_image_path, $ticket_status);
-    $stmt->fetch();
+    $stmt->bind_result($image_path);
+
+    // Fetch all image paths into an array
+    while ($stmt->fetch()) {
+        $imagePaths[] = $image_path;
+    }
     $stmt->close();
 } else {
-    error_log('Error preparing statement: ' . $conn->error);
+    error_log('Error preparing statement to retrieve image paths: ' . $conn->error);
     echo 'error';
     exit();
 }
 
-// Check if the ticket status is 'Close'
-if ($ticket_status === 'Close') {
-    echo 'closed';
+// Delete images from server and records from tbl_ticket_images
+if (!empty($imagePaths)) {
+    foreach ($imagePaths as $path) {
+        $path = trim($path); // Ensure no leading/trailing spaces
+        $fullPath = $uploadDir . $path;
+
+        error_log('Attempting to delete file: ' . $fullPath); // Log the file path being deleted
+
+        if (file_exists($fullPath)) {
+            if (!unlink($fullPath)) {
+                error_log('Failed to delete file img: ' . $fullPath);
+                echo 'error';
+                exit();
+            } else {
+                error_log('Successfully deleted file: ' . $fullPath);
+            }
+        } else {
+            error_log('File does not exist: ' . $fullPath);
+        }
+    }
+}
+
+// Now delete records from tbl_ticket_images
+$queryDeleteImages = "DELETE FROM tbl_ticket_images WHERE ticket_id = ?";
+if ($stmtDeleteImages = $conn->prepare($queryDeleteImages)) {
+    $stmtDeleteImages->bind_param("i", $id);
+    if ($stmtDeleteImages->execute()) {
+        error_log('Successfully deleted records from tbl_ticket_images for ticket_id: ' . $id);
+        $stmtDeleteImages->close();
+    } else {
+        error_log('Error executing delete query for tbl_ticket_images: ' . $stmtDeleteImages->error);
+        echo 'error';
+        exit();
+    }
+} else {
+    error_log('Error preparing delete statement for tbl_ticket_images: ' . $conn->error);
+    echo 'error';
     exit();
 }
 
-// Prepare the SQL statement to delete the ticket
-$query = "DELETE FROM tbl_ticket WHERE id = ?";
-if ($stmt = $conn->prepare($query)) {
-    $stmt->bind_param("i", $id);
-    if ($stmt->execute()) {
-        // If the deletion is successful, delete the image file
-        if (!empty($issue_image_path)) {
-            $image_paths = explode(',', $issue_image_path);
-            foreach ($image_paths as $path) {
-                $path = trim($path); // Ensure there are no leading/trailing spaces
-                if (file_exists($path)) {
-                    unlink($path);
-                } else {
-                    error_log('File does not exist: ' . $path);
-                }
-            }
-        }
-        echo 'success';
+// After deleting images and records, proceed to delete the ticket from tbl_ticket
+$queryDeleteTicket = "DELETE FROM tbl_ticket WHERE id = ?";
+if ($stmtDeleteTicket = $conn->prepare($queryDeleteTicket)) {
+    $stmtDeleteTicket->bind_param("i", $id);
+    if ($stmtDeleteTicket->execute()) {
+        echo 'success'; // Return success if everything deleted successfully
     } else {
-        error_log('Error executing delete: ' . $stmt->error);
+        error_log('Error executing delete query for tbl_ticket: ' . $stmtDeleteTicket->error);
         echo 'fail';
     }
-    $stmt->close();
+    $stmtDeleteTicket->close();
 } else {
-    error_log('Error preparing delete statement: ' . $conn->error);
+    error_log('Error preparing delete statement for tbl_ticket: ' . $conn->error);
     echo 'error';
 }
 

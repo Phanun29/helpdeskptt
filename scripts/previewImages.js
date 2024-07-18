@@ -1,9 +1,9 @@
+
 var selectedFiles = []; // Array to store selected files
 
 // Function to create preview for each selected file
 function previewImages(event) {
     var previewContainer = document.getElementById('imagePreview');
-
     var files = event.target.files;
     var newFiles = Array.from(files); // Convert FileList to array
 
@@ -14,21 +14,28 @@ function previewImages(event) {
         var reader = new FileReader();
 
         reader.onload = function (e) {
-            var imageContainer = document.createElement('div');
-            imageContainer.className = 'image-container col-4 col-md-2';
-            imageContainer.style.width = '200px';
+            var fileContainer = document.createElement('div');
+            fileContainer.className = 'image-container col-4 col-md-2';
 
-            var image = document.createElement('img');
-            image.className = 'preview-image';
-            image.src = e.target.result;
-            imageContainer.appendChild(image);
+            if (file.type.startsWith('image/')) {
+                var image = document.createElement('img');
+                image.className = 'preview-image';
+                image.src = e.target.result;
+                fileContainer.appendChild(image);
+            } else if (file.type.startsWith('video/')) {
+                var video = document.createElement('video');
+                video.className = 'preview-video';
+                video.src = e.target.result;
+                video.controls = true;
+                fileContainer.appendChild(video);
+            }
 
             var closeButton = document.createElement('button');
             closeButton.className = 'close-button';
             closeButton.innerHTML = '&times;';
             closeButton.addEventListener('click', function () {
-                // Remove the image container when the button is clicked
-                imageContainer.remove();
+                // Remove the file container when the button is clicked
+                fileContainer.remove();
                 // Remove the corresponding file from the selectedFiles array
                 var index = selectedFiles.indexOf(file);
                 if (index !== -1) selectedFiles.splice(index, 1);
@@ -36,8 +43,8 @@ function previewImages(event) {
                 updateFileInput();
             });
 
-            imageContainer.appendChild(closeButton);
-            previewContainer.appendChild(imageContainer);
+            fileContainer.appendChild(closeButton);
+            previewContainer.appendChild(fileContainer);
         };
 
         reader.readAsDataURL(file);

@@ -34,25 +34,24 @@ if ($result_user && $result_user->num_rows > 0) {
 }
 
 
+
+// Check if the request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $issue_description = $_POST['issue_description'];
-    $issue_type = implode(', ', $_POST['issue_type']); // Convert array to string without spaces
-    // $SLA_category = $_POST['SLA_category'] ?? null;
-    if (isset($_POST['SLA_category'])) {
+    $issue_type = implode(',', $_POST['issue_type']) ?? null; // Convert array to string without spaces
+    if ($SLA_category != null) {
         $SLA_category = $_POST['SLA_category'];
     } else {
         $SLA_category = null;
     }
-
     $status = 'Open';
     $user_create_ticket = $fetch_info['users_id'];
     date_default_timezone_set('Asia/Bangkok');
-
     $ticket_open = date('Y-m-d H:i:s');
 
     // Validate station_id
-    $station_check_query = "SELECT station_name, station_type ,province FROM tbl_station WHERE station_id = ?";
+    $station_check_query = "SELECT station_name, station_type FROM tbl_station WHERE station_id = ?";
     $stmt = $conn->prepare($station_check_query);
     $stmt->bind_param("s", $station_id);
     $stmt->execute();
@@ -78,45 +77,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Extract the sequential number from the last ticket ID
         $last_seq_number = intval(substr($last_ticket_id, -6));
-        // If the last ticket ID exists, increment the sequential number, otherwise set it to 1
         $new_seq_number = ($last_seq_number !== null) ? $last_seq_number + 1 : 1;
-        // Pad the sequential number with leading zeros
         $padded_seq_number = str_pad($new_seq_number, 6, "0", STR_PAD_LEFT);
 
         // Construct the new ticket ID
         $ticket_id = "POS$current_year$current_month$padded_seq_number";
 
-        // // Process multiple file uploads
-        // $uploaded_images = [];
-        // if (!empty($_FILES['issue_image']['name'][0])) {
-        //     $target_dir = "../uploads/";
-        //     foreach ($_FILES['issue_image']['name'] as $key => $image) {
-        //         $target_file = $target_dir . basename($image);
-        //         if (move_uploaded_file($_FILES["issue_image"]["tmp_name"][$key], $target_file)) {
-        //             $uploaded_images[] = $target_file;
-        //         } else {
-        //             $_SESSION['error_message'] = "Error uploading image: " . $image;
-        //             header('Location: ' . $_SERVER['REQUEST_URI']);
-        //             exit();
-        //         }
-        //     }
-        // }
-        // // Convert the array of image paths to a comma-separated string
-        // $issue_image_paths = implode(',', $uploaded_images);
-
-        // Process multiple file uploads
-        // Process multiple file uploads
+        /// Process multiple file uploads
         $uploaded_images = [];
         if (!empty($_FILES['issue_image']['name'][0])) {
             $target_dir = "../uploads/";
             foreach ($_FILES['issue_image']['name'] as $key => $image) {
-                // Generate a unique name for the image
                 $image_extension = pathinfo($image, PATHINFO_EXTENSION);
                 $unique_name = uniqid() . '.' . $image_extension;
                 $target_file = $target_dir . $unique_name;
 
                 if (move_uploaded_file($_FILES["issue_image"]["tmp_name"][$key], $target_file)) {
-                    $uploaded_images[] = $target_file; // Save the full path
+                    $uploaded_images[] = $target_file; // Save the file path
                 } else {
                     $_SESSION['error_message'] = "Error uploading image: " . $image;
                     header('Location: ' . $_SERVER['REQUEST_URI']);
@@ -125,25 +102,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // Convert the array of image paths to a comma-separated string
-        $issue_image_paths = implode(',', $uploaded_images);
-
-        // Convert the array of image names to a comma-separated string
-        $issue_image_paths = implode(',', $uploaded_images);
-
         // Debugging: Check station_id before inserting
         error_log("Attempting to insert ticket with station_id: $station_id");
 
         // Prepare the SQL query to insert the ticket
-        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province,issue_description, issue_image, issue_type, SLA_category,status,user_create_ticket, ticket_open) 
-                VALUES (?, ?, ?, ?, ?,?, ?,?, ?,  ?, ?, ?)";
+        $sql = "INSERT INTO tbl_ticket (ticket_id, station_id, station_name, station_type, province, issue_description, issue_type, SLA_category, status, user_create_ticket, ticket_open) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("ssssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_image_paths, $issue_type, $SLA_category, $status, $user_create_ticket, $ticket_open);
+            $stmt->bind_param("sssssssssss", $ticket_id, $station_id, $station_name, $station_type, $province, $issue_description, $issue_type, $SLA_category, $status, $user_create_ticket, $ticket_open);
 
             if ($stmt->execute()) {
-                $_SESSION['success_message'] = "New ticket added successfully";
+                // Insert images into tbl_ticket_images
+                $image_insert_success = true;
+                foreach ($uploaded_images as $target_file) {
+                    $image_insert_query = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES (?, ?)";
+                    $stmt_image = $conn->prepare($image_insert_query);
+                    if ($stmt_image) {
+                        $stmt_image->bind_param("ss", $ticket_id, $target_file);
+                        if (!$stmt_image->execute()) {
+                            $image_insert_success = false;
+                            error_log('Error inserting image path: ' . $stmt_image->error);
+                        }
+                        $stmt_image->close();
+                    } else {
+                        $image_insert_success = false;
+                        error_log('Error preparing image insert statement: ' . $conn->error);
+                    }
+                }
+
+                if ($image_insert_success) {
+                    $_SESSION['success_message'] = "New ticket added successfully";
+                } else {
+                    $_SESSION['error_message'] = "Ticket added, but failed to save all images.";
+                }
             } else {
                 $_SESSION['error_message'] = "Error: " . $stmt->error;
             }
@@ -151,9 +144,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $_SESSION['error_message'] = "Error preparing statement: " . $conn->error;
         }
+        header("Location: ticket.php");
+        exit();
     }
-    header('Location: ticket.php ');
-    exit();
 }
 
 ?>
@@ -248,8 +241,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
-                                            <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
 
+                                            <input type="file" class="form-control" id="issue_image" name="issue_image[]" multiple accept="image/*,video/*">
                                         </div>
                                         <!-- Display selected new images -->
                                         <div class="col-12 row mt-3" id="imagePreview">

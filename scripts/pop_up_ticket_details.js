@@ -22,23 +22,34 @@ function showTicketDetails(ticket) {
     document.getElementById('modalAssign').textContent = ticket.users_name;
 
     // Format the dates
-    document.getElementById('modalTicketOpen').textContent = formatDateTime(ticket.ticket_open);
-    document.getElementById('modalTicketOnHold').textContent = formatDateTime(ticket.ticket_on_hold);
-    document.getElementById('modalTicketInProgress').textContent = formatDateTime(ticket.ticket_in_progress);
-    document.getElementById('modalTicketPendingVendor').textContent = formatDateTime(ticket.ticket_pending_vendor);
-    document.getElementById('modalTicketClose').textContent = formatDateTime(ticket.ticket_close);
+    if (ticket.ticket_open) {
+        document.getElementById('modalTicketOpen').textContent = formatDateTime(ticket.ticket_open);
+    }
+    if (ticket.ticket_on_hold) {
+        document.getElementById('modalTicketOnHold').textContent = formatDateTime(ticket.ticket_on_hold);
+    }
+    if (ticket.ticket_in_progress) {
+        document.getElementById('modalTicketInProgress').textContent = formatDateTime(ticket.ticket_in_progress);
+    }
+    if (ticket.ticket_pending_vendor) {
+        document.getElementById('modalTicketPendingVendor').textContent = formatDateTime(ticket.ticket_pending_vendor);
+    }
+    if (ticket.ticket_close) {
+        document.getElementById('modalTicketClose').textContent = formatDateTime(ticket.ticket_close);
+    }
+
     document.getElementById('modalComment').textContent = ticket.comment;
 
     // Set image source for main image
-    document.getElementById('modalIssueImages').src = ticket.issue_image || '';
+    document.getElementById('modalIssueImages').src = ticket.image_paths || '';
 
     // Clear previous images
     const modalIssueImages = document.getElementById('modalIssueImages');
     modalIssueImages.innerHTML = '';
 
     // Display multiple images if available
-    if (ticket.issue_image) {
-        const images = ticket.issue_image.split(',');
+    if (ticket.image_paths) {
+        const images = ticket.image_paths.split(',');
         images.forEach(image => {
             const imgElement = document.createElement('img');
             imgElement.src = image.trim();

@@ -45,3 +45,5 @@
 <!-- app -->
 <link rel="manifest" href="../manifest.json">
 <script src="../scripts/app.js"></script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100..900&display=swap">

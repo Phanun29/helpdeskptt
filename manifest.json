@@ -1,6 +1,6 @@
 {
-    "name": "NHelpdeskApp",
-    "short_name": "helpdeskN1",
+    "name": "POSHelpDesk",
+    "short_name": "POS_Desk",
     "icons": [
       {
         "src": "/helpdeskptt/icons/icon-512.png",
