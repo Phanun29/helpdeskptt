@@ -20,7 +20,7 @@ $uploadDir = '../uploads/'; // Ensure this is defined in the scope
 // Initialize variables
 $imagePaths = []; // Array to store image paths
 
-// Prepare the SQL statement to retrieve issue_image paths from tbl_ticket_images
+// Prepare the SQL statement to retrieve image paths from tbl_ticket_images
 $query = "SELECT image_path FROM tbl_ticket_images WHERE ticket_id = ?";
 if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("i", $id);
@@ -42,20 +42,21 @@ if ($stmt = $conn->prepare($query)) {
 if (!empty($imagePaths)) {
     foreach ($imagePaths as $path) {
         $path = trim($path); // Ensure no leading/trailing spaces
-        $fullPath = $uploadDir . $path;
+        $fullPath = realpath($uploadDir . $path); // Get absolute path
 
-        error_log('Attempting to delete file: ' . $fullPath); // Log the file path being deleted
+        // Log the full path for debugging
+        error_log('Attempting to delete file: ' . $fullPath);
 
-        if (file_exists($fullPath)) {
+        if ($fullPath && file_exists($fullPath)) {
             if (!unlink($fullPath)) {
-                error_log('Failed to delete file img: ' . $fullPath);
+                error_log('Failed to delete file: ' . $fullPath . ' Error: ' . print_r(error_get_last(), true));
                 echo 'error';
                 exit();
             } else {
                 error_log('Successfully deleted file: ' . $fullPath);
             }
         } else {
-            error_log('File does not exist: ' . $fullPath);
+            error_log('File does not exist or path is invalid: ' . $fullPath);
         }
     }
 }
@@ -94,5 +95,5 @@ if ($stmtDeleteTicket = $conn->prepare($queryDeleteTicket)) {
     echo 'error';
 }
 
-// Close the database connection
+// Close the database connection 
 $conn->close();

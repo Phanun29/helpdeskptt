@@ -1,7 +1,9 @@
 $(document).ready(function () {
     // Handle delete button click
     $(document).on('click', '.delete-btn', function () {
-        var ticketId = $(this).data('id');
+        var ticketId = $(this).data('id'); // Get the ID from data attribute
+
+        // Display confirmation dialog using SweetAlert2
         Swal.fire({
             title: 'Are you sure?',
             text: 'You will not be able to recover this ticket!',
@@ -12,15 +14,19 @@ $(document).ready(function () {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
+                // Make AJAX request to delete_ticket.php
                 $.ajax({
                     url: 'delete_ticket.php',
                     type: 'POST',
                     data: { id: ticketId },
                     success: function (response) {
                         console.log('Response:', response); // Debugging: Log the response
+
                         if (response === 'success') {
-                            console.log('Removing row with ID: #ticket-' + ticketId); // Log the row being removed
-                            $('#ticket-' + ticketId).remove(); // Ensure the ID selector matches your HTML
+                            // Remove the row from the table
+                            var rowSelector = '#ticket-' + ticketId;
+                            console.log('Removing row with selector: ' + rowSelector); // Log the row being removed
+                            $(rowSelector).remove();
                             Swal.fire('Deleted!', 'Your ticket has been deleted.', 'success');
                         } else if (response === 'closed') {
                             Swal.fire('Error!', 'Closed tickets cannot be deleted.', 'error');
@@ -35,12 +41,5 @@ $(document).ready(function () {
                 });
             }
         });
-    });
-
-    // Handle edit button click
-    $(document).on('click', '.edit-btn', function () {
-        var ticketId = $(this).data('id');
-        // Redirect or load edit form page, passing ticketId
-        window.location.href = 'edit_ticket.php?id=' + ticketId;
     });
 });

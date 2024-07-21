@@ -212,7 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <a href="ticket.php" class="btn btn-primary ">BACK</a>
                             </div>
 
-                            <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
+                            <form method="POST" id="quickForm" novalidate="" enctype="multipart/form-data">
                                 <div class="card-body col">
                                     <div class="row">
                                         <div class="form-group col-sm-3">
@@ -250,6 +250,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
 
                                         <div class="form-group col-sm-4">
+                                            <style>
+                                                .choices {
+                                                    margin-bottom: 0;
+                                                }
+                                            </style>
                                             <label for="issue_type">Issue Type <span class="text-danger">*</span></label>
                                             <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>
 
@@ -259,6 +264,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="Dispenser">Dispenser</option>
                                                 <option value="Unassigned">Unassigned</option>
                                             </select>
+                                            <div id="error-message" class="text-danger" style="display:none;">Please select at least one issue type.</div>
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="SLA_category">SLA Category</label>
@@ -272,6 +278,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="CAT 4 Report*">CAT 4 Report*</option>
                                                 <option value="CAT 5*">CAT 5*</option>
                                             </select>
+
                                         </div>
 
 
@@ -282,6 +289,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </div>
                                 </div>
                             </form>
+                            <script>
+                                document.getElementById('quickForm').addEventListener('submit', function(event) {
+                                    var issueTypeSelect = document.getElementById('issue_type');
+                                    var selectedOptions = Array.from(issueTypeSelect.selectedOptions);
+                                    var errorMessage = document.getElementById('error-message');
+
+                                    if (selectedOptions.length === 0) {
+                                        errorMessage.style.display = 'block';
+                                        event.preventDefault(); // Prevent form submission
+                                    } else {
+                                        errorMessage.style.display = 'none';
+                                    }
+                                });
+                            </script>
+
                         </div>
                     </div>
                 </div>
@@ -321,7 +343,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- auto fill station -->
     <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
 
-    <!-- previewImages -->
+    <!-- previewMedia -->
     <script src="../scripts/previewImages.js"></script>
 </body>
 

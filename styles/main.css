@@ -41,13 +41,15 @@ td,textarea {
 .image-container {
   width: 200px;
 
+overflow: hidden;
+border-radius: 5px;
   float: left;
   position: relative;
 }
 
-.preview-image {
-  width: 100%;
-  height: auto;
+.preview-image, .preview-video {
+    width: 100%;
+    height: auto;
 }
 
 .close-button {
@@ -62,8 +64,6 @@ td,textarea {
 }
 
 /* /image ticket */
-
-
 
 /* table ticket */
 #example1_filter{
@@ -91,11 +91,12 @@ td,textarea {
     /* width: 40%;
     margin-bottom:0; */
   }
-  #add_ticket{
+  #add_ticket ,.button-filter{
     margin-bottom: .5em;
   }
   .table_users_rules{
     width: 100%;
   }
 }
+
 

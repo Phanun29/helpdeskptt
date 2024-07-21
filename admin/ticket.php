@@ -4,7 +4,7 @@ include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-
+$user_create_ticket = $fetch_info['users_id'];
 $query_user = "
         SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
         FROM tbl_users u
@@ -30,17 +30,20 @@ if ($result_user && $result_user->num_rows > 0) {
          LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
          LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
          GROUP BY t.ticket_id DESC" :
-        "SELECT t.*, REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
-                 GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
-         FROM tbl_ticket t
-         LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-         LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
-         WHERE FIND_IN_SET(?, t.users_id)
-         GROUP BY t.ticket_id DESC";
+        "SELECT t.*, 
+        REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+        GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
+        FROM tbl_ticket t
+        LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id) OR FIND_IN_SET(u.users_id, t.user_create_ticket)
+        LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+        WHERE FIND_IN_SET(?, t.users_id) OR FIND_IN_SET(?, t.user_create_ticket)
+        GROUP BY t.ticket_id
+        ORDER BY t.ticket_id DESC";
+
 
     $stmt_ticket = $conn->prepare($ticket_query);
     if ($listTicketAssign != 0) {
-        $stmt_ticket->bind_param("i", $user_id);
+        $stmt_ticket->bind_param("ii", $user_id, $user_create_ticket);
     }
     $stmt_ticket->execute();
     $ticket_result = $stmt_ticket->get_result();
@@ -137,12 +140,30 @@ if ($result_user && $result_user->num_rows > 0) {
                                 <?php if (isset($AddTicket) && $AddTicket) : ?>
                                     <a id="add_ticket" href="add_ticket.php" class="btn btn-primary ">Add Ticket</a>
                                 <?php endif; ?>
+                                <button type="button" class="btn btn-secondary button-filter" id="toggleFilterBtn">Filter</button>
+                                <!-- script dropdown filter -->
+                                <script>
+                                    document.getElementById('toggleFilterBtn').addEventListener('click', function() {
+                                        var filterForm = document.getElementById('filterForm1');
+                                        if (filterForm.classList.contains('show')) {
+                                            filterForm.classList.remove('show');
+                                            setTimeout(function() {
+                                                filterForm.style.display = 'none';
+                                            }, 500); // Match the transition duration
+                                        } else {
+                                            filterForm.style.display = 'block';
+                                            setTimeout(function() {
+                                                filterForm.classList.add('show');
+                                            }, 10); // Slight delay to trigger transition
+                                        }
+                                    });
+                                </script>
                                 <div id="button_export" class="dt-buttons btn-group flex-wrap">
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToCSV()" type="button"><span>CSV</span></button>
                                     <button class="btn btn-secondary buttons-pdf buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToPDF()" type="button"><span>PDF</span></button>
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToExcel()" type="button"><span>Excel</span></button>
                                 </div>
-                                <button type="button" class="btn btn-secondary" id="toggleFilterBtn">Filter</button>
+
                             </div>
 
                             <div class="card-header" id="filterForm1" style="display: none;">
@@ -292,6 +313,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Ticket In Progress</th>
                                         <th>Ticket Pending Vender</th>
                                         <th>Ticket Close</th>
+                                        <th>Ticket Time</th>
                                         <th>Comment</th>
                                     </tr>
                                 </thead>
@@ -326,7 +348,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1' style='font-family: Khmer, sans-serif;'>" . $row['issue_description'] . "</td>";
                                             $image_paths = explode(',', $row['image_paths']);
                                             if ($row['image_paths'] != null) {
-                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showImage(\"" . $row['image_paths'] . "\")'>Click to View</button></td>";
+                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showMedia(\"" . $row['image_paths'] . "\")'>Click to View</button></td>";
                                             } else {
                                                 echo "<td class='export-ignore text-center text-warning'>none</td>";
                                             }
@@ -356,6 +378,32 @@ if ($result_user && $result_user->num_rows > 0) {
                                             } else {
                                                 echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
                                             }
+                                            if ($row['ticket_time'] != null) {
+                                                echo "<td class='py-1'>" . $row['ticket_time'] . "</td>";
+                                            } else {
+                                                date_default_timezone_set('Asia/Bangkok');
+                                                $ticketOpenTime = new DateTime($row['ticket_open']);
+                                                $ticketCloseTime = new DateTime();
+                                                // Calculate the difference
+                                                $interval = $ticketCloseTime->diff($ticketOpenTime);
+
+                                                // Format the difference
+                                                $ticket_time = '';
+                                                if ($interval->d > 0) {
+                                                    $ticket_time .= $interval->d . 'd, ';
+                                                }
+                                                if ($interval->h > 0 || $interval->d > 0) {
+                                                    $ticket_time .= $interval->h . 'h, ';
+                                                }
+                                                if ($interval->i > 0 || $interval->h > 0 || $interval->d > 0) {
+                                                    $ticket_time .= $interval->i . 'm, ';
+                                                }
+                                                $ticket_time .= $interval->s . 's ago';
+
+                                                // Output the formatted time difference
+                                                echo "<td class='py-1'>" . htmlspecialchars($ticket_time) . "</td>";
+                                            }
+
                                             echo "<td class='py-1' style='font-family: Khmer, sans-serif; font-weight: 400; font-style: normal;'>" . $row['comment'] . "</td>";
                                             echo "</tr>";
                                         }
@@ -442,13 +490,19 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                                 </tr>
                                                 <tr>
+                                                    <td class="p-1">Ticket Time:</td>
+
+                                                    <td class="p-1"> <span id="modalTicketTime" class="word-wrap"></span></td>
+
+                                                </tr>
+                                                <tr>
                                                     <td class="p-1">Comment:</td>
                                                     <td class="p-1"> <span id="modalComment" class="word-wrap"></span></td>
                                                 </tr>
 
                                             </table>
-                                            <p class="p-0">Issue Images</p>
-                                            <div id="modalIssueImages" onclick="showImage(this.src)"></div>
+                                            <p class="p-0">Issue Media</p>
+                                            <div id="modalIssueMedia" class="d-flex flex-wrap" onclick="showMedia(this.src)"></div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -467,14 +521,14 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
-                                        <div class="modal-body">
-                                            <div class="">
-                                                <div class="text-center">
-                                                    <img style="width:600px;" id="modalImage" class="img-fluid">
-                                                </div>
 
+                                        <div class="modal-body">
+                                            <div class="text-center" style="display: flex;justify-content:center;">
+                                                <img id="modalImage" class="img-fluid" style="width: 600px; display: none;">
+                                                <video id="modalVideo" class="img-fluid" style="width: 600px; display: none;" controls></video>
                                             </div>
                                         </div>
+
                                         <div class="modal-footer">
                                             <span id="imageIndex"></span> / <span id="totalImages"></span> <!-- Display image index and total -->
                                             <button type="button" class="btn btn-secondary" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
@@ -539,7 +593,7 @@ if ($result_user && $result_user->num_rows > 0) {
     <!-- script pop up image  -->
     <script src="../scripts/pop_up_images.js"></script>
     <!-- script delete ticket -->
-    <script src="../scripts/delete_edit_ticket.js"></script>
+    <script src="../scripts/delete_ticket.js"></script>
     <!-- auto fill station id -->
     <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
 
@@ -570,23 +624,7 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
-    <!-- script dropdown filter -->
-    <script>
-        document.getElementById('toggleFilterBtn').addEventListener('click', function() {
-            var filterForm = document.getElementById('filterForm1');
-            if (filterForm.classList.contains('show')) {
-                filterForm.classList.remove('show');
-                setTimeout(function() {
-                    filterForm.style.display = 'none';
-                }, 500); // Match the transition duration
-            } else {
-                filterForm.style.display = 'block';
-                setTimeout(function() {
-                    filterForm.classList.add('show');
-                }, 10); // Slight delay to trigger transition
-            }
-        });
-    </script>
+
     <!-- export -->
     <!-- Include jsPDF and jsPDF AutoTable libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>

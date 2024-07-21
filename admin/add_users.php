@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 
 <head>
-    
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -157,7 +157,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="form-group">
                                                 <label for="password">Password <span class="text-danger">*</span></label>
                                                 <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                                                <button type="button" class="show-password btn-sm " onclick="togglePasswordVisibility()"> <i class="fas fa-eye" id="togglePasswordIcon"></i></button>
                                             </div>
+                                            <style>
+                                                .show-password {
+                                                    position: absolute;
+                                                    top: 33px;
+                                                    right: 11px;
+                                                    background: none;
+                                                    border: none;
+                                                    color: #495057;
+                                                    font-size: 20px;
+                                                    cursor: pointer;
+                                                }
+                                            </style>
+                                            <script>
+                                                function togglePasswordVisibility() {
+                                                    var passwordInput = document.getElementById("password");
+                                                    var togglePasswordIcon = document.getElementById("togglePasswordIcon");
+
+                                                    if (passwordInput.type === "password") {
+                                                        passwordInput.type = "text";
+                                                        togglePasswordIcon.classList.remove("fa-eye");
+                                                        togglePasswordIcon.classList.add("fa-eye-slash");
+                                                    } else {
+                                                        passwordInput.type = "password";
+                                                        togglePasswordIcon.classList.remove("fa-eye-slash");
+                                                        togglePasswordIcon.classList.add("fa-eye");
+                                                    }
+                                                }
+                                            </script>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
@@ -222,7 +251,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->

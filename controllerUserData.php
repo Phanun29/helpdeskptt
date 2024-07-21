@@ -25,7 +25,7 @@ function sendEmail($to, $subject, $message)
         $mail->Port = 587;
 
         // Recipients
-        $mail->setFrom('kingkong290804@gmail.com', 'King Konng'); // Replace with your email and name
+        $mail->setFrom('kingkong290804@gmail.com', 'PTT (CAMBODIA) Limited'); // Replace with your email and name
         $mail->addAddress($to);
 
         // Content
@@ -41,53 +41,53 @@ function sendEmail($to, $subject, $message)
     }
 }
 
-if (isset($_POST['signup'])) {
-    // Get and sanitize user inputs
-    $name = htmlspecialchars($_POST['name']);
-    $email = htmlspecialchars($_POST['email']);
-    $password = htmlspecialchars($_POST['password']);
-    $cpassword = htmlspecialchars($_POST['cpassword']);
+// if (isset($_POST['signup'])) {
+//     // Get and sanitize user inputs
+//     $name = htmlspecialchars($_POST['name']);
+//     $email = htmlspecialchars($_POST['email']);
+//     $password = htmlspecialchars($_POST['password']);
+//     $cpassword = htmlspecialchars($_POST['cpassword']);
 
-    // Check if passwords match
-    if ($password !== $cpassword) {
-        $errors['password'] = "Confirm password does not match!";
-    }
+//     // Check if passwords match
+//     if ($password !== $cpassword) {
+//         $errors['password'] = "Confirm password does not match!";
+//     }
 
-    // Check if email already exists
-    $stmt = $conn->prepare("SELECT * FROM tbl_users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $res = $stmt->get_result();
+//     // Check if email already exists
+//     $stmt = $conn->prepare("SELECT * FROM tbl_users WHERE email = ?");
+//     $stmt->bind_param("s", $email);
+//     $stmt->execute();
+//     $res = $stmt->get_result();
 
-    if ($res->num_rows > 0) {
-        $errors['email'] = "Email that you have entered already exists!";
-    }
+//     if ($res->num_rows > 0) {
+//         $errors['email'] = "Email that you have entered already exists!";
+//     }
 
-    // If there are no errors, proceed with user registration
-    if (count($errors) === 0) {
-        // Hash the password
-        $encpass = password_hash($password, PASSWORD_BCRYPT);
+//     // If there are no errors, proceed with user registration
+//     if (count($errors) === 0) {
+//         // Hash the password
+//         $encpass = password_hash($password, PASSWORD_BCRYPT);
 
-        // Directly insert the user without email verification
-        $status = "1"; // Directly mark the user as verified
-        $stmt = $conn->prepare("INSERT INTO tbl_users (users_name, email, password, status) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $name, $email, $encpass, $status);
+//         // Directly insert the user without email verification
+//         $status = "1"; // Directly mark the user as verified
+//         $stmt = $conn->prepare("INSERT INTO tbl_users (users_name, email, password, status) VALUES (?, ?, ?, ?)");
+//         $stmt->bind_param("ssss", $name, $email, $encpass, $status);
 
-        if ($stmt->execute()) {
-            // Automatically log the user in after successful registration
-            $_SESSION['users_id'] = $stmt->insert_id; // Get the inserted user's ID
-            $_SESSION['users_name'] = $name;
-            $_SESSION['email'] = $email;
-            $_SESSION['status'] = $status;
+//         if ($stmt->execute()) {
+//             // Automatically log the user in after successful registration
+//             $_SESSION['users_id'] = $stmt->insert_id; // Get the inserted user's ID
+//             $_SESSION['users_name'] = $name;
+//             $_SESSION['email'] = $email;
+//             $_SESSION['status'] = $status;
 
-            // Redirect to the user's dashboard or homepage
-            header('location: dashboard.php'); // Adjust this path as necessary
-            exit();
-        } else {
-            $errors['db-error'] = "Failed while inserting data into the database!";
-        }
-    }
-}
+//             // Redirect to the user's dashboard or homepage
+//             header('location: dashboard.php'); // Adjust this path as necessary
+//             exit();
+//         } else {
+//             $errors['db-error'] = "Failed while inserting data into the database!";
+//         }
+//     }
+// }
 
 // If user click verification code submit button
 if (isset($_POST['check'])) {

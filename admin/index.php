@@ -4,7 +4,7 @@ include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-
+$user_create_ticket = $fetch_info['users_id'];
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
@@ -27,7 +27,7 @@ if ($result_user && $result_user->num_rows > 0) {
         FROM 
             tbl_ticket t
         LEFT JOIN 
-            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)";
+            tbl_users u ON FIND_IN_SET(u.users_id, t.users_id) OR FIND_IN_SET(u.users_id, t.user_create_ticket)";
   $group_by = "GROUP BY t.ticket_id DESC LIMIT 20";
 
   // Set query based on user type
@@ -37,10 +37,24 @@ if ($result_user && $result_user->num_rows > 0) {
     $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket WHERE SLA_category IS NOT NULL GROUP BY SLA_category";
     $issue_query = "SELECT issue_type FROM tbl_ticket";
   } else {
-    $ticket_query = "$ticket_select WHERE FIND_IN_SET($user_id, t.users_id) $group_by";
-    $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id) GROUP BY status";
-    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count FROM tbl_ticket WHERE SLA_category IS NOT NULL AND FIND_IN_SET($user_id, users_id) GROUP BY SLA_category";
-    $issue_query = "SELECT issue_type FROM tbl_ticket WHERE FIND_IN_SET($user_id, users_id)";
+    $ticket_query = "$ticket_select WHERE FIND_IN_SET($user_id, t.users_id) OR FIND_IN_SET($user_create_ticket, t.user_create_ticket) $group_by";
+
+    $status_query = "SELECT 
+    status, COUNT(*) as count 
+    FROM tbl_ticket 
+    WHERE FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket) 
+    GROUP BY status";
+
+    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count 
+    FROM tbl_ticket 
+    WHERE SLA_category IS NOT NULL AND (FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket) ) 
+    GROUP BY SLA_category";
+
+
+
+    $issue_query = "SELECT issue_type 
+    FROM tbl_ticket 
+    WHERE FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket)  ";
   }
 
   // Execute ticket query
@@ -304,7 +318,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <h3 class="card-title">Ticket</h3>
               </div>
               <div class="card-body table-responsive p-0">
-                <table id="myTable" class="table table-head-fixed text-nowrap">
+                <table id="myTable" class="table table-bordered table-head-fixed text-nowrap">
                   <thead>
                     <tr>
                       <th>No.</th>
@@ -318,7 +332,11 @@ if ($result_user && $result_user->num_rows > 0) {
                       <th>SLA Category </th>
                       <th>Status</th>
                       <th>Ticket Open</th>
+                      <th>Ticket On Hold</th>
+                      <th>Ticket in Progress</th>
+                      <th>Ticket Pendign Vendor</th>
                       <th>Ticket Close</th>
+                      <th>Ticket Time</th>
                       <th>Comment</th>
 
                     </tr>
@@ -341,9 +359,53 @@ if ($result_user && $result_user->num_rows > 0) {
                         echo "<td>" . $row['issue_type'] . "</td>";
                         echo "<td>" . $row['SLA_category'] . "</td>";
                         echo "<td>" . $row['status'] . "</td>";
-                        // echo "<td>" . $row['users_id'] . "</td>";
-                        echo "<td>" . $row['ticket_open'] . "</td>";
-                        echo "<td>" . $row['ticket_close'] . "</td>";
+                        echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_open'])) . "</td>";
+
+                        if ($row['ticket_on_hold'] != null) {
+                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_on_hold'])) . "</td>";
+                        } else {
+                          echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
+                        }
+                        if ($row['ticket_in_progress'] != null) {
+                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_in_progress'])) . "</td>";
+                        } else {
+                          echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
+                        }
+                        if ($row['ticket_pending_vendor'] != null) {
+                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_pending_vendor'])) . "</td>";
+                        } else {
+                          echo "<td class='py-1'>" . $row['ticket_pending_vendor'] . "</td>";
+                        }
+                        if ($row['ticket_close'] != null) {
+                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_close'])) . "</td>";
+                        } else {
+                          echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
+                        }
+                        if ($row['ticket_time'] != null) {
+                          echo "<td class='py-1'>" . $row['ticket_time'] . "</td>";
+                        } else {
+                          date_default_timezone_set('Asia/Bangkok');
+                          $ticketOpenTime = new DateTime($row['ticket_open']);
+                          $ticketCloseTime = new DateTime();
+                          // Calculate the difference
+                          $interval = $ticketCloseTime->diff($ticketOpenTime);
+
+                          // Format the difference
+                          $ticket_time = '';
+                          if ($interval->d > 0) {
+                            $ticket_time .= $interval->d . 'd, ';
+                          }
+                          if ($interval->h > 0 || $interval->d > 0) {
+                            $ticket_time .= $interval->h . 'h, ';
+                          }
+                          if ($interval->i > 0 || $interval->h > 0 || $interval->d > 0) {
+                            $ticket_time .= $interval->i . 'm, ';
+                          }
+                          $ticket_time .= $interval->s . 's ago';
+
+                          // Output the formatted time difference
+                          echo "<td class='py-1'>" . htmlspecialchars($ticket_time) . "</td>";
+                        }
                         echo "<td>" . $row['comment'] . "</td>";
                         echo "</tr>";
                       }
