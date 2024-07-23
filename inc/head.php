@@ -47,3 +47,6 @@
 <script src="../scripts/app.js"></script>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100..900&display=swap">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Battambang&display=swap" rel="stylesheet">

@@ -355,32 +355,14 @@ if ($result_user && $result_user->num_rows > 0) {
                         echo "<td>" . $row['station_type'] . "</td>";
                         echo "<td>" . $row['province'] . "</td>";
                         echo "<td>" . $row['issue_description'] . "</td>";
-
                         echo "<td>" . $row['issue_type'] . "</td>";
                         echo "<td>" . $row['SLA_category'] . "</td>";
                         echo "<td>" . $row['status'] . "</td>";
-                        echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_open'])) . "</td>";
-
-                        if ($row['ticket_on_hold'] != null) {
-                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_on_hold'])) . "</td>";
-                        } else {
-                          echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
-                        }
-                        if ($row['ticket_in_progress'] != null) {
-                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_in_progress'])) . "</td>";
-                        } else {
-                          echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
-                        }
-                        if ($row['ticket_pending_vendor'] != null) {
-                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_pending_vendor'])) . "</td>";
-                        } else {
-                          echo "<td class='py-1'>" . $row['ticket_pending_vendor'] . "</td>";
-                        }
-                        if ($row['ticket_close'] != null) {
-                          echo "<td class='py-1'>" . date("d M, Y h:i:s A", strtotime($row['ticket_close'])) . "</td>";
-                        } else {
-                          echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
-                        }
+                        echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
+                        echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
+                        echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
+                        echo "<td class='py-1'>" . $row['ticket_pending_vendor'] . "</td>";
+                        echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
                         if ($row['ticket_time'] != null) {
                           echo "<td class='py-1'>" . $row['ticket_time'] . "</td>";
                         } else {

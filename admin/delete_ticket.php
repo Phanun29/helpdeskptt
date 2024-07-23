@@ -15,49 +15,44 @@ if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
 }
 
 $id = $_POST['id'];
-$uploadDir = '../uploads/'; // Ensure this is defined in the scope
 
-// Initialize variables
-$imagePaths = []; // Array to store image paths
+// Define the target directory relative to the script
+$target_dir = "../uploads/";
 
-// Prepare the SQL statement to retrieve image paths from tbl_ticket_images
+// Prepare the SQL statement to retrieve media paths from tbl_ticket_images
 $query = "SELECT image_path FROM tbl_ticket_images WHERE ticket_id = ?";
+$mediaPaths = []; // Initialize array to store media paths
 if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("i", $id);
     $stmt->execute();
-    $stmt->bind_result($image_path);
+    $stmt->bind_result($media_path);
 
-    // Fetch all image paths into an array
+    // Fetch all media paths into an array
     while ($stmt->fetch()) {
-        $imagePaths[] = $image_path;
+        $mediaPaths[] = $media_path;
     }
     $stmt->close();
 } else {
-    error_log('Error preparing statement to retrieve image paths: ' . $conn->error);
+    error_log('Error preparing statement to retrieve media paths: ' . $conn->error);
     echo 'error';
     exit();
 }
 
-// Delete images from server and records from tbl_ticket_images
-if (!empty($imagePaths)) {
-    foreach ($imagePaths as $path) {
-        $path = trim($path); // Ensure no leading/trailing spaces
-        $fullPath = realpath($uploadDir . $path); // Get absolute path
+// Debug: Log media paths to ensure they're correct
+error_log('Media Paths to Delete: ' . print_r($mediaPaths, true));
 
-        // Log the full path for debugging
-        error_log('Attempting to delete file: ' . $fullPath);
-
-        if ($fullPath && file_exists($fullPath)) {
-            if (!unlink($fullPath)) {
-                error_log('Failed to delete file: ' . $fullPath . ' Error: ' . print_r(error_get_last(), true));
-                echo 'error';
-                exit();
-            } else {
-                error_log('Successfully deleted file: ' . $fullPath);
-            }
+// Delete media files from the server
+foreach ($mediaPaths as $relativePath) {
+    // Convert relative path to absolute path
+    $absolutePath = realpath($target_dir . ltrim($relativePath, '/')); // Ensure no leading slashes
+    if ($absolutePath && file_exists($absolutePath)) {
+        if (unlink($absolutePath)) {
+            error_log('Successfully deleted file: ' . $absolutePath);
         } else {
-            error_log('File does not exist or path is invalid: ' . $fullPath);
+            error_log('Error deleting file: ' . $absolutePath);
         }
+    } else {
+        error_log('File does not exist or invalid path: ' . $absolutePath);
     }
 }
 
@@ -79,7 +74,7 @@ if ($stmtDeleteImages = $conn->prepare($queryDeleteImages)) {
     exit();
 }
 
-// After deleting images and records, proceed to delete the ticket from tbl_ticket
+// Proceed to delete the ticket from tbl_ticket
 $queryDeleteTicket = "DELETE FROM tbl_ticket WHERE id = ?";
 if ($stmtDeleteTicket = $conn->prepare($queryDeleteTicket)) {
     $stmtDeleteTicket->bind_param("i", $id);

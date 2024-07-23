@@ -103,7 +103,7 @@ if ($result_user && $result_user->num_rows > 0) {
                             <?php endif; ?>
                             <br>
 
-                            <table id="example1"  class="table_users_rules table table-bordered table-hover text-nowrap">
+                            <table id="example1" class="table_users_rules table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -124,7 +124,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $i =  1;
                                     if ($station_result->num_rows > 0) {
                                         while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr>";
+                                            echo "<tr id='userRules-{$row['rules_id']}'>";
                                             echo "<td  class='py-1'>" . $i++ . "</td>";
                                             if ($EditUserRules == 0 &  $DeleteUserRules == 0) {
                                                 echo "<td style='display:none;'></td>";
@@ -136,7 +136,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 }
                                                 // Delete button if user has permission
                                                 if ($DeleteUserRules) {
-                                                    echo "<a href='delete_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    //echo "<a href='delete_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    echo "<button data-id='" . $row['rules_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
@@ -183,6 +184,8 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
@@ -208,8 +211,52 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
-       <!-- auto close alert -->
-       <script src="../scripts/auto_close_alert.js"></script>
+    <!-- auto close alert -->
+    <script src="../scripts/auto_close_alert.js"></script>
+    <!-- delete user rules-->
+    <script>
+        $(document).ready(function() {
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function() {
+                var userRules = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this users rules!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'delete_users_rules.php', // Adjust URL to your delete script
+                            type: 'POST',
+                            data: {
+                                id: userRules
+                            },
+                            success: function(response) {
+                                console.log('Response:', response); // Debugging: Log the response
+                                if (response === 'success') {
+                                    console.log('Removing row with ID: #userRules-' + userRules); // Log the row being removed
+                                    $('#userRules-' + userRules).remove(); // Remove the row from the table
+                                    Swal.fire('Deleted!', 'Your user Rules has been deleted.', 'success');
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete user rules.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                                Swal.fire('Error!', 'An error occurred while deleting the user rules.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+
+        });
+    </script>
 </body>
 
 </html>

@@ -472,13 +472,13 @@ $stmt_ticket->close();
                                                     // Determine if the file is an image or video
                                                     if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif'])) {
                                                         // Image
-                                                        echo '<div class="image-container col-4 col-md-2" style="">';
+                                                        echo '<div class="image-container col-4 col-md-1" style="">';
                                                         echo '<img style="width:100%;" src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
                                                         echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times;</button>';
                                                         echo '</div>';
                                                     } elseif (in_array($file_extension, ['mp4', 'webm', 'ogg'])) {
                                                         // Video
-                                                        echo '<div class="image-container col-4 col-md-2" style="">';
+                                                        echo '<div class="image-container col-4 col-md-1" style="">';
                                                         echo '<video style="width:100%;" src="' . htmlspecialchars($image_path) . '" controls class="issue-video"></video>';
                                                         echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times;</button>';
                                                         echo '</div>';
@@ -488,8 +488,7 @@ $stmt_ticket->close();
                                             ?>
 
 
-                                            <div class="col-12
-                                             row mt-3" id="imagePreview">
+                                            <div class="col-12 row mt-3" id="imagePreview">
                                             </div>
                                         </div>
                                     </div>
@@ -694,44 +693,8 @@ $stmt_ticket->close();
             $("#suggestion_dropdown").empty();
         }
     </script>
-    <!-- delete image -->
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.delete-image').forEach(button => {
-                button.addEventListener('click', function() {
-                    const image = this.getAttribute('data-image');
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'delete_image.php', true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState == 4 && xhr.status == 200) {
-                            button.parentElement.remove(); // Remove the image container
-                        }
-                    };
-                    xhr.send('image=' + encodeURIComponent(image) + '&ticket_id=<?php echo $ticket_id; ?>');
-                });
-            });
-        });
 
-        // Display newly added images immediately
-        document.querySelector('input[type="file"]').addEventListener('change', function(event) {
-            const files = event.target.files;
-            const imageContainer = document.querySelector('.form-group img');
-            if (files.length > 0) {
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const newImage = document.createElement('img');
-                        newImage.src = e.target.result;
-                        newImage.className = 'issue-image';
-                        imageContainer.appendChild(newImage);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        });
-    </script> -->
-    <!-- preview image -->
+    <!-- preview media -->
     <script src="../scripts/previewImages.js">
 
     </script>

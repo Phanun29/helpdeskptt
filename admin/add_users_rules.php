@@ -74,12 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                       $add_user_rules, $edit_user_rules, $delete_user_rules, $list_user_rules)";
 
     if ($conn->query($query) === TRUE) {
-        $_SESSION['success_message'] = "Permission added successfully!";
+        $_SESSION['success_message'] = "Users Rules added successfully!";
     } else {
         $_SESSION['error_message'] = "Error: " . $conn->error;
     }
 
-    //Redirect to the same page to avoid form resubmission on refresh
+    //Redirect to the same page 
     header("Location: users_rules.php ");
     exit();
 }

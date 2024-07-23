@@ -1,4 +1,3 @@
-
 var selectedFiles = []; // Array to store selected files
 
 // Function to create preview for each selected file
@@ -15,7 +14,7 @@ function previewImages(event) {
 
         reader.onload = function (e) {
             var fileContainer = document.createElement('div');
-            fileContainer.className = 'image-container col-4 col-md-2';
+            fileContainer.className = 'image-container col-4 col-md-1';
 
             if (file.type.startsWith('image/')) {
                 var image = document.createElement('img');
