@@ -11,7 +11,7 @@ td,textarea {
   overflow: auto;
 }
 
-#example1_wrapper>.row:first-child {
+.dataTables_wrapper>.row:first-child {
   margin: 0 10px;
 }
 /* tabel  */
@@ -40,9 +40,8 @@ td,textarea {
 /* image ticket */
 .image-container {
   width: 200px;
-
-overflow: hidden;
-border-radius: 5px;
+  overflow: hidden;
+  border-radius: 5px;
   float: left;
   position: relative;
 }

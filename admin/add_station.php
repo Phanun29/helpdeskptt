@@ -1,60 +1,49 @@
 <?php
-include "config.php"; // Include your database connection configuration
-include "../inc/header.php";
+include "../inc/header.php"; // Include the header
 
 // Fetch user details including rules_id and permissions in one query
-$user_id = $fetch_info['users_id']; // Example user ID
-
-$query_user = "
-    SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
-    FROM tbl_users u 
-    JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
-    WHERE u.users_id = $user_id";
+$user_id = $fetch_info['users_id']; //  user ID
+$query_user = " SELECT r.list_station, r.add_station, r.edit_station, r.delete_station 
+                FROM tbl_users u 
+                JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
+                WHERE u.users_id = $user_id";
 
 $result_user = $conn->query($query_user);
-
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
-    $listStation1 = $user['list_station'];
-    $canAddStation = $user['add_station'];
-    $canEditStation = $user['edit_station'];
-    $canDeleteStation = $user['delete_station'];
-
-    if (!$listStation1) {
-        header("location: 404.php");
-        exit();
-    }
-    if (!$canAddStation) {
+    // Check for permissions
+    if (!$user['list_station'] || !$user['add_station']) {
         header("location: 404.php");
         exit();
     }
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("location: 404.php");
+    exit();
 }
 
-
-
+// Handle form submission for adding a new station
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
     $province = $_POST['province'];
 
-    $sql = "INSERT INTO tbl_station (station_id, station_name, station_type,province) 
-              VALUES ('$station_id', '$station_name', '$station_type','$province')";
+    $sql = "INSERT INTO tbl_station (station_id, station_name, station_type, province) 
+            VALUES ('$station_id', '$station_name', '$station_type', '$province')";
 
     if ($conn->query($sql) === TRUE) {
         // Successful insertion
         $_SESSION['success_message'] = "New station created successfully";
-        header('Location: station.php ' );
+        header('Location: station.php');
         exit();
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
 }
-//$conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -77,31 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="col-sm-6">
                             <h1 class="m-0">Add Station</h1>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <?php
-                                if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['success_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['success_message']); // Clear the message after displaying
-                                }
 
-                                if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['error_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['error_message']); // Clear the message after displaying
-                                }
-                                ?>
-                            </ol>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -17,21 +17,11 @@ if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
 $id = $_POST['id'];
 
 // Prepare the SQL statement to delete the station
-$query = "DELETE FROM tbl_station WHERE id = ?";
-if ($stmt = $conn->prepare($query)) {
-    $stmt->bind_param("i", $id);
-    if ($stmt->execute()) {
-        echo 'success';
-    } else {
-        error_log('Error executing delete: ' . $stmt->error);
-        echo 'fail';
-    }
-    $stmt->close();
+$query = "DELETE FROM tbl_station WHERE id = $id";
+if ($conn->query($query) === TRUE) {
+    echo 'success';
 } else {
-    error_log('Error preparing delete statement: ' . $conn->error);
-    echo 'error';
+    echo "fail";
 }
-
 // Close the database connection
 $conn->close();
-?>

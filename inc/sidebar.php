@@ -1,90 +1,27 @@
 <?php
-// Function to check 
-function listTicket($rules_id, $conn)
-{
-    $query = "SELECT list_ticket_status FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['list_ticket_status'] == 1; // Check if add_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
 
-// Function to check if 
-function listStation($rules_id, $conn)
-{
-    $query = "SELECT list_station FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['list_station'] == 1; // Check if edit_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
+// Fetch user details including rules_id and permissions in one query
+$user_id = $fetch_info['users_id']; //  user ID
 
-// Function to check if 
-function listUsers($rules_id, $conn)
-{
-    $query = "SELECT list_user_status FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['list_user_status'] == 1; // Check if delete_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
+$query_user = " SELECT u.*, r.list_station, r.list_ticket_status, r.list_user_status, r.list_user_rules 
+                FROM tbl_users u 
+                JOIN tbl_users_rules r 
+                ON u.rules_id = r.rules_id 
+                WHERE u.users_id = $user_id";
 
-// function listUsers($rules_id, $conn)
-// {
-//     $query = "SELECT list_user_status FROM tbl_users_rules WHERE rules_id = ?";
-//     $stmt = $conn->prepare($query);
-//     $stmt->bind_param("i", $rules_id);
-//     $stmt->execute();
-//     $result = $stmt->get_result();
-
-//     if ($result && $result->num_rows > 0) {
-//         $row = $result->fetch_assoc();
-//         return $row['list_user_status'] == 1; // Check if add_user_status is set to 1 (allowed)
-//     }
-//     return false; // Default to false if no permission found
-// }
-
-
-// Function to check if 
-function listUsersRules($rules_id, $conn)
-{
-    $query = "SELECT list_user_rules FROM tbl_users_rules WHERE rules_id = $rules_id";
-    $result = $conn->query($query);
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['list_user_rules'] == 1; // Check if delete_status is set to 1 (allowed)
-    }
-    return false; // Default to false if no permission found
-}
-
-// Assume $user_id is fetched from session or database
-$user_id = $fetch_info['users_id']; // Example user ID
-
-// Fetch user details including rules_id
-$query_user = "SELECT * FROM tbl_users WHERE users_id = $user_id";
 $result_user = $conn->query($query_user);
+
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-    $rules_id = $user['rules_id'];
 
-    // Check if user has permission to add, edit, or delete stations
-    $listTicket = listTicket($rules_id, $conn);
-    $listStation = listStation($rules_id, $conn);
-    $listUsers = listUsers($rules_id, $conn);
-    $listUsersRules = listUsersRules($rules_id, $conn);
+    $listStation = $user['list_station'];
+    $listTicket = $user['list_ticket_status'];
+    $listUsers = $user['list_user_status'];
+    $listUsersRules = $user['list_user_rules'];
 } else {
-    // Handle error if user not found or permission check fails
     $_SESSION['error_message'] = "User not found or permission check failed.";
-    // header("Location: users_rules.php"); // Redirect to appropriate page
-    // exit;    
-
 }
+
 // Define the current page URL
 $current_menu = basename($_SERVER['PHP_SELF']);
 ?>
@@ -105,7 +42,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 <!-- Add icons to the links using the .nav-icon class
          with font-awesome or any other icon font library -->
                 <li class="nav-item menu-open">
-                    <!-- <a href="index.php" class="nav-link active"> -->
+
                     <a href="index.php" <?php if ($current_menu === 'index.php') echo 'class="nav-link active"';
                                         else echo 'class="nav-link"'; ?>>
                         <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -115,9 +52,8 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                     </a>
                 </li>
                 <?php
-                if ($listTicket) { ?>
+                if ($listTicket) : ?>
                     <li class="nav-item">
-                        <!-- <a href="ticket.php" class="nav-link"> -->
                         <a href="ticket.php" <?php if ($current_menu === 'ticket.php' || $current_menu === 'add_ticket.php' || $current_menu === 'edit_ticket.php') echo 'class="nav-link active"';
                                                 else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon  fa-solid fa-ticket"></i>
@@ -127,11 +63,10 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                 <?php
-                }
-
-                if ($listStation) { ?>
+                endif;
+                if ($listStation) : ?>
                     <li class="nav-item">
-                        <!-- <a href="station.php" class="nav-link"> -->
+
                         <a href="station.php" <?php if ($current_menu === 'station.php'  || $current_menu === 'add_station.php' || $current_menu === 'edit_station.php') echo 'class="nav-link active"';
                                                 else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa-solid fa-gas-pump"></i>
@@ -141,11 +76,10 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                 <?php
-                }
-
-                if ($listUsers) { ?>
+                endif;
+                if ($listUsers) : ?>
                     <li class="nav-item">
-                        <!-- <a href="users.php" class="nav-link"> -->
+
                         <a href="users.php" <?php if ($current_menu === 'users.php' || $current_menu === 'add_users.php' || $current_menu === 'edit_users.php') echo 'class="nav-link active"';
                                             else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa-solid fa-users"></i>
@@ -155,11 +89,10 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                 <?php
-                }
-
-                if ($listUsersRules) { ?>
+                endif;
+                if ($listUsersRules) : ?>
                     <li class="nav-item">
-                        <!-- <a href="permission.php" class="nav-link"> -->
+
                         <a href="users_rules.php" <?php if ($current_menu === 'users_rules.php' || $current_menu === 'add_users_rules.php' || $current_menu === 'edit_users_rules.php') echo 'class="nav-link active"';
                                                     else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fas fa-users-cog"></i>
@@ -169,11 +102,10 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                 <?php
-
-                }
+                endif;
                 ?>
                 <li class="nav-item">
-                    <!-- <a href="permission.php" class="nav-link"> -->
+
                     <a href="report.php" <?php if ($current_menu === 'report.php') echo 'class="nav-link active"';
                                             else echo 'class="nav-link"'; ?>>
                         <i class="nav-icon fa fa-file"></i>

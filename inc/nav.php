@@ -21,13 +21,8 @@
             <li class="nav-item  no-arrow">
                 <a class="nav-link -toggle" href="#" id="userDropdown" role="" data-toggle="" aria-haspopup="true" aria-expanded="false">
                     <?php
-                    if (isset($fetch_info['users_name']) && $fetch_info['users_name'] != null) { ?>
-
-                    <?php
                         echo $fetch_info['users_name'];
-                    } else {
-                        // echo "unknown";
-                    } ?>
+                     ?>
                 </a>
             </li>
         </ul>

@@ -1,5 +1,5 @@
 <?php
-include "config.php"; // Include your database connection configuration
+
 include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
@@ -77,31 +77,7 @@ $row = $user_result->fetch_assoc();
                         <div class="col-sm-6">
                             <h1 class="m-0">Add Users</h1>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <?php
-                                if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['success_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['success_message']); // Clear the message after displaying
-                                }
-
-                                if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['error_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['error_message']); // Clear the message after displaying
-                                }
-                                ?>
-                            </ol>
-                        </div>
+                      
                     </div>
                 </div>
             </div>
@@ -122,13 +98,13 @@ $row = $user_result->fetch_assoc();
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="users_name">User Name</label>
-                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" value="<?php echo $row['users_name'] ?>" required>
+                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" value="<?= $row['users_name'] ?>" required>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="email">Email address</label>
-                                                <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" value="<?php echo $row['email'] ?>" required>
+                                                <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" value="<?= $row['email'] ?>" required>
                                             </div>
                                         </div>
                                     </div>
@@ -137,8 +113,8 @@ $row = $user_result->fetch_assoc();
                                             <div class="form-group">
                                                 <label for="status">Status</label>
                                                 <select name="status" class="form-control select2bs4" style="width: 100%;" required>
-                                                    <option value="1" <?php echo ($row['status'] == '1') ? 'selected' : ''; ?>>Active</option>
-                                                    <option value="0" <?php echo ($row['status'] == '0') ? 'selected' : ''; ?>>Inactive</option>
+                                                    <option value="1" <?= ($row['status'] == '1') ? 'selected' : ''; ?>>Active</option>
+                                                    <option value="0" <?= ($row['status'] == '0') ? 'selected' : ''; ?>>Inactive</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -167,8 +143,8 @@ $row = $user_result->fetch_assoc();
 
                                                 <select class="form-control" name="company" id="company">
 
-                                                    <option value="PTTCL" <?php echo $row['company'] == 'PTTCL' ? 'selected' : ''; ?>>PTTCL</option>
-                                                    <option value="PTTDigital" <?php echo $row['company']  == 'PTTDigital' ? 'selected' : ''; ?>>PTTDigital</option>
+                                                    <option value="PTTCL" <?= $row['company'] == 'PTTCL' ? 'selected' : ''; ?>>PTTCL</option>
+                                                    <option value="PTTDigital" <?= $row['company']  == 'PTTDigital' ? 'selected' : ''; ?>>PTTDigital</option>
 
                                                 </select>
                                             </div>

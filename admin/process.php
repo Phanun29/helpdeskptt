@@ -1,7 +1,7 @@
 <?php
-include "config.php";
+
 include "../inc/header.php";
-$user_id = $fetch_info['users_id']; // Example user ID
+$user_id = $fetch_info['users_id']; // user ID
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
     FROM tbl_users u 
@@ -37,7 +37,7 @@ $ticket_query = "
         tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
 ";
 
-// Adjust query based on user type
+
 if ($listTicketAssign == 1) {
     $ticket_query .= " WHERE FIND_IN_SET($user_id, t.users_id)";
 } else {
@@ -147,14 +147,38 @@ if ($ticket_result->num_rows > 0) {
         // echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
         echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
         echo "<td class='py-1'>" . $row['status'] . "</td>";
-        // if ($users_id == !null) {
-        //     echo "<td class='py-1'>" . $users_id . "</td>";
-        // } else {
-        //     echo "<td class='py-1'>" . $row['users_name'] . "</td>";
-        // }
         echo "<td class='py-1'>" . $row['users_name'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
+        echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
+        echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
+        echo "<td class='py-1'>" . $row['ticket_pending_vender'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
+        if ($row['ticket_time'] != null) {
+            echo "<td class='py-1'>" . $row['ticket_time'] . "</td>";
+        } else {
+            date_default_timezone_set('Asia/Bangkok');
+            $ticketOpenTime = new DateTime($row['ticket_open']);
+            $ticketCloseTime = new DateTime();
+            // Calculate the difference
+            $interval = $ticketCloseTime->diff($ticketOpenTime);
+
+            // Format the difference
+            $ticket_time = '';
+            if ($interval->d > 0) {
+                $ticket_time .= $interval->d . 'd, ';
+            }
+            if ($interval->h > 0 || $interval->d > 0) {
+                $ticket_time .= $interval->h . 'h, ';
+            }
+            if ($interval->i > 0 || $interval->h > 0 || $interval->d > 0) {
+                $ticket_time .= $interval->i . 'm, ';
+            }
+            $ticket_time .= $interval->s . 's ago';
+
+            // Output the formatted time difference
+            echo "<td class='py-1'>" . htmlspecialchars($ticket_time) . "</td>";
+        }
+
         echo "<td class='py-1'>" . $row['comment'] . "</td>";
         echo "</tr>";
     }

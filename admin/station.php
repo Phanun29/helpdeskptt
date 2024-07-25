@@ -1,9 +1,9 @@
 <?php
-include "config.php";
+
 include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
-$user_id = $fetch_info['users_id']; // Example user ID
+$user_id = $fetch_info['users_id']; //  user ID
 
 $query_user = "
     SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
@@ -87,7 +87,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                 </div>
                             <?php endif; ?>
                             <br>
-                            <table id="example1" class="table table-bordered table-hover text-nowrap">
+                            <table id="tableStation" class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -111,7 +111,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                     if ($station_result->num_rows > 0) {
                                         while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr id='stationId-{$row['id']}'>"; // Ensure each row has a unique ID
+                                            echo "<tr id='stationId-{$row['id']}'>"; 
                                             echo "<td class='py-1'>{$i}</td>";
                                             if (!$canEditStation && !$canDeleteStation) {
                                                 echo "<td style='display:none;'></td>";
@@ -170,12 +170,12 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../dist/js/demo.js"></script>
     <script>
         $(function() {
-            $("#example1").DataTable({
+            $("#tableStation").DataTable({
                 "lengthChange": false,
                 "autoWidth": false,
                 "buttons": ["csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
+            }).buttons().container().appendTo('#tableStation_wrapper .col-md-6:eq(0)');
+            $('#tableStation2').DataTable({
                 "paging": true,
                 "lengthChange": false,
                 "searching": false,
@@ -237,7 +237,7 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
-       <!-- auto close alert -->
+    <!-- auto close alert -->
     <script src="../scripts/auto_close_alert.js"></script>
 
 </body>

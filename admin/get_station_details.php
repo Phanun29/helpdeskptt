@@ -6,7 +6,7 @@ if (isset($_POST['station_id'])) {
 
     $stmt = $conn->prepare("SELECT station_name, station_type, province FROM tbl_station WHERE station_id LIKE ?");
     $stmt->bind_param("s", $station_id);
-    $station_id_param = '%' . $station_id . '%'; // Assuming $station_id = 'A123'
+    $station_id_param = '%' . $station_id . '%'; // Assuming $station_id
     $stmt->execute();
 
     $result = $stmt->get_result();

@@ -98,7 +98,7 @@ if ($result_user && $result_user->num_rows > 0) {
                             <?php endif; ?>
 
                             <br>
-                            <table id="example1" class="table table-bordered table-hover text-nowrap">
+                            <table id="tableUser" class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -120,6 +120,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $user_query = "SELECT tbl_users.*, tbl_users_rules.rules_name 
                                     FROM tbl_users 
                                     LEFT JOIN tbl_users_rules ON tbl_users.rules_id = tbl_users_rules.rules_id 
+                                    ORDER BY users_id DESC
                                     ";
                                     $user_result = $conn->query($user_query);
                                     $i = 1;
@@ -197,14 +198,14 @@ if ($result_user && $result_user->num_rows > 0) {
     <!-- Page specific script -->
     <script>
         $(function() {
-            $("#example1").DataTable({
+            $("#tableUser").DataTable({
                 // "responsive": true,
 
                 "lengthChange": false,
                 "autoWidth": false,
                 "buttons": [, "csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
+            }).buttons().container().appendTo('#tableUser_wrapper .col-md-6:eq(0)');
+            $('#tableUser2').DataTable({
                 "paging": true,
                 "lengthChange": false,
                 "searching": false,

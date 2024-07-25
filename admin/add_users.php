@@ -1,5 +1,5 @@
 <?php
-include "config.php"; // Include your database connection configuration
+
 include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
@@ -12,27 +12,16 @@ $query_user = "
     WHERE u.users_id = $user_id";
 
 $result_user = $conn->query($query_user);
-
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
-    $listUsers = $user['list_user_status'];
-    $AddUsers = $user['add_user_status'];
-    $EditUsers = $user['edit_user_status'];
-    $DeleteUsers = $user['delete_user_status'];
-
-    if (!$listUsers) {
-        header("location: 404.php");
-        exit();
-    }
-    if (!$AddUsers) {
+    if (!$user['list_user_status'] || !$user['add_user_status']) {
         header("location: 404.php");
         exit();
     }
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $users_name = $_POST['users_name'];
     $email = $_POST['email'];
@@ -40,40 +29,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rules_id = $_POST['rules_id'];
     $company = $_POST['company'];
     $status = $_POST['status'];
-
-
     // Validate inputs
     if (empty($users_name) || empty($email) || empty($password)) {
         $_SESSION['error_message'] = "All fields are required.";
     } else {
         // Check if email already exists
-        $check_email_query = "SELECT * FROM tbl_users WHERE email = ?";
-        $stmt = $conn->prepare($check_email_query);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
+        $check_email_query = "SELECT * FROM tbl_users WHERE email = '$email'";
+        $result_email = $conn->query($check_email_query);
+        if ($result_email->num_rows > 0) {
             $_SESSION['error_message'] = "Email already exists.";
         } else {
             // Insert new user into the database
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $insert_query = "INSERT INTO tbl_users (users_name, email, password, rules_id,company, status) VALUES (?, ?, ?, ?, ?,?)";
-            $stmt = $conn->prepare($insert_query);
-            $stmt->bind_param("sssiss", $users_name, $email, $hashed_password, $rules_id, $company, $status);
-
-            if ($stmt->execute()) {
+            $insert_user_query = "INSERT INTO tbl_users (users_name, email, password, rules_id,company, status) 
+            VALUES ('$users_name', '$email', '$hashed_password', '$rules_id', '$company', '$status')";
+            if ($conn->query($insert_user_query) == TRUE) {
                 $_SESSION['success_message'] = "User added successfully.";
             } else {
                 $_SESSION['error_message'] = "Error adding user: " . $conn->error;
             }
         }
     }
-
     // Redirect to the same page to display messages
     header('Location: users.php');
     exit();
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -97,31 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="col-sm-6">
                             <h1 class="m-0">Add Users</h1>
                         </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <?php
-                                if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['success_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['success_message']); // Clear the message after displaying
-                                }
 
-                                if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['error_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['error_message']); // Clear the message after displaying
-                                }
-                                ?>
-                            </ol>
-                        </div>
                     </div>
                 </div>
             </div>

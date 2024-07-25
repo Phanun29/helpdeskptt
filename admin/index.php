@@ -1,5 +1,4 @@
 <?php
-include "config.php"; // Include your database connection configuration
 include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
@@ -39,22 +38,19 @@ if ($result_user && $result_user->num_rows > 0) {
   } else {
     $ticket_query = "$ticket_select WHERE FIND_IN_SET($user_id, t.users_id) OR FIND_IN_SET($user_create_ticket, t.user_create_ticket) $group_by";
 
-    $status_query = "SELECT 
-    status, COUNT(*) as count 
-    FROM tbl_ticket 
-    WHERE FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket) 
-    GROUP BY status";
+    $status_query = " SELECT status, COUNT(*) as count 
+                      FROM tbl_ticket 
+                      WHERE FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket) 
+                      GROUP BY status";
 
-    $SLA_category_query = "SELECT SLA_category, COUNT(*) as count 
-    FROM tbl_ticket 
-    WHERE SLA_category IS NOT NULL AND (FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket) ) 
-    GROUP BY SLA_category";
-
-
+    $SLA_category_query = " SELECT SLA_category, COUNT(*) as count 
+                            FROM tbl_ticket 
+                            WHERE SLA_category IS NOT NULL AND (FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket) ) 
+                            GROUP BY SLA_category";
 
     $issue_query = "SELECT issue_type 
-    FROM tbl_ticket 
-    WHERE FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket)  ";
+                    FROM tbl_ticket 
+                    WHERE FIND_IN_SET($user_id, users_id) OR FIND_IN_SET($user_id, user_create_ticket)  ";
   }
 
   // Execute ticket query
@@ -182,7 +178,6 @@ if ($result_user && $result_user->num_rows > 0) {
                         <p>Open</p>
                       </div>
                       <div class="icon">
-
                       </div>
                       <a href="moreinfo.php?status=Open" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
@@ -247,14 +242,14 @@ if ($result_user && $result_user->num_rows > 0) {
                 </div>
                 <div class="chartCard">
                   <div class="chartBox">
-                    <canvas id="myChart"></canvas>
+                    <canvas id="issueTypeChart"></canvas>
                   </div>
                 </div>
               </div>
               <!-- /.section start Summary -->
 
               <!-- Section Start SLA_category -->
-              <div class="card col-12">
+              <div class="card col-12" id="SLA_category">
                 <div class="card-header">
                   <h3 class="card-title"><b>SLA Category %</b></h3>
                 </div>
@@ -318,7 +313,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <h3 class="card-title">Ticket</h3>
               </div>
               <div class="card-body table-responsive p-0">
-                <table id="myTable" class="table table-bordered table-head-fixed text-nowrap">
+                <table id="tableTicket" class="table table-bordered table-head-fixed text-nowrap">
                   <thead>
                     <tr>
                       <th>No.</th>
@@ -331,6 +326,7 @@ if ($result_user && $result_user->num_rows > 0) {
                       <th>Type</th>
                       <th>SLA Category </th>
                       <th>Status</th>
+                      <th>Assign</th>
                       <th>Ticket Open</th>
                       <th>Ticket On Hold</th>
                       <th>Ticket in Progress</th>
@@ -348,7 +344,7 @@ if ($result_user && $result_user->num_rows > 0) {
                       while ($row = $ticket_result->fetch_assoc()) {
 
                         echo "<tr>";
-                        echo " <td>" . $i++ . "</td>";
+                        echo "<td>" . $i++ . "</td>";
                         echo "<td>" . $row['ticket_id'] . "</td>";
                         echo "<td>" . $row['station_id'] . "</td>";
                         echo "<td>" . $row['station_name'] . "</td>";
@@ -358,6 +354,7 @@ if ($result_user && $result_user->num_rows > 0) {
                         echo "<td>" . $row['issue_type'] . "</td>";
                         echo "<td>" . $row['SLA_category'] . "</td>";
                         echo "<td>" . $row['status'] . "</td>";
+                        echo "<td>" . $row['users_name'] . "</td>";
                         echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
                         echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
                         echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
@@ -457,7 +454,7 @@ if ($result_user && $result_user->num_rows > 0) {
     };
 
     // Render the chart
-    const myChart = new Chart(document.getElementById('myChart'), config);
+    const myChart = new Chart(document.getElementById('issueTypeChart'), config);
   </script>
 
   <!-- jQuery -->

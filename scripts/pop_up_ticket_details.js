@@ -72,6 +72,10 @@ function showTicketDetails(ticket) {
     }
 
     $('#ticketModal').modal('show');
+
 }
 
-
+function showMedia(imageUrl) {
+    $('#imageToShow').attr('src', imageUrl);
+    $('#imageModal').modal('show');
+}

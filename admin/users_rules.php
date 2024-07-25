@@ -1,5 +1,5 @@
 <?php
-include "config.php"; // Include your database connection configuration
+
 include "../inc/header.php";
 
 
@@ -92,10 +92,8 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="container-fluid">
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
-
                         <!-- /.card-header -->
                         <div class="card-body p-0" style="overflow: hidden;">
-
                             <?php if (isset($AddUserRules) && $AddUserRules) : ?>
                                 <div class="card-header">
                                     <a href="add_users_rules.php" id="add_ticket" class="btn btn-primary ">Add Users Rules</a>
@@ -103,12 +101,11 @@ if ($result_user && $result_user->num_rows > 0) {
                             <?php endif; ?>
                             <br>
 
-                            <table id="example1" class="table_users_rules table table-bordered table-hover text-nowrap">
+                            <table id="tableUserRules" class="table_users_rules table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <?php if ($EditUserRules == 0 & $DeleteUserRules == 0) {
-
                                             echo "<th style='display:none;'></th>";
                                         } else {
                                             echo " <th>Action</th>";
@@ -193,14 +190,14 @@ if ($result_user && $result_user->num_rows > 0) {
     <!-- Page specific script -->
     <script>
         $(function() {
-            $("#example1").DataTable({
+            $("#tableUserRules").DataTable({
                 // "responsive": true,
 
                 "lengthChange": false,
                 "autoWidth": false,
                 "buttons": [, "csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
+            }).buttons().container().appendTo('#tableUserRules_wrapper .col-md-6:eq(0)');
+            $('#tableUserRules2').DataTable({
                 "paging": true,
                 "lengthChange": false,
                 "searching": false,

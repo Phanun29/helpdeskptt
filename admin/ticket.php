@@ -1,19 +1,16 @@
 <?php
-include "config.php"; // Include your database connection configuration
+
 include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
-$user_id = $fetch_info['users_id']; // Example user ID
+$user_id = $fetch_info['users_id']; //  user ID
 $user_create_ticket = $fetch_info['users_id'];
 $query_user = "
         SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
         FROM tbl_users u
         JOIN tbl_users_rules r ON u.rules_id = r.rules_id
-        WHERE u.users_id = ?";
-$stmt_user = $conn->prepare($query_user);
-$stmt_user->bind_param("i", $user_id);
-$stmt_user->execute();
-$result_user = $stmt_user->get_result();
+        WHERE u.users_id = '$user_id'";
+$result_user = $conn->query($query_user);
 
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
@@ -84,7 +81,6 @@ if ($result_user && $result_user->num_rows > 0) {
                         <div class="col-sm-6">
                             <h1 class="m-0">Ticket</h1>
                         </div>
-
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <?php
@@ -160,8 +156,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                 </script>
                                 <div id="button_export" class="dt-buttons btn-group flex-wrap">
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToCSV()" type="button"><span>CSV</span></button>
-                                    <button class="btn btn-secondary buttons-pdf buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToPDF()" type="button"><span>PDF</span></button>
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToExcel()" type="button"><span>Excel</span></button>
+                                    <button class="btn btn-secondary buttons-pdf buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToPDF()" type="button"><span>PDF</span></button>
                                 </div>
 
                             </div>
@@ -170,7 +166,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                 <form id="filterForm" class="row">
                                     <div class="form-group col-6 col-md-3">
                                         <label for="station_id">Station ID</label>
-                                        <input class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)">
+                                        <input class="form-control" type="text" name="station_id" id="station_id" placeholder="All" autocomplete="off" onkeyup="showSuggestions(this.value)">
                                         <div id="suggestion_dropdown" class="dropdown-content"></div>
                                     </div>
                                     <div class="form-group col-6 col-md-3">
@@ -287,7 +283,7 @@ if ($result_user && $result_user->num_rows > 0) {
                             </div>
 
                             <br>
-                            <table id="example1" class="table table-bordered table-hover text-nowrap">
+                            <table id="tableTicket" class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -302,7 +298,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Station Name</th>
                                         <th>Station Type</th>
                                         <th>Province</th>
-                                        <th>Description</th>
+                                        <th>Issue Description</th>
                                         <th class="export-ignore">Issue Image</th>
                                         <th>Issue Type</th>
                                         <th>SLA Category</th>
@@ -345,7 +341,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $row['station_name'] . "</td>";
                                             echo "<td class='py-1'>" . $row['station_type'] . "</td>";
                                             echo "<td class='py-1'>" . $row['province'] . "</td>";
-                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif;'>" . $row['issue_description'] . "</td>";
+                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif;'><p>" . $row['issue_description'] . "</p></td>";
                                             $image_paths = explode(',', $row['image_paths']);
                                             if ($row['image_paths'] != null) {
                                                 echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showMedia(\"" . $row['image_paths'] . "\")'>Click to View</button></td>";
@@ -396,9 +392,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                     ?>
                                 </tbody>
                             </table>
-
                             <!-- Ticket Details Modal -->
-
                             <div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
@@ -554,13 +548,12 @@ if ($result_user && $result_user->num_rows > 0) {
     <!-- Page specific script -->
     <script>
         $(function() {
-            $("#example1").DataTable({
-                // "buttons": [, "csv", "excel", "pdf"],
+            $("#tableTicket").DataTable({
                 "lengthChange": true,
                 "autoWidth": true,
 
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
+            }).buttons().container().appendTo('#tableTicket_wrapper .col-md-6:eq(0)');
+            $('#tableTicket2').DataTable({
                 "paging": true,
                 "lengthChange": false,
                 "searching": true,
@@ -579,7 +572,6 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../scripts/delete_ticket.js"></script>
     <!-- auto fill station id -->
     <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
-
     <!-- filter -->
     <script>
         $(document).ready(function() {
@@ -603,15 +595,15 @@ if ($result_user && $result_user->num_rows > 0) {
             $('#filterResetBtn').on('click', function() {
                 $('#filterForm')[0].reset();
                 // Reset DataTable
-                $('#example1').DataTable().search('').draw();
+                $('#tableTicket').DataTable().search('').draw();
             });
         });
     </script>
-
     <!-- export -->
     <!-- Include jsPDF and jsPDF AutoTable libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="../scripts/export.js"></script>
     <!-- auto close alert -->
     <script src="../scripts/auto_close_alert.js"></script>

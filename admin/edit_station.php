@@ -1,5 +1,5 @@
 <?php
-include "config.php";
+
 include "../inc/header.php";
 
 // Fetch user details including rules_id and permissions in one query
@@ -39,46 +39,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Retrieve the current station_id
-        $sql = "SELECT station_id FROM tbl_station WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $station_id_query = "SELECT station_id FROM tbl_station WHERE id = $id";
+        $result = $conn->query($station_id_query);
 
         if ($result->num_rows === 0) {
             throw new Exception("Station not found.");
         }
         $station = $result->fetch_assoc();
         $old_station_id = $station['station_id'];
-        $stmt->close();
 
         // Temporarily disable foreign key checks
         $conn->query("SET foreign_key_checks = 0");
-
         // Update the station_id in tbl_ticket
-        $sql = "UPDATE tbl_ticket SET station_id = ? ,station_name = ?, station_type = ?, province=? WHERE station_id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssss", $new_station_id, $station_name, $station_type, $province, $old_station_id);
-        if (!$stmt->execute()) {
-            throw new Exception("Error updating tickets: " . $stmt->error);
+        $sql_tbl_ticket = "UPDATE tbl_ticket SET station_id = '$new_station_id' ,station_name = '$station_name', station_type = '$station_type', province = '$province' WHERE station_id = '$old_station_id'";
+        if (!$conn->query($sql_tbl_ticket)) {
+            throw new Exception("Error updating tbl_ticket" . $conn->$error);
         }
-        $stmt->close();
-
         // Update the station in tbl_station
-        $sql = "UPDATE tbl_station SET station_id = ?, station_name = ?, station_type = ?, province=? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssi", $new_station_id, $station_name, $station_type, $province, $id);
-        if (!$stmt->execute()) {
-            throw new Exception("Error updating station: " . $stmt->error);
+        $sql_tbl_station = "UPDATE tbl_station SET station_id = '$new_station_id' ,station_name = '$station_name', station_type = '$station_type', province = '$province'  WHERE id = '$id'";
+        if (!$conn->query($sql_tbl_station)) {
+            throw new Exception("Error updating tbl_station" . $conn->$error);
         }
-        $stmt->close();
-
         // Re-enable foreign key checks
         $conn->query("SET foreign_key_checks = 1");
 
-        // Commit the transaction
+        // // Commit the transaction
         $conn->commit();
-
         // Set success message and redirect
         $_SESSION['success_message'] = "Station updated successfully.";
         header("Location: station.php");
@@ -89,22 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['error_message'] = "Failed: " . $e->getMessage();
     }
 
-    $conn->close();
+    //  $conn->close();
 } else {
     // Retrieve the station details for editing
     if (isset($_GET['id'])) {
         $id = $_GET['id'];
-        $sql = "SELECT * FROM tbl_station WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows === 0) {
-            echo "Station not found.";
-            exit();
-        }
-        $station = $result->fetch_assoc();
-        $stmt->close();
+        $sql = "SELECT * FROM tbl_station WHERE id = $id";
+        $station_result = $conn->query($sql);
+        $station = $station_result->fetch_assoc();
     } else {
         // Redirect back to the station list page if no station ID is provided
         header("Location: station.php");
@@ -133,34 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Station</h1>
+                            <h1 class="m-0">Update Station</h1>
                         </div><!-- /.col -->
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <?php
-                                if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['success_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['success_message']); // Clear the message after displaying
-                                }
-
-                                if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show mt-2 mb-0' role='alert'>
-                                        <strong>{$_SESSION['error_message']}</strong>
-                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
-                                    </div>";
-                                    unset($_SESSION['error_message']); // Clear the message after displaying
-                                }
-                                ?>
-                            </ol>
-                        </div>
-                        <!-- /.col -->
                     </div><!-- /.row -->
                 </div><!-- /.container-fluid -->
             </div>
@@ -179,12 +131,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <form method="POST">
-                                <input type="hidden" name="id" value="<?php echo isset($station['id']) ? $station['id'] : ''; ?>">
+                                <input type="hidden" name="id" value="<?= isset($station['id']) ? $station['id'] : ''; ?>">
                                 <div class="card-body ">
                                     <div class="row">
                                         <div class="form-group col-12 col-md-6">
                                             <label for="exampleInputStatioID">Station ID</label>
-                                            <input type="text" class="form-control" id="station_id" name="station_id" value="<?php echo isset($station['station_id']) ? $station['station_id'] : ''; ?>" required>
+                                            <input type="text" class="form-control" id="station_id" name="station_id" value="<?= isset($station['station_id']) ? $station['station_id'] : ''; ?>" required>
                                         </div>
                                         <div class="form-group col-12 col-md-6">
                                             <label for="exampleInputStatioName">Station Name</label>
@@ -193,12 +145,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="form-group col-12 col-md-6">
                                             <label for="station_type">Station Type</label>
                                             <select name="station_type" id="station_type" class="form-control select2bs4" style="width: 100%;" required>
-                                                <option value="COCO" <?php echo (isset($station['station_type']) && $station['station_type'] == 'COCO') ? 'selected' : ''; ?>>COCO</option>
-                                                <option value="DODO" <?php echo (isset($station['station_type']) && $station['station_type'] == 'DODO') ? 'selected' : ''; ?>>DODO</option>
+                                                <option value="COCO" <?= (isset($station['station_type']) && $station['station_type'] == 'COCO') ? 'selected' : ''; ?>>COCO</option>
+                                                <option value="DODO" <?= (isset($station['station_type']) && $station['station_type'] == 'DODO') ? 'selected' : ''; ?>>DODO</option>
                                             </select>
                                         </div>
                                         <?php
-                                        // Example selected value
+                                        //  selected provinve
                                         $selected_province = isset($station['province']) ? $station['province'] : '';
 
                                         ?>
