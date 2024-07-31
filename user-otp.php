@@ -14,7 +14,7 @@ if ($email == false) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
     <!-- icon -->
-    <link rel="icon" href="img/favicon.ico.png">
+    <link rel="icon" href="icons/favicon.ico.png">
 </head>
 
 <body>

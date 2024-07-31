@@ -1,5 +1,5 @@
 <?php
-include "../inc/header.php"; // Include the header
+include "../inc/header_script.php"; // Include the header
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // User ID from session or fetched information
@@ -356,9 +356,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-
-
-
 
 </body>
 

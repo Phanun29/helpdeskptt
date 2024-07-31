@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 ?>
 <!DOCTYPE html>

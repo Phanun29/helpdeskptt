@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
 $status = isset($_GET['status']) ? $_GET['status'] : ''; // Get status from URL parameter
@@ -389,13 +389,13 @@ $ticket_result = $conn->query($ticket_query);
         $(function() {
             $("#tableTicket").DataTable({
                 "buttons": [, "csv", "excel", "pdf"],
-                "lengthChange": false,
+                "lengthChange": true,
                 "autoWidth": true,
 
             }).buttons().container().appendTo('#tableTicket_wrapper .col-md-6:eq(0)');
             $('#tableTicket2').DataTable({
                 "paging": true,
-                "lengthChange": false,
+                "lengthChange": true,
                 "searching": true,
                 "ordering": true,
                 "info": true,
@@ -473,7 +473,7 @@ $ticket_result = $conn->query($ticket_query);
                         videoElement.src = trimmedItem;
                         videoElement.style.width = '50px';
                         videoElement.style.cursor = 'pointer';
-                        videoElement.controls = true;
+                        videoElement.controls = false;
                         videoElement.onclick = () => showMedia(trimmedItem);
                         modalIssueMedia.appendChild(videoElement);
                     }

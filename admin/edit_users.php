@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id'];
@@ -77,7 +77,7 @@ $row = $user_result->fetch_assoc();
                         <div class="col-sm-6">
                             <h1 class="m-0">Add Users</h1>
                         </div>
-                      
+
                     </div>
                 </div>
             </div>
@@ -142,9 +142,16 @@ $row = $user_result->fetch_assoc();
                                                 <label for="company">Company</label>
 
                                                 <select class="form-control" name="company" id="company">
+                                                    <option value="ABA Bank" <?= $row['company'] == "ABA Bank" ? 'selec   ted' : '' ?>>ABA Bank</option>
+                                                    <option value="Wing Bank" <?= $row['company'] == "ABA Bank" ? "selected" : '' ?>>Wing Bank</option>
+                                                    <option value="PTTCL" <?= $row['company'] == "PTTCL" ? 'selected' : '' ?>>PTTCL</option>
+                                                    <option value="PTT Digital Thailand" <?= $row['company'] == 'PTT Digital Thailand' ? 'selected' : '' ?>>PTT Digital Thailand</option>
+                                                    <option value="PTT Digital Cambodia" <?= $row['company'] == "PTT Digital Cambodia" ? 'selected' : '' ?>>PTT Digital Cambodia</option>
+                                                    <option value="MBA" <?= $row['company'] == "MBA" ? 'selected' : '' ?>>MBA</option>
+                                                    <option value="SD" <?= $row['company'] == "SD" ? 'selected' : '' ?>>SD</option>
+                                                    <option value="CamSys" <?= $row['company'] == "CamSys" ? "selected" : '' ?>>CamSys</option>
+                                                    <option value="DIN" <?= $row['company'] == "DIN" ? "selected" : '' ?>>DIN</option>
 
-                                                    <option value="PTTCL" <?= $row['company'] == 'PTTCL' ? 'selected' : ''; ?>>PTTCL</option>
-                                                    <option value="PTTDigital" <?= $row['company']  == 'PTTDigital' ? 'selected' : ''; ?>>PTTDigital</option>
 
                                                 </select>
                                             </div>

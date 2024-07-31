@@ -17,7 +17,7 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <!-- icon -->
-    <link rel="icon" href="img/favicon.ico.png">
+    <link rel="icon" href="icon/favicon.ico.png">
 </head>
 
 <body class="hold-transition login-page">

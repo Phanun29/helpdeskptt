@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; //  user ID
@@ -171,13 +171,13 @@ if ($result_user && $result_user->num_rows > 0) {
     <script>
         $(function() {
             $("#tableStation").DataTable({
-                "lengthChange": false,
+                "lengthChange": true,
                 "autoWidth": false,
                 "buttons": ["csv", "excel", "pdf"]
             }).buttons().container().appendTo('#tableStation_wrapper .col-md-6:eq(0)');
             $('#tableStation2').DataTable({
                 "paging": true,
-                "lengthChange": false,
+                "lengthChange": true,
                 "searching": false,
                 "ordering": true,
                 "info": true,

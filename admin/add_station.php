@@ -1,23 +1,31 @@
 <?php
-include "../inc/header.php"; // Include the header
+include "../inc/header_script.php"; // Include the header
 
-// Fetch user details including rules_id and permissions in one query
+// Retrieve the current user's ID from the fetched user information
 $user_id = $fetch_info['users_id']; //  user ID
+
+// Construct the SQL query to fetch user details along with their associated permissions
 $query_user = " SELECT r.list_station, r.add_station, r.edit_station, r.delete_station 
                 FROM tbl_users u 
                 JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
                 WHERE u.users_id = $user_id";
 
+// Execute the query
 $result_user = $conn->query($query_user);
+
+// Check if the query was successful and if any rows were returned
 if ($result_user && $result_user->num_rows > 0) {
+    // Fetch the user's data as an associative array
     $user = $result_user->fetch_assoc();
 
-    // Check for permissions
+    // Check if the user has permission to list and add station
     if (!$user['list_station'] || !$user['add_station']) {
+        // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
+    // Set an error message if the user was not found or if permission check failed
     $_SESSION['error_message'] = "User not found or permission check failed.";
     header("location: 404.php");
     exit();
@@ -30,16 +38,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_type = $_POST['station_type'];
     $province = $_POST['province'];
 
-    $sql = "INSERT INTO tbl_station (station_id, station_name, station_type, province) 
+    $insert_station_query = "INSERT INTO tbl_station (station_id, station_name, station_type, province) 
             VALUES ('$station_id', '$station_name', '$station_type', '$province')";
 
-    if ($conn->query($sql) === TRUE) {
+    if ($conn->query($insert_station_query) === TRUE) {
         // Successful insertion
         $_SESSION['success_message'] = "New station created successfully";
+        // Redirect to the page station to display messages
         header('Location: station.php');
         exit();
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $insert_station_query . "<br>" . $conn->error;
     }
 }
 ?>

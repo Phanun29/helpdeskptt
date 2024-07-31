@@ -1,15 +1,19 @@
 <?php
-
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
-$user_id = $fetch_info['users_id']; //  user ID
+$user_id = $fetch_info['users_id']; // User ID
 $user_create_ticket = $fetch_info['users_id'];
+
+// Ensure to sanitize $user_id to avoid SQL injection
+$user_id_sanitized = $conn->real_escape_string($user_id);
+
+// Fetch user details and permissions
 $query_user = "
-        SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
-        FROM tbl_users u
-        JOIN tbl_users_rules r ON u.rules_id = r.rules_id
-        WHERE u.users_id = '$user_id'";
+    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
+    FROM tbl_users u
+    JOIN tbl_users_rules r ON u.rules_id = r.rules_id
+    WHERE u.users_id = '$user_id_sanitized'";
 $result_user = $conn->query($query_user);
 
 if ($result_user && $result_user->num_rows > 0) {
@@ -20,40 +24,46 @@ if ($result_user && $result_user->num_rows > 0) {
     $DeleteTicket = $user['delete_ticket_status'];
     $listTicketAssign = $user['list_ticket_assign'];
 
-    $ticket_query = ($listTicketAssign == 0) ?
-        "SELECT t.*, REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
-                 GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
-         FROM tbl_ticket t
-         LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
-         LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
-         GROUP BY t.ticket_id DESC" :
-        "SELECT t.*, 
-        REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
-        GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
-        FROM tbl_ticket t
-        LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id) OR FIND_IN_SET(u.users_id, t.user_create_ticket)
-        LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
-        WHERE FIND_IN_SET(?, t.users_id) OR FIND_IN_SET(?, t.user_create_ticket)
-        GROUP BY t.ticket_id
-        ORDER BY t.ticket_id DESC";
-
-
-    $stmt_ticket = $conn->prepare($ticket_query);
-    if ($listTicketAssign != 0) {
-        $stmt_ticket->bind_param("ii", $user_id, $user_create_ticket);
+    // Build the ticket query based on permissions
+    if ($listTicketAssign == 0) {
+        $ticket_query = "
+            SELECT t.*, 
+                   REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+                   GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
+            FROM tbl_ticket t
+            LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
+            LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+            GROUP BY t.ticket_id
+            ORDER BY t.ticket_id DESC";
+    } else {
+        $user_create_ticket_sanitized = $conn->real_escape_string($user_create_ticket);
+        $ticket_query = "
+            SELECT t.*, 
+                   REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+                   GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
+            FROM tbl_ticket t
+            LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id) OR FIND_IN_SET(u.users_id, t.user_create_ticket)
+            LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+            WHERE FIND_IN_SET('$user_id_sanitized', t.users_id) OR FIND_IN_SET('$user_create_ticket_sanitized', t.user_create_ticket)
+            GROUP BY t.ticket_id
+            ORDER BY t.ticket_id DESC";
     }
-    $stmt_ticket->execute();
-    $ticket_result = $stmt_ticket->get_result();
 
+    // Execute the ticket query
+    $ticket_result = $conn->query($ticket_query);
+
+    // Check if user has permission to view tickets
     if (!$listTicket) {
         header("location: 404.php");
         exit();
     }
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("location: 404.php");
+    exit();
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -64,6 +74,19 @@ if ($result_user && $result_user->num_rows > 0) {
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: url('KhmerOSbattambang.ttf') format('truetype');
+        }
+
+        /* <!-- style for show filter form --> */
+
+        #filterForm1 {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #filterForm1.show {
+            display: block;
+            opacity: 1;
         }
     </style>
 </head>
@@ -119,19 +142,7 @@ if ($result_user && $result_user->num_rows > 0) {
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
                         <div class="card-body p-0" style="overflow: hidden;">
-                            <!-- style for show filter form -->
-                            <style>
-                                #filterForm1 {
-                                    display: none;
-                                    opacity: 0;
-                                    transition: opacity 0.5s ease-in-out;
-                                }
 
-                                #filterForm1.show {
-                                    display: block;
-                                    opacity: 1;
-                                }
-                            </style>
                             <div class="card-header">
                                 <?php if (isset($AddTicket) && $AddTicket) : ?>
                                     <a id="add_ticket" href="add_ticket.php" class="btn btn-primary ">Add Ticket</a>
@@ -171,7 +182,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                     </div>
                                     <div class="form-group col-6 col-md-3">
                                         <label for="province">Province</label>
-                                        <select id="province" name="province" class="form-control" style="width: 100%;" required>
+                                        <select id="province" name="province" class="form-control" style="width: 100%;">
                                             <option value="">All</option>
                                             <option value="Phnom Penh">Phnom Penh</option>
                                             <option value="Siem Reap">Siem Reap </option>
@@ -203,13 +214,15 @@ if ($result_user && $result_user->num_rows > 0) {
                                     </div>
                                     <div class="form-group col-6 col-md-3">
                                         <label for="issue_type">Issue Type</label>
-                                        <select class="form-control" name="issue_type" id="issue_type">
+                                        <select name="issue_type" id="issue_type" class="form-control" placeholder="-Select-">
                                             <option value="">All</option>
                                             <option value="Hardware">Hardware</option>
                                             <option value="Software">Software</option>
                                             <option value="Network">Network</option>
                                             <option value="Dispenser">Dispenser</option>
-                                            <option value="Unassigned">Unassigned</option>
+                                            <option value="ABA">ABA</option>
+                                            <option value="FleetCard">FleetCard</option>
+                                            <option value="ATG">ATG</option>
                                         </select>
                                     </div>
                                     <div class="form-group col-6 col-md-3">
@@ -217,12 +230,13 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <select name="SLA_category" id="SLA_category" class="form-control">
                                             <option value="">All</option>
                                             <option value="CAT Hardware">CAT Hardware</option>
-                                            <option value="CAT 1*">CAT 1*</option>
-                                            <option value="CAT 2*">CAT 2*</option>
-                                            <option value="CAT 3*">CAT 3*</option>
-                                            <option value="CAT 4*">CAT 4*</option>
-                                            <option value="CAT 4 Report*">CAT 4 Report*</option>
-                                            <option value="CAT 5*">CAT 5*</option>
+                                            <option value="CAT 1">CAT 1</option>
+                                            <option value="CAT 2">CAT 2</option>
+                                            <option value="CAT 3">CAT 3</option>
+                                            <option value="CAT 4">CAT 4</option>
+                                            <option value="CAT 4 Report">CAT 4 Report</option>
+                                            <option value="CAT 5">CAT 5</option>
+                                            <option value="Other">Other</option>
                                         </select>
                                     </div>
                                     <div class="form-group col-6 col-md-3">

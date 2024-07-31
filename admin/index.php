@@ -1,11 +1,10 @@
 <?php
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
 $user_create_ticket = $fetch_info['users_id'];
-$query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
+$query_user = "SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -19,8 +18,8 @@ if ($result_user && $result_user->num_rows > 0) {
   $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
 
   // Set common parts of the query
-  $ticket_select = "
-        SELECT 
+  $ticket_select =
+    "SELECT 
             t.*, 
             REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
         FROM 
@@ -73,12 +72,13 @@ if ($result_user && $result_user->num_rows > 0) {
   // Fetch SLA_category counts and calculate percentages
   $SLA_category_counts = [
     'CAT Hardware' => 0,
-    'CAT 1*' => 0,
-    'CAT 2*' => 0,
-    'CAT 3*' => 0,
-    'CAT 4*' => 0,
-    'CAT 4 Report*' => 0,
-    'CAT 5*' => 0
+    'CAT 1' => 0,
+    'CAT 2' => 0,
+    'CAT 3' => 0,
+    'CAT 4' => 0,
+    'CAT 4 Report' => 0,
+    'CAT 5' => 0,
+    'Other' => 0
   ];
 
   $total_tickets = 0;
@@ -98,7 +98,9 @@ if ($result_user && $result_user->num_rows > 0) {
     'Software' => 0,
     'Network' => 0,
     'Dispenser' => 0,
-    'Unassigned' => 0
+    'ABA' => 0,
+    'FleetCard' => 0,
+    'ATG' => 0
   ];
 
   $result_issue = $conn->query($issue_query);
@@ -108,8 +110,6 @@ if ($result_user && $result_user->num_rows > 0) {
       $type = trim($issue_type);
       if (isset($issue_counts[$type])) {
         $issue_counts[$type]++;
-      } else {
-        $issue_counts['Unassigned']++;
       }
     }
   }
@@ -164,150 +164,161 @@ if ($result_user && $result_user->num_rows > 0) {
           <div class="row">
 
             <!-- section start Summary -->
-
-            <div class="row col-12 ">
-              <div class="card col-sm-6">
-                <div class="card-header">
-                  <h3 class="card-title"> Status</h3>
-                </div>
-                <div class="row">
-                  <div class="col-lg-4 col-4">
-                    <div class="small-box bg-info">
-                      <div class="inner">
-                        <h3><?php echo $status_counts['Open']; ?></h3>
-                        <p>Open</p>
-                      </div>
-                      <div class="icon">
-                      </div>
-                      <a href="moreinfo.php?status=Open" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            <style>
+              .inner p,
+              h3 {
+                margin: 0;
+              }
+            </style>
+            <!-- <div class="row col-12 "> -->
+            <div class="card col-12 col-md-6">
+              <div class="card-header">
+                <h3 class="card-title"> Status</h3>
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-4">
+                  <div class="small-box bg-info">
+                    <div class="inner">
+                      <h3><?php echo $status_counts['Open']; ?></h3>
+                      <p>Open</p>
                     </div>
-                  </div>
-
-                  <div class="col-lg-4 col-4">
-                    <div class="small-box bg-danger">
-                      <div class="inner">
-                        <h3><?php echo $status_counts['On Hold']; ?></h3>
-                        <p>On Hold</p>
-                      </div>
-                      <div class="icon">
-
-                      </div>
-                      <a href="moreinfo.php?status=On Hold" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <div class="icon">
                     </div>
-                  </div>
-
-                  <div class="col-lg-4 col-4">
-                    <div class="small-box bg-warning">
-                      <div class="inner">
-                        <h3><?php echo $status_counts['In Progress']; ?></h3>
-                        <p>In Progress</p>
-                      </div>
-                      <div class="icon">
-
-                      </div>
-                      <a href="moreinfo.php?status=In Progress" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                    </div>
+                    <a href="moreinfo.php?status=Open" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="col-lg-8 col-6">
-                    <div class="small-box bg-primary">
-                      <div class="inner">
-                        <h3><?php echo $status_counts['Pending Vendor']; ?></h3>
-                        <p>Pending Vendor</p>
-                      </div>
-                      <div class="icon">
 
-                      </div>
-                      <a href="moreinfo.php?status=Pending Vendor" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                <div class="col-lg-4 col-4">
+                  <div class="small-box bg-danger">
+                    <div class="inner">
+                      <h3><?php echo $status_counts['On Hold']; ?></h3>
+                      <p>On Hold</p>
                     </div>
+                    <div class="icon">
+
+                    </div>
+                    <a href="moreinfo.php?status=On Hold" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                   </div>
+                </div>
 
-                  <div class="col-lg-4 col-6">
-                    <div class="small-box bg-success">
-                      <div class="inner">
-                        <h3><?php echo $status_counts['Close']; ?></h3>
-                        <p>Close</p>
-                      </div>
-                      <div class="icon">
-
-                      </div>
-                      <a href="moreinfo.php?status=Close" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                <div class="col-lg-4 col-4">
+                  <div class="small-box bg-warning">
+                    <div class="inner">
+                      <h3><?php echo $status_counts['In Progress']; ?></h3>
+                      <p>In Progress</p>
                     </div>
+                    <div class="icon">
+
+                    </div>
+                    <a href="moreinfo.php?status=In Progress" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                   </div>
                 </div>
               </div>
-              <div class="card col-sm-6">
-                <div class="chartMenu">
-                </div>
-                <div class="chartCard">
-                  <div class="chartBox">
-                    <canvas id="issueTypeChart"></canvas>
-                  </div>
-                </div>
-              </div>
-              <!-- /.section start Summary -->
-
-              <!-- Section Start SLA_category -->
-              <div class="card col-12" id="SLA_category">
-                <div class="card-header">
-                  <h3 class="card-title"><b>SLA Category %</b></h3>
-                </div>
-                <div class="col-12">
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT Hardware']; ?>" data-width="90" data-height="90" data-fgcolor="#3c8dbc" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT Hardware</div>
-                      </div>
-
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 1*']; ?>" data-width="90" data-height="90" data-fgcolor="#f56954" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT 1*</div>
-                      </div>
-
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 2*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT 2*</div>
-                      </div>
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 3*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT 3*</div>
-                      </div>
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT 4*</div>
-                      </div>
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4 Report*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT 4 Report*</div>
-                      </div>
-                      <div class="col-6 col-md-3 text-center">
-                        <div style="display:inline;width:90px;height:90px;">
-                          <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 5*']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
-                        </div>
-                        <div class="knob-label">CAT 5*</div>
-                      </div>
+              <div class="row">
+                <div class="col-lg-6 col-6">
+                  <div class="small-box bg-primary">
+                    <div class="inner">
+                      <h3><?php echo $status_counts['Pending Vendor']; ?></h3>
+                      <p>Pending Vendor</p>
                     </div>
+                    <div class="icon">
+
+                    </div>
+                    <a href="moreinfo.php?status=Pending Vendor" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                  </div>
+                </div>
+
+                <div class="col-lg-6 col-6">
+                  <div class="small-box bg-success">
+                    <div class="inner">
+                      <h3><?php echo $status_counts['Close']; ?></h3>
+                      <p>Close</p>
+                    </div>
+                    <div class="icon">
+
+                    </div>
+                    <a href="moreinfo.php?status=Close" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                   </div>
                 </div>
               </div>
-
-              <!-- /.Section Start SLA_category -->
-
             </div>
+            <div class="card col-12 col-md-6">
+              <div class="chartMenu">
+              </div>
+              <div class="chartCard">
+                <div class="chartBox">
+                  <canvas id="issueTypeChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <!-- /.section start Summary -->
+
+            <!-- Section Start SLA_category -->
+            <div class="card col-12" id="SLA_category">
+              <div class="card-header">
+                <h3 class="card-title"><b>SLA Category %</b></h3>
+              </div>
+              <div class="col-12">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT Hardware']; ?>" data-width="90" data-height="90" data-fgcolor="#3c8dbc" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT Hardware</div>
+                    </div>
+
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 1']; ?>" data-width="90" data-height="90" data-fgcolor="#f56954" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT 1</div>
+                    </div>
+
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 2']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT 2</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 3']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT 3</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT 4</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4 Report']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT 4 Report</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 5']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">CAT 5</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                      <div style="display:inline;width:90px;height:90px;">
+                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['Other']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                      </div>
+                      <div class="knob-label">Other</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- /.Section Start SLA_category -->
+
+            <!-- </div> -->
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">Ticket</h3>
@@ -322,8 +333,8 @@ if ($result_user && $result_user->num_rows > 0) {
                       <th>Station Name</th>
                       <th>Station Type</th>
                       <th>Province</th>
-                      <th>Description</th>
-                      <th>Type</th>
+                      <th>Issue Description</th>
+                      <th>Issue Type</th>
                       <th>SLA Category </th>
                       <th>Status</th>
                       <th>Assign</th>
@@ -427,24 +438,31 @@ if ($result_user && $result_user->num_rows > 0) {
           label: 'Issue Type',
           data: data,
           backgroundColor: [
-            'rgba(0, 166, 158, 1)', // Hardware
-            'rgba(255, 184, 34, 1)', // Software
-            'rgba(255, 182, 94, 1)', // Network
-            'rgba(141, 68, 173, 1)', // Dispenser
-            'rgba(107, 210, 190, 1)' // Unassigned
+            // 'red', // Hardware
+            // 'blue', // Software
+            // 'yellow', // Network
+            // 'white', // Dispenser
+            // '#00415f', // aba
+            // '#a9cf38', //fleet card
+            // 'rgba(111, 18, 13, 1)' //atg
+
+            'rgba(54, 162, 235, 0.2)',
           ],
-          borderColor: [
-            'rgba(0, 166, 158, 1)',
-            'rgba(255, 184, 34, 1)',
-            'rgba(255, 182, 94, 1)',
-            'rgba(141, 68, 173, 1)',
-            'rgba(107, 210, 190, 1)'
-          ],
+          // borderColor: [
+          //   'rgba(0, 166, 158, 1)', // Hardware
+          //   'rgba(255, 184, 34, 1)', // Software
+          //   'rgba(255, 182, 94, 1)', // Network
+          //   'rgba(141, 68, 173, 1)', // Dispenser
+          //   'rgba(107, 210, 190, 1)', //aba
+          //   'rgba(141, 648, 173, 1)', //fleet card
+          //   'rgba(111, 18, 13, 1)' //atg
+          // ],
+          borderColor: '#146ca4',
           borderWidth: 1
         }]
       },
       options: {
-        indexAxis: 'y',
+        // indexAxis: 'y',
         scales: {
           y: {
             beginAtZero: true

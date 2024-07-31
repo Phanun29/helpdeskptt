@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 23, 2024 at 04:06 AM
+-- Generation Time: Jul 26, 2024 at 04:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -238,9 +238,8 @@ CREATE TABLE `tbl_ticket` (
   `province` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `issue_description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `issue_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `issue_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `SLA_category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('Open','On Hold','In Progress','Pending Vendor','Close') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `users_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ticket_open` datetime DEFAULT NULL,
   `ticket_on_hold` datetime DEFAULT NULL,
@@ -251,16 +250,6 @@ CREATE TABLE `tbl_ticket` (
   `comment` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `user_create_ticket` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Dumping data for table `tbl_ticket`
---
-
-INSERT INTO `tbl_ticket` (`id`, `ticket_id`, `station_id`, `station_name`, `station_type`, `province`, `issue_description`, `issue_type`, `issue_image`, `SLA_category`, `status`, `users_id`, `ticket_open`, `ticket_on_hold`, `ticket_in_progress`, `ticket_pending_vendor`, `ticket_close`, `ticket_time`, `comment`, `user_create_ticket`) VALUES
-(312, 'POS2407000001', 'F601', 'F601 Station Neak Vorn', 'COCO', 'Phnom Penh', 'nun', 'Unassigned', NULL, 'CAT Hardware', 'Close', NULL, '2024-07-21 17:17:04', '2024-07-22 08:28:06', '2024-07-22 08:28:14', '2024-07-22 08:28:18', '2024-07-22 08:28:22', '15h, 11m, 18s', '', 37),
-(313, 'POS2407000002', 'F601', 'F601 Station Neak Vorn', 'COCO', 'Phnom Penh', '1', 'Software', NULL, NULL, 'Open', NULL, '2024-07-21 17:17:09', NULL, NULL, NULL, NULL, NULL, NULL, 37),
-(324, 'POS2407000003', 'F601', 'F601 Station Neak Vorn', 'COCO', 'Phnom Penh', '1', 'Network', NULL, 'CAT Hardware', 'On Hold', NULL, '2024-07-22 13:15:28', '2024-07-22 13:16:00', NULL, NULL, NULL, NULL, '', 37),
-(325, 'POS2407000004', '10035930', 'PTT_PonheaKrek_PICH HENG DARA INVESTMENT Co.,Ltd_10035930', 'DODO', 'Tboung Khmum', 'Heartbreak​ ស្ត្រី', 'Unassigned', NULL, 'CAT Hardware', 'Close', '37,55', '2024-07-22 13:46:24', NULL, NULL, NULL, NULL, NULL, 'Please support asap.', 59);
 
 -- --------------------------------------------------------
 
@@ -285,8 +274,8 @@ CREATE TABLE `tbl_users` (
   `users_name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `code` mediumint(50) NOT NULL,
-  `status` text NOT NULL,
+  `code` mediumint(50) NOT NULL COMMENT '0 = verified ',
+  `status` tinyint(1) NOT NULL COMMENT '0 = inactive ,1 = active',
   `rules_id` int(11) DEFAULT NULL,
   `company` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -296,11 +285,12 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`users_id`, `users_name`, `email`, `password`, `code`, `status`, `rules_id`, `company`) VALUES
-(37, 'admin', 'nun@ptt.com', '$2y$10$9e6KqmpVXo.eqHRSA1QveOW78cvc2YUpOtNnl/W6wh1liHkCto2gO', 0, '1', 1461, 'PTTDigital'),
-(55, 'Chhoy Too', 'too.ch@ptt.com.kh', '$2y$10$cM1YiSxTsHiW0zYXjTO3LuQfKBfGY3KD2WjNPHwjn0MktMrqG2/Ea', 0, '1', 1472, 'PTTCL'),
-(56, 'Madina', 'madina@ptt.com.kh', '$2y$10$d2y8vFG4tgncAJgU0R5GVeCf7Lna8CGdFi57/iXlGVt88UZuFuv9e', 0, '1', 1472, 'PTTCL'),
-(57, 'oilretail.pos', 'oilretail.pos@ptt.com.kh', '$2y$10$oT73TiQjAGy0Swsh3Gs.T.O.889tKl/JPfX7UpALG/FduSlKoQGTu', 0, '1', 1461, 'PTTCL'),
-(59, 'chantha.m', 'chantha.m@ptt.com.kh', '$2y$10$jdK3S07WoMsM5LDybaRgM.H/g0NKA4ZpxFniajqib2pebO7aukFy2', 0, '1', 1472, 'PTTCL');
+(37, 'admin', 'nun@ptt.com', '$2y$10$9e6KqmpVXo.eqHRSA1QveOW78cvc2YUpOtNnl/W6wh1liHkCto2gO', 0, 1, 1461, 'PTTDigital'),
+(55, 'Chhoy Too', 'too.ch@ptt.com.kh', '$2y$10$cM1YiSxTsHiW0zYXjTO3LuQfKBfGY3KD2WjNPHwjn0MktMrqG2/Ea', 0, 1, 1472, 'PTTCL'),
+(56, 'Madina', 'madina@ptt.com.kh', '$2y$10$d2y8vFG4tgncAJgU0R5GVeCf7Lna8CGdFi57/iXlGVt88UZuFuv9e', 0, 1, 1472, 'PTTCL'),
+(57, 'oilretail.pos', 'oilretail.pos@ptt.com.kh', '$2y$10$oT73TiQjAGy0Swsh3Gs.T.O.889tKl/JPfX7UpALG/FduSlKoQGTu', 0, 1, 1461, 'PTTCL'),
+(59, 'chantha.m', 'chantha.m@ptt.com.kh', '$2y$10$jdK3S07WoMsM5LDybaRgM.H/g0NKA4ZpxFniajqib2pebO7aukFy2', 0, 1, 1472, 'PTTCL'),
+(60, 'user', 'user@ptt.com', '$2y$10$WGTBKQADQowzPrvPFBlrauyj.ijhRq0/QWh7mkyfwDR4LDxX.jk3.', 0, 1, 1472, 'PTTCL');
 
 -- --------------------------------------------------------
 
@@ -309,25 +299,25 @@ INSERT INTO `tbl_users` (`users_id`, `users_name`, `email`, `password`, `code`, 
 --
 
 CREATE TABLE `tbl_users_rules` (
-  `rules_id` int(11) NOT NULL,
+  `rules_id` int(100) NOT NULL,
   `rules_name` varchar(255) DEFAULT NULL,
-  `add_user_status` tinyint(4) DEFAULT NULL,
-  `edit_user_status` tinyint(4) DEFAULT NULL,
-  `delete_user_status` tinyint(4) DEFAULT NULL,
-  `list_user_status` tinyint(4) DEFAULT NULL,
-  `add_ticket_status` tinyint(4) DEFAULT NULL,
-  `edit_ticket_status` tinyint(4) DEFAULT NULL,
-  `delete_ticket_status` tinyint(4) DEFAULT NULL,
-  `list_ticket_status` tinyint(4) DEFAULT NULL,
-  `list_ticket_assign` tinyint(4) DEFAULT NULL,
-  `add_user_rules` tinyint(4) DEFAULT NULL,
-  `edit_user_rules` tinyint(4) DEFAULT NULL,
-  `delete_user_rules` tinyint(4) DEFAULT NULL,
-  `list_user_rules` tinyint(4) DEFAULT NULL,
-  `add_station` tinyint(4) DEFAULT NULL,
-  `edit_station` tinyint(4) DEFAULT NULL,
-  `delete_station` tinyint(4) DEFAULT NULL,
-  `list_station` tinyint(4) DEFAULT NULL
+  `add_user_status` tinyint(1) DEFAULT NULL,
+  `edit_user_status` tinyint(1) DEFAULT NULL,
+  `delete_user_status` tinyint(1) DEFAULT NULL,
+  `list_user_status` tinyint(1) DEFAULT NULL,
+  `add_ticket_status` tinyint(1) DEFAULT NULL,
+  `edit_ticket_status` tinyint(1) DEFAULT NULL,
+  `delete_ticket_status` tinyint(1) DEFAULT NULL,
+  `list_ticket_status` tinyint(1) DEFAULT NULL,
+  `list_ticket_assign` tinyint(1) DEFAULT NULL,
+  `add_user_rules` tinyint(1) DEFAULT NULL,
+  `edit_user_rules` tinyint(1) DEFAULT NULL,
+  `delete_user_rules` tinyint(1) DEFAULT NULL,
+  `list_user_rules` tinyint(1) DEFAULT NULL,
+  `add_station` tinyint(1) DEFAULT NULL,
+  `edit_station` tinyint(1) DEFAULT NULL,
+  `delete_station` tinyint(1) DEFAULT NULL,
+  `list_station` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -336,7 +326,8 @@ CREATE TABLE `tbl_users_rules` (
 
 INSERT INTO `tbl_users_rules` (`rules_id`, `rules_name`, `add_user_status`, `edit_user_status`, `delete_user_status`, `list_user_status`, `add_ticket_status`, `edit_ticket_status`, `delete_ticket_status`, `list_ticket_status`, `list_ticket_assign`, `add_user_rules`, `edit_user_rules`, `delete_user_rules`, `list_user_rules`, `add_station`, `edit_station`, `delete_station`, `list_station`) VALUES
 (1461, 'Admin', 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1),
-(1472, 'user', 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1);
+(1472, 'user', 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1),
+(1486, 'nunas', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 --
 -- Indexes for dumped tables
@@ -356,7 +347,8 @@ ALTER TABLE `tbl_ticket`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `ticket_id` (`ticket_id`),
   ADD KEY `station_id` (`station_id`),
-  ADD KEY `users_id` (`users_id`);
+  ADD KEY `users_id` (`users_id`),
+  ADD KEY `tbl_ticket_ibfk_1` (`user_create_ticket`);
 
 --
 -- Indexes for table `tbl_ticket_images`
@@ -386,31 +378,31 @@ ALTER TABLE `tbl_users_rules`
 -- AUTO_INCREMENT for table `tbl_station`
 --
 ALTER TABLE `tbl_station`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=435;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=439;
 
 --
 -- AUTO_INCREMENT for table `tbl_ticket`
 --
 ALTER TABLE `tbl_ticket`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=326;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=487;
 
 --
 -- AUTO_INCREMENT for table `tbl_ticket_images`
 --
 ALTER TABLE `tbl_ticket_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=328;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=520;
 
 --
 -- AUTO_INCREMENT for table `tbl_users`
 --
 ALTER TABLE `tbl_users`
-  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
 
 --
 -- AUTO_INCREMENT for table `tbl_users_rules`
 --
 ALTER TABLE `tbl_users_rules`
-  MODIFY `rules_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1480;
+  MODIFY `rules_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1487;
 
 --
 -- Constraints for dumped tables
@@ -420,6 +412,7 @@ ALTER TABLE `tbl_users_rules`
 -- Constraints for table `tbl_ticket`
 --
 ALTER TABLE `tbl_ticket`
+  ADD CONSTRAINT `tbl_ticket_ibfk_1` FOREIGN KEY (`user_create_ticket`) REFERENCES `tbl_users` (`users_id`),
   ADD CONSTRAINT `tbl_ticket_ibfk_2` FOREIGN KEY (`station_id`) REFERENCES `tbl_station` (`station_id`);
 
 --

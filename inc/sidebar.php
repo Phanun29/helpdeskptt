@@ -31,7 +31,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <img src="../dist/img/logo.png" class="img" alt="User Image" style="margin-left:10px;">
+            <img src="../img/logo.png" class="img" alt="User Image" style="margin-left:10px;">
             <div class="info" style="padding-top: 12px;">
                 <a href="index.php" class="d-block">PTT (CAMBODIA) Limited</a>
             </div>

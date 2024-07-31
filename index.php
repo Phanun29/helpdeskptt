@@ -16,8 +16,60 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <!-- icon -->
-    <link rel="icon" href="img/favicon.ico.png">
+    <link rel="icon" href="icons/favicon.ico.png">
     <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+
+        .login-box {
+            width: 360px;
+            margin: 7% auto;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #95999e;
+            color: #fff;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .card-header img {
+            max-width: 120px;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
+        }
+
+        @keyframes iconBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .input-group-text span {
+            animation: iconBounce 1.5s infinite;
+        }
+    </style>
 </head>
 
 <body class="hold-transition login-page">
@@ -59,19 +111,6 @@
                             </div>
                         </div>
 
-                        <script>
-                            function togglePasswordVisibility() {
-                                var passwordInput = document.getElementById("password");
-                                var togglePasswordIcon = document.getElementById("togglePasswordIcon");
-
-                                if (passwordInput.type === "password") {
-                                    passwordInput.type = "text";
-
-                                } else {
-                                    passwordInput.type = "password";
-                                }
-                            }
-                        </script>
 
                     </div>
                     <div class="input-group mt-1">
@@ -101,18 +140,25 @@
                 </form>
 
 
-
-                <p class="mb-1">
-
-                </p>
-
             </div>
             <!-- /.card-body -->
         </div>
         <!-- /.card -->
     </div>
     <!-- /.login-box -->
+    <script>
+        function togglePasswordVisibility() {
+            var passwordInput = document.getElementById("password");
+            var togglePasswordIcon = document.getElementById("togglePasswordIcon");
 
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+
+            } else {
+                passwordInput.type = "password";
+            }
+        }
+    </script>
     <!-- jQuery -->
     <script src="plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->

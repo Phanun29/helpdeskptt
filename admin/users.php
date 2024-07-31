@@ -1,18 +1,19 @@
 <?php
-include "config.php"; // Include your database connection configuration
-include "../inc/header.php";
+include "../inc/header_script.php";
 
-// Fetch user details including rules_id and permissions in one query
+// Retrieve the current user's ID from the fetched user information
 $user_id = $fetch_info['users_id'];
 
+// Construct the SQL query to fetch user details along with their associated permissions
 $query_user = "
     SELECT u.*, r.list_user_status, r.add_user_status, r.edit_user_status, r.delete_user_status 
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
-
+// Execute the query
 $result_user = $conn->query($query_user);
 
+// Check if the query was successful and if any rows were returned
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
@@ -22,11 +23,15 @@ if ($result_user && $result_user->num_rows > 0) {
     $DeleteUsers = $user['delete_user_status'];
 
     if (!$listUsers) {
+         // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
-    $_SESSION['error_message'] = "User not found or permission check failed.";
+      // Set an error message if the user was not found or if permission check failed
+      $_SESSION['error_message'] = "User not found or permission check failed.";
+      header("location: 404.php");
+      exit();
 }
 ?>
 <!DOCTYPE html>
@@ -201,13 +206,13 @@ if ($result_user && $result_user->num_rows > 0) {
             $("#tableUser").DataTable({
                 // "responsive": true,
 
-                "lengthChange": false,
+                "lengthChange": true,
                 "autoWidth": false,
                 "buttons": [, "csv", "excel", "pdf"]
             }).buttons().container().appendTo('#tableUser_wrapper .col-md-6:eq(0)');
             $('#tableUser2').DataTable({
                 "paging": true,
-                "lengthChange": false,
+                "lengthChange": true,
                 "searching": false,
                 "ordering": true,
                 "info": true,

@@ -64,7 +64,7 @@ function showTicketDetails(ticket) {
                 videoElement.src = trimmedItem;
                 videoElement.style.width = '50px';
                 videoElement.style.cursor = 'pointer';
-                videoElement.controls = true;
+                //videoElement.controls = true;
                 videoElement.onclick = () => showMedia(trimmedItem);
                 modalIssueMedia.appendChild(videoElement);
             }
@@ -75,7 +75,4 @@ function showTicketDetails(ticket) {
 
 }
 
-function showMedia(imageUrl) {
-    $('#imageToShow').attr('src', imageUrl);
-    $('#imageModal').modal('show');
-}
+

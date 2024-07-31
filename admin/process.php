@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 $user_id = $fetch_info['users_id']; // user ID
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
@@ -74,7 +74,7 @@ if (!empty($_GET['status'])) {
 
 if (!empty($_GET['users_id'])) {
     $users_id = $conn->real_escape_string($_GET['users_id']);
-    $ticket_query .= " AND FIND_IN_SET('$users_id', t.users_id)";
+    $ticket_query .= " AND t.users_id LIKE '%$users_id%'";
 }
 
 if (!empty($_GET['ticket_open_from'])) {
@@ -144,10 +144,14 @@ if ($ticket_result->num_rows > 0) {
         } else {
             echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
         }
-        // echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
         echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
         echo "<td class='py-1'>" . $row['status'] . "</td>";
-        echo "<td class='py-1'>" . $row['users_name'] . "</td>";
+        if ($users_id == null) {
+            echo "<td class='py-1'>" . $row['users_name'] . "</td>";
+        } else {
+            $users_id = $row['users_name'];
+            echo "<td class= 'py-1'>" . $users_id . " </td>";
+        }
         echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
         echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";

@@ -1,27 +1,38 @@
 <?php
 
-include "../inc/header.php";
-
-// Fetch user details including rules_id and permissions in one query
+include "../inc/header_script.php";
+// Retrieve the current user's ID from the fetched user information
 $user_id = $fetch_info['users_id'];
 
-$query_user = "
-    SELECT u.*, r.list_user_status, r.add_user_status, r.edit_user_status, r.delete_user_status 
+// Construct the SQL query to fetch user details along with their associated permissions
+$query_user =
+    "SELECT u.*, r.list_user_status, r.add_user_status, r.edit_user_status, r.delete_user_status 
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
 
+// Execute the query
 $result_user = $conn->query($query_user);
+
+// Check if the query was successful and if any rows were returned
 if ($result_user && $result_user->num_rows > 0) {
+    // Fetch the user's data as an associative array
     $user = $result_user->fetch_assoc();
 
+    // Check if the user has permission to list and add users
     if (!$user['list_user_status'] || !$user['add_user_status']) {
+        // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
+    // Set an error message if the user was not found or if permission check failed
     $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("location: 404.php");
+    exit();
 }
+
+// Check if the request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $users_name = $_POST['users_name'];
     $email = $_POST['email'];
@@ -50,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
-    // Redirect to the same page to display messages
+    // Redirect to the page user to display messages
     header('Location: users.php');
     exit();
 }
@@ -147,12 +158,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="company">Company <span class="text-danger">*</span></label>
-
                                                 <select class="form-control" name="company" id="company" required>
                                                     <option value="">select</option>
+                                                    <option value="ABA Bank">ABA Bank</option>
+                                                    <option value="Wing Bank">Wing Bank</option>
                                                     <option value="PTTCL">PTTCL</option>
-                                                    <option value="PTTDigital">PTTDigital</option>
-
+                                                    <option value="PTT Digital Thailand">PTT Digital Thailand</option>
+                                                    <option value="PTT Digital Cambodia">PTT Digital Cambodia</option>
+                                                    <option value="MBA">MBA</option>
+                                                    <option value="SD">SD</option>
+                                                    <option value="CamSys">CamSys</option>
+                                                    <option value="DIN">DIN</option>
                                                 </select>
                                             </div>
                                         </div>

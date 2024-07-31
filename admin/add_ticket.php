@@ -1,7 +1,7 @@
 <?php
-include "../inc/header.php"; // Include the header
+include "../inc/header_script.php"; // Include the header
 
-// Fetch user details including rules_id and permissions in one query
+// Retrieve the current user's ID from the fetched user information
 $user_id = $fetch_info['users_id']; // User ID
 
 $query_user = " SELECT r.list_ticket_status, r.add_ticket_status 
@@ -9,14 +9,22 @@ $query_user = " SELECT r.list_ticket_status, r.add_ticket_status
                 JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
                 WHERE u.users_id = $user_id";
 
+// Execute the query
 $result_user = $conn->query($query_user);
+
+// Check if the query was successful and if any rows were returned
 if ($result_user && $result_user->num_rows > 0) {
+    // Fetch the user's data as an associative array
     $user = $result_user->fetch_assoc();
+
+    // Check if the user has permission to list and add ticket
     if (!$user['list_ticket_status'] || !$user['add_ticket_status']) {
+        // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
+    // Set an error message if the user was not found or if permission check failed
     $_SESSION['error_message'] = "User not found or permission check failed.";
     header("location: 404.php");
     exit();
@@ -27,11 +35,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $issue_description = $_POST['issue_description'];
     $issue_type = isset($_POST['issue_type']) ? implode(',', $_POST['issue_type']) : null; // Convert array to string without spaces
-    if ($SLA_category != null) {
-        $SLA_category = $_POST['SLA_category'];
-    } else {
-        $SLA_category = null;
-    }
+    // if ($SLA_category != null) {
+    $SLA_category = $_POST['SLA_category'] ?? null;
+    // } else {
+    //     $SLA_category = null;
+    // }
     $status = 'Open';
     $users_id = $fetch_info['users_id'];
     $user_create_ticket = $fetch_info['users_id'];
@@ -103,6 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['error_message'] = "Error: " . $stmt->error;
         }
         $stmt->close();
+        // Redirect to the page ticket to display messages
         header("Location: ticket.php");
         exit();
     }
@@ -169,7 +178,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="form-group col-sm-8">
                                             <label for="issue_description">Issue Description <span class="text-danger">*</span></label>
                                             <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description" required></textarea>
-                                            <div id="error-message-issue-description" class="text-danger" style="display:none;">Please Input Issue Description</div>
+                                            <div id="error-message-issue-description" class="text-danger" style="display:none;">Please fill Issue Description</div>
                                         </div>
 
                                         <div class="form-group col-sm-4">
@@ -192,23 +201,93 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="Software">Software</option>
                                                 <option value="Network">Network</option>
                                                 <option value="Dispenser">Dispenser</option>
-                                                <option value="Unassigned">Unassigned</option>
+                                                <option value="ABA">ABA</option>
+                                                <option value="FleetCard">FleetCard</option>
+                                                <option value="ATG">ATG</option>
                                             </select>
                                             <div id="error-message-issueType" class="text-danger" style="display:none;">Please select at least one issue type.</div>
                                         </div>
+
                                         <div class="form-group col-sm-4">
-                                            <label for="SLA_category">SLA Category</label>
-                                            <select name="SLA_category" id="SLA_category" class="form-control">
-                                                <option value="">-Select-</option>
-                                                <option value="CAT Hardware">CAT Hardware</option>
-                                                <option value="CAT 1*">CAT 1*</option>
-                                                <option value="CAT 2*">CAT 2*</option>
-                                                <option value="CAT 3*">CAT 3*</option>
-                                                <option value="CAT 4*">CAT 4*</option>
-                                                <option value="CAT 4 Report*">CAT 4 Report*</option>
-                                                <option value="CAT 5*">CAT 5*</option>
+                                            <label for="SLA_category">SLA Category <span class="text-danger">*</span></label>
+                                            <select name="SLA_category" id="SLA_category" class="form-control" required>
+                                                <option value="" title="Please select a category">-Select-</option>
+                                                <option value="CAT Hardware" title=" Hardware ">CAT Hardware</option>
+                                                <option value="CAT 1" title="(CAT 1)means that a system device cannot work in sales at all, a level where sales cannot be performed at the POS, 
+or the back office cannot contact the POS, or the dispenser cannot be dispensed in case the dispenser is connected to the system. Automation, 
+which is the result of software or system glitches, is so outaged that it cannot be sold or cannot be sold through the system (must be sold offline). ">CAT 1</option>
+                                                <option value=" CAT 2" title="(CAT 2) means that system equipment can still perform partial sales tasks, which the system can still run because of software glitches. However, the station is so severely limited that it affects the data around the day, such as:
+•  Can't afford some fuel, dispenser This is caused by dispensers not being able to connect to automation systems.">CAT 2</option>
+                                                <option value="CAT 3" title="(CAT 3) refers to a system device that is defective but does not affect sales work. It has some but mild impact on all stations or operations of the head office, such as:
+•  Each cycle cannot be closed.  
+•  Reports cannot be printed.  
+•  Ticket printers cannot be printed.  
+•  Cash drawers do not open automatically.  
+•  The point-of-sale keyboard is not available, but the Mouse is still available or can be used either.">CAT 3</option>
+                                                <option value="CAT 4" title="(CAT 4) refers to minor issues that are caused by software vulnerabilities that do not affect the sales process, such as:
+•  Staff at the station are unsure how to use the system, so training is required on the next occasion.
+•  Additional device replacements  
+•  Problems occurring within vulnerable areas as announced by the government. ">CAT 4</option>
+                                                <option value="CAT 4 Report" title="(CAT 4 Report) Report error detection within 96 hours">CAT 4 Report</option>
+                                                <option value="CAT 5" title="(CAT 5) refers to issues related to data editing in POS, BO systems, such as: Reports cannot be generated.">CAT 5</option>
+                                                <option value="Other" title="(Other) In case problem cause by equipment that is not related with POS system equipment such as Network Cable, Media converter, Internet Router, internet connection, Wi-Fi access point, Fiber Optic Cable, Dispenser signal cable, Dispensers, Electric Supply Equipment, etc. is not response by PTT POS System.">Other</option>
                                             </select>
+                                            <div id="error-message-SLA_category" class="text-danger" style="display:none;">Please select SLA category.</div>
+
                                         </div>
+
+                                        <script>
+                                            document.getElementById('issue_type').addEventListener('change', function() {
+                                                const issueTypes = Array.from(this.selectedOptions).map(option => option.value);
+                                                const slaCategorySelect = document.getElementById('SLA_category');
+                                                const errorMessageNotSelectIssueType = document.getElementById('error-message-NotSelectIssueType');
+
+                                                const hardwareSoftwareOptions = `
+                                                    <option value="">-Select-</option>
+                                                    <option value="CAT Hardware">CAT Hardware</option>
+                                                    <option value="CAT 1">CAT 1</option>
+                                                    <option value="CAT 2">CAT 2</option>
+                                                    <option value="CAT 3">CAT 3</option> 
+                                                    <option value="CAT 4">CAT 4</option>
+                                                    <option value="CAT 4 Report">CAT 4 Report</option>
+                                                    <option value="CAT 5">CAT 5</option>
+                                                `;
+
+                                                const hardwareOrSoftwareOptions = `
+                                                    <option value="">-Select-</option>
+                                                    <option value="CAT Hardware">CAT Hardware</option>
+                                                    <option value="CAT 1">CAT 1</option>
+                                                    <option value="CAT 2">CAT 2</option>
+                                                    <option value="CAT 3">CAT 3</option>
+                                                    <option value="CAT 4">CAT 4</option>
+                                                    <option value="CAT 4 Report">CAT 4 Report</option>
+                                                    <option value="CAT 5">CAT 5</option>
+                                                    <option value="Other">Other</option>
+                                                `;
+
+                                                const allOptions = `
+                                                    <option value="">-Select-</option>
+                                                    <option value="Other">Other</option>
+                                                `;
+
+                                                if (issueTypes.includes('Software') && issueTypes.includes('Hardware')) {
+                                                    slaCategorySelect.innerHTML = hardwareSoftwareOptions;
+                                                } else if (issueTypes.includes('Software') || issueTypes.includes('Hardware')) {
+                                                    slaCategorySelect.innerHTML = hardwareOrSoftwareOptions;
+                                                } else {
+                                                    slaCategorySelect.innerHTML = allOptions;
+                                                }
+
+                                                if (issueTypes.length === 0) {
+                                                    slaCategorySelect.disabled = true;
+                                                    errorMessageNotSelectIssueType.style.display = 'block';
+                                                } else {
+                                                    slaCategorySelect.disabled = false;
+                                                    errorMessageNotSelectIssueType.style.display = 'none';
+                                                }
+                                            });
+                                        </script>
+
                                     </div>
 
                                     <div class="mt-3">
@@ -250,6 +329,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     } else {
                                         errorMessageIssueDescription.style.display = 'none';
                                     }
+
+                                    var SLA_categorySelect = document.getElementById('SLA_category');
+                                    var selectedValue = SLA_categorySelect.value; // Get the selected value
+                                    var errorMessageSLA_category = document.getElementById('error-message-SLA_category');
+                                    if (selectedValue === '') { // Check if the selected value is empty
+                                        errorMessageSLA_category.style.display = 'block';
+                                        event.preventDefault(); // Prevent form submission
+                                    } else {
+                                        errorMessageSLA_category.style.display = 'none';
+                                    }
                                 });
                             </script>
 
@@ -266,20 +355,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- select multiple -->
-    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
     <!-- select multiple -->
+    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
+    <!-- select multiple -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var issueTypeChoices = new Choices('#issue_type', {
                 removeItemButton: true,
-                maxItemCount: 5,
-                searchResultLimit: 5,
-                renderChoiceLimit: 5
+                maxItemCount: 10,
+                searchResultLimit: 10,
+                renderChoiceLimit: 10
             });
 
             var usersIdChoices = new Choices('#users_id', {

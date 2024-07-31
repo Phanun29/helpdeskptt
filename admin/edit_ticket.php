@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
@@ -35,16 +35,7 @@ if (!is_numeric($id)) {
     header("Location: 404.php");
     exit();
 }
-// $query_user_create_ticket = "SELECT users_id FROM tbl_ticket WHERE ticket_id = $id";
-// $result_user_create_ticket = $conn->query($query_user_create_ticket);
-// if ($result_user_create_ticket->num_rows > 0) {
-//     $user_created = $result_user_create_ticket->fetch_assoc();
-//     $ticket_created = $user_created['users_id'];
-//     if ($user_id = $ticket_created) {
-//         header("Location: 404.php");
-//         exit();
-//     }
-// }
+
 // Check if form is submitted
 date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -142,7 +133,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: 404.php");
         exit();
     }
+    //if statys close
+    if ($status == 'Close') {
+        // Set the current time as the ticket close time
+        $ticket_close = date('Y-m-d H:i:s');
 
+        // Calculate the difference between ticket open and close times
+        $ticketOpenTime = new DateTime($ticket_open);
+        $ticketCloseTime = new DateTime($ticket_close);
+        $interval = $ticketCloseTime->diff($ticketOpenTime);
+
+        // Format the difference
+        $ticket_time = '';
+        if ($interval->d > 0) {
+            $ticket_time .= $interval->d . 'd, ';
+        }
+        if ($interval->h > 0 || $interval->d > 0) {
+            $ticket_time .= $interval->h . 'h, ';
+        }
+        if ($interval->i > 0 || $interval->h > 0 || $interval->d > 0) {
+            $ticket_time .= $interval->i . 'm, ';
+        }
+        $ticket_time .= $interval->s . 's';
+    }
     // Check if ticket_id exists in tbl_ticket
     $check_ticket_query = "SELECT ticket_id FROM tbl_ticket WHERE id = '$id'";
     $ticket_result = $conn->query($check_ticket_query);
@@ -420,7 +433,6 @@ if ($ticket_result->num_rows > 0) {
                                             }
                                             ?>
 
-
                                             <div class="col-12 row mt-3" id="imagePreview">
                                             </div>
                                         </div>
@@ -447,14 +459,12 @@ if ($ticket_result->num_rows > 0) {
                                         });
                                     </script>
 
-
-
                                     <div class=" row">
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type</label>
-                                            <select name="issue_type[]" class="form-control" id="issue_type" placeholder="-Select-" multiple>
+                                            <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>
                                                 <?=
-                                                $issue_types = ['Hardware', 'Software', 'Network', 'Dispenser', 'Unassigned'];
+                                                $issue_types = ['Hardware', 'Software', 'Network', 'Dispenser', 'ABA', 'FleetCard', 'ATG'];
                                                 $selected_issue_types = explode(', ', $row['issue_type']);
                                                 foreach ($issue_types as $issue_type) {
                                                     $selected = in_array(trim($issue_type), $selected_issue_types) ? 'selected' : '';
@@ -465,20 +475,13 @@ if ($ticket_result->num_rows > 0) {
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="SLA_category">SLA Category</label>
-                                            <select name="SLA_category" id="SLA_category" class="form-control select2bs4" style="width: 100%;">
-                                                <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-                                                <option value="CAT 1*" <?= ($row['SLA_category'] == 'CAT 1*') ? 'selected' : ''; ?>>CAT 1*</option>
-                                                <option value="CAT 2*" <?= ($row['SLA_category'] == 'CAT 2*') ? 'selected' : ''; ?>>CAT 2*</option>
-                                                <option value="CAT 3*" <?= ($row['SLA_category'] == 'CAT 3*') ? 'selected' : ''; ?>>CAT 3*</option>
-                                                <option value="CAT 4*" <?= ($row['SLA_category'] == 'CAT 4*') ? 'selected' : ''; ?>>CAT 4*</option>
-                                                <option value="CAT 4 Report*" <?= ($row['SLA_category'] == 'CAT 4 Report*') ? 'selected' : ''; ?>>CAT 4 Report*</option>
-                                                <option value="CAT 5*" <?= ($row['SLA_category'] == 'CAT 5*') ? 'selected' : ''; ?>>CAT 5*</option>
+                                            <select name="SLA_category" id="SLA_category" class="form-control " style="width: 100%;">
+
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="status">Status</label>
                                             <select name="status" id="status" class="form-control" style="width: 100%;">
-
                                                 <option value="On Hold" <?= ($row['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
                                                 <option value="In Progress" <?= ($row['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
                                                 <option value="Pending Vendor" <?= ($row['status'] == 'Pending Vendor') ? 'selected' : ''; ?>>Pending Vendor</option>
@@ -491,9 +494,31 @@ if ($ticket_result->num_rows > 0) {
                                         <div class="form-group col-sm-4">
                                             <label for="users_id">Assign</label>
                                             <select name="users_id[]" class="form-control" id="users_id" placeholder='-select-' multiple>
+                                                <?php
+                                                // Check selected issue types
+                                                $show_hardware_software_companies = in_array('Hardware', $selected_issue_types) || in_array('Software', $selected_issue_types);
+                                                $show_network_companies = in_array('Network', $selected_issue_types);
+                                                $show_dispenser_atg_companies = in_array('Dispenser', $selected_issue_types) || in_array('ATG', $selected_issue_types);
+                                                $show_aba_companies = in_array('ABA', $selected_issue_types);
+                                                $show_fleetcard_companies = in_array('FleetCard', $selected_issue_types);
 
-                                                <?=
-                                                $user_query = "SELECT users_id, users_name FROM tbl_users  WHERE status = 1";
+                                                // Determine the company condition
+                                                if ($show_hardware_software_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'PTT Digital Thailand', 'PTT Digital Cambodia')";
+                                                } elseif ($show_network_companies) {
+                                                    $company_condition = "AND company = 'PTTCL'";
+                                                } elseif ($show_dispenser_atg_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'MBA', 'SD', 'CamSys', 'DIN')";
+                                                } elseif ($show_aba_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'ABA Bank')";
+                                                } elseif ($show_fleetcard_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'Wing Bank')";
+                                                } else {
+                                                    $company_condition = '';
+                                                }
+
+                                                // Fetch users based on the condition
+                                                $user_query = "SELECT users_id, users_name FROM tbl_users WHERE status = 1 $company_condition";
                                                 $user_result = $conn->query($user_query);
                                                 $assigned_users = explode(',', $row['users_id']);
                                                 if ($user_result->num_rows > 0) {
@@ -539,16 +564,16 @@ if ($ticket_result->num_rows > 0) {
         document.addEventListener('DOMContentLoaded', function() {
             var issueTypeChoices = new Choices('#issue_type', {
                 removeItemButton: true,
-                maxItemCount: 5,
-                searchResultLimit: 3,
-                renderChoiceLimit: 3
+                maxItemCount: 100,
+                searchResultLimit: 100,
+                renderChoiceLimit: 100
             });
 
             var usersIdChoices = new Choices('#users_id', {
                 removeItemButton: true,
-                maxItemCount: 5,
-                searchResultLimit: 3,
-                renderChoiceLimit: 3
+                maxItemCount: 100,
+                searchResultLimit: 100,
+                renderChoiceLimit: 100
             });
         });
     </script>
@@ -627,11 +652,78 @@ if ($ticket_result->num_rows > 0) {
         }
     </script>
     <!-- preview media -->
-    <script src="../scripts/previewImages.js">
+    <script src="../scripts/previewImages.js"></script>
+    <!-- assign by issue type -->
 
+    <!-- sla category by issue type -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const issueTypeSelect = document.getElementById('issue_type');
+            const slaCategorySelect = document.getElementById('SLA_category');
+            const errorMessageNotSelectIssueType = document.getElementById('error-message-NotSelectIssueType');
+
+            const hardwareSoftwareOptions = `
+                                                <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+                                                <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+                                                <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+                                                <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+                                                <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+                                                <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+                                                <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+                                    
+        `;
+            const SoftwareOptions = `
+                                                <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+                                                <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+                                                <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+                                                <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+                                                <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+                                                <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+                                                <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+                                    
+        `;
+            const hardwareOrSoftwareOptions = `
+                                                <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+                                                <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+                                                <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+                                                <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+                                                <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+                                                <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+                                                <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+                                                <option value="Other" <?= ($row['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>
+        `;
+
+            const allOptions = `  <option value="Other" <?= ($row['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>`;
+
+            function updateSlaCategoryOptions() {
+                const issueTypes = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
+                // if (issueTypes.includes('Software') ) {
+                //     slaCategorySelect.innerHTML = SoftwareOptions;
+                // } else if (issueTypes.includes('Hardware')) {
+                //     slaCategorySelect.innerHTML = SoftwareOptions;
+                // } else
+                if (issueTypes.includes('Software') && issueTypes.includes('Hardware')) {
+                    slaCategorySelect.innerHTML = hardwareSoftwareOptions;
+                } else if (issueTypes.includes('Software') || issueTypes.includes('Hardware')) {
+                    slaCategorySelect.innerHTML = hardwareOrSoftwareOptions;
+                } else {
+                    slaCategorySelect.innerHTML = allOptions;
+                }
+
+
+            }
+
+            issueTypeSelect.addEventListener('change', updateSlaCategoryOptions);
+
+
+
+
+
+            // Initialize the SLA options based on existing selections
+            updateSlaCategoryOptions();
+        });
     </script>
-    <style>
-    </style>
+
 
 
 

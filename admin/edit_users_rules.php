@@ -1,6 +1,6 @@
 <?php
 
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 
 // Fetch user details including rules_id and permissions in one query

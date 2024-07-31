@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option Descriptions</title>
+    <style>
+        /* Style for the description box */
+        .description-box {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Button styling */
+        .description-box button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .description-box button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Adjust description box for touch devices */
+        @media (max-width: 768px) {
+            .description-box {
+                font-size: 16px;
+                padding: 15px;
+            }
+
+            .description-box button {
+                font-size: 16px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <select name="SLA_category" id="SLA_category" class="form-control" required>
+        <option value="" data-description="">-Select-</option>
+        <option value="CAT Hardware" data-description="Category for Hardware related issues">CAT Hardware</option>
+        <option value="CAT 1" data-description="Category 1 description">CAT 1 <span>?</span></option>
+        <option value="CAT 2" data-description="Category 2 description">CAT 2</option>
+        <option value="CAT 3" data-description="Category 3 description">CAT 3</option>
+        <option value="CAT 4" data-description="Category 4 description">CAT 4</option>
+        <option value="CAT 4 Report" data-description="Category 4 Report description">CAT 4 Report</option>
+        <option value="CAT 5" data-description="Category 5 description">CAT 5</option>
+        <option value="Other" data-description="Other categories">Other</option>
+    </select>
+    <div id="description-box" class="description-box"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('SLA_category');
+            const descriptionBox = document.getElementById('description-box');
+
+            // Function to update description box based on selected option
+            function updateDescription(e) {
+                const option = e.target;
+                if (option.tagName === 'OPTION' && option.dataset.description) {
+                    descriptionBox.textContent = option.dataset.description;
+
+                    // Add a button if required
+                    const button = document.createElement('button');
+                    button.textContent = 'More Info';
+                    button.onclick = function() {
+                        alert(option.dataset.description);
+                    };
+
+                    descriptionBox.appendChild(button);
+                    descriptionBox.style.display = 'block';
+                } else {
+                    descriptionBox.style.display = 'none';
+                }
+            }
+
+            // Event listeners for updating description box
+            select.addEventListener('change', updateDescription);
+            select.addEventListener('mouseover', updateDescription);
+            select.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                updateDescription(e);
+            });
+            select.addEventListener('click', updateDescription);
+        });
+    </script>
+</body>
+</html>
