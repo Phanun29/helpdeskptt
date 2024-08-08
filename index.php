@@ -77,7 +77,7 @@
         <!-- /.login-logo -->
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <a href="#" class="h4 text-primary">PTT (CAMBODIA) Limited</a>
+                <a href="#" class="h4 text-white">PTT (CAMBODIA) Limited</a>
             </div>
             <div class="card-body">
                 <p class="login-box-msg">Login with your email and password.</p>

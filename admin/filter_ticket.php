@@ -27,8 +27,8 @@ if ($result_user && $result_user->num_rows > 0) {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
 // Base ticket query
-$ticket_query = "
-    SELECT 
+$ticket_query = 
+    "SELECT 
         t.*, 
         REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name
     FROM 
@@ -97,7 +97,7 @@ if (!empty($_GET['ticket_close_to'])) {
     $ticket_query .= " AND t.ticket_close <= '$ticket_close_to'";
 }
 
-// Add more conditions for other filters like issue_type, SLA_category, status, etc.
+
 $ticket_query .= "
     GROUP BY 
         t.ticket_id DESC";

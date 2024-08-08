@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 26, 2024 at 04:25 AM
+-- Generation Time: Aug 07, 2024 at 08:58 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -239,7 +239,7 @@ CREATE TABLE `tbl_ticket` (
   `issue_description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `issue_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `SLA_category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('Open','On Hold','In Progress','Pending Vendor','Close') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `users_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ticket_open` datetime DEFAULT NULL,
   `ticket_on_hold` datetime DEFAULT NULL,
@@ -266,6 +266,24 @@ CREATE TABLE `tbl_ticket_images` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tbl_ticket_track`
+--
+
+CREATE TABLE `tbl_ticket_track` (
+  `id` int(11) NOT NULL,
+  `ticket_id` varchar(250) NOT NULL,
+  `open_time` datetime NOT NULL,
+  `modify_time` datetime DEFAULT NULL,
+  `modified_by` int(11) NOT NULL,
+  `issue_type` text DEFAULT NULL,
+  `SLA_category` text DEFAULT NULL,
+  `assign` text DEFAULT NULL,
+  `status` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tbl_users`
 --
 
@@ -285,11 +303,11 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`users_id`, `users_name`, `email`, `password`, `code`, `status`, `rules_id`, `company`) VALUES
-(37, 'admin', 'nun@ptt.com', '$2y$10$9e6KqmpVXo.eqHRSA1QveOW78cvc2YUpOtNnl/W6wh1liHkCto2gO', 0, 1, 1461, 'PTTDigital'),
-(55, 'Chhoy Too', 'too.ch@ptt.com.kh', '$2y$10$cM1YiSxTsHiW0zYXjTO3LuQfKBfGY3KD2WjNPHwjn0MktMrqG2/Ea', 0, 1, 1472, 'PTTCL'),
-(56, 'Madina', 'madina@ptt.com.kh', '$2y$10$d2y8vFG4tgncAJgU0R5GVeCf7Lna8CGdFi57/iXlGVt88UZuFuv9e', 0, 1, 1472, 'PTTCL'),
-(57, 'oilretail.pos', 'oilretail.pos@ptt.com.kh', '$2y$10$oT73TiQjAGy0Swsh3Gs.T.O.889tKl/JPfX7UpALG/FduSlKoQGTu', 0, 1, 1461, 'PTTCL'),
-(59, 'chantha.m', 'chantha.m@ptt.com.kh', '$2y$10$jdK3S07WoMsM5LDybaRgM.H/g0NKA4ZpxFniajqib2pebO7aukFy2', 0, 1, 1472, 'PTTCL'),
+(37, 'admin', 'nun@ptt.com', '$2y$10$9e6KqmpVXo.eqHRSA1QveOW78cvc2YUpOtNnl/W6wh1liHkCto2gO', 0, 1, 1461, 'PTTCL'),
+(55, 'Chhoy Too', 'too.ch@ptt.com.kh', '$2y$10$cM1YiSxTsHiW0zYXjTO3LuQfKBfGY3KD2WjNPHwjn0MktMrqG2/Ea', 0, 1, 1472, 'ABA Bank'),
+(56, 'Madina', 'madina@ptt.com.kh', '$2y$10$d2y8vFG4tgncAJgU0R5GVeCf7Lna8CGdFi57/iXlGVt88UZuFuv9e', 0, 1, 1472, 'SD'),
+(57, 'oilretail.pos', 'oilretail.pos@ptt.com.kh', '$2y$10$oT73TiQjAGy0Swsh3Gs.T.O.889tKl/JPfX7UpALG/FduSlKoQGTu', 0, 1, 1461, 'Wing Bank'),
+(59, 'chantha.m', 'chantha.m@ptt.com.kh', '$2y$10$jdK3S07WoMsM5LDybaRgM.H/g0NKA4ZpxFniajqib2pebO7aukFy2', 0, 1, 1472, 'Wing Bank'),
 (60, 'user', 'user@ptt.com', '$2y$10$WGTBKQADQowzPrvPFBlrauyj.ijhRq0/QWh7mkyfwDR4LDxX.jk3.', 0, 1, 1472, 'PTTCL');
 
 -- --------------------------------------------------------
@@ -326,8 +344,7 @@ CREATE TABLE `tbl_users_rules` (
 
 INSERT INTO `tbl_users_rules` (`rules_id`, `rules_name`, `add_user_status`, `edit_user_status`, `delete_user_status`, `list_user_status`, `add_ticket_status`, `edit_ticket_status`, `delete_ticket_status`, `list_ticket_status`, `list_ticket_assign`, `add_user_rules`, `edit_user_rules`, `delete_user_rules`, `list_user_rules`, `add_station`, `edit_station`, `delete_station`, `list_station`) VALUES
 (1461, 'Admin', 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1),
-(1472, 'user', 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1),
-(1486, 'nunas', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+(1472, 'user', 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1);
 
 --
 -- Indexes for dumped tables
@@ -358,6 +375,14 @@ ALTER TABLE `tbl_ticket_images`
   ADD KEY `tbl_ticket_images_ibfk_1` (`ticket_id`);
 
 --
+-- Indexes for table `tbl_ticket_track`
+--
+ALTER TABLE `tbl_ticket_track`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ticket_id` (`ticket_id`),
+  ADD KEY `modified_by` (`modified_by`);
+
+--
 -- Indexes for table `tbl_users`
 --
 ALTER TABLE `tbl_users`
@@ -378,31 +403,37 @@ ALTER TABLE `tbl_users_rules`
 -- AUTO_INCREMENT for table `tbl_station`
 --
 ALTER TABLE `tbl_station`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=439;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=440;
 
 --
 -- AUTO_INCREMENT for table `tbl_ticket`
 --
 ALTER TABLE `tbl_ticket`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=487;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=555;
 
 --
 -- AUTO_INCREMENT for table `tbl_ticket_images`
 --
 ALTER TABLE `tbl_ticket_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=520;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=548;
+
+--
+-- AUTO_INCREMENT for table `tbl_ticket_track`
+--
+ALTER TABLE `tbl_ticket_track`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
 -- AUTO_INCREMENT for table `tbl_users`
 --
 ALTER TABLE `tbl_users`
-  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
+  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT for table `tbl_users_rules`
 --
 ALTER TABLE `tbl_users_rules`
-  MODIFY `rules_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1487;
+  MODIFY `rules_id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1489;
 
 --
 -- Constraints for dumped tables
@@ -420,6 +451,13 @@ ALTER TABLE `tbl_ticket`
 --
 ALTER TABLE `tbl_ticket_images`
   ADD CONSTRAINT `tbl_ticket_images_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tbl_ticket` (`ticket_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `tbl_ticket_track`
+--
+ALTER TABLE `tbl_ticket_track`
+  ADD CONSTRAINT `tbl_ticket_track_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tbl_ticket` (`ticket_id`),
+  ADD CONSTRAINT `tbl_ticket_track_ibfk_2` FOREIGN KEY (`modified_by`) REFERENCES `tbl_users` (`users_id`);
 
 --
 -- Constraints for table `tbl_users`
