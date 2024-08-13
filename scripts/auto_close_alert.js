@@ -9,5 +9,5 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert.remove();
             }, 500); // Remove alert after transition
         });
-    }, 3000); // 3000 milliseconds = 5 seconds
+    }, 5000); // 5000 milliseconds = 5 seconds
 });
