@@ -1,9 +1,9 @@
 <?php
-include "config.php";
-include "../inc/header.php";
+
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
-$user_id = $fetch_info['users_id']; // Example user ID
+$user_id = $fetch_info['users_id']; //  user ID
 
 $query_user = "
     SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
@@ -26,15 +26,14 @@ if ($result_user && $result_user->num_rows > 0) {
         exit();
     }
 } else {
-    $_SESSION['error_message'] = "User not found or permission check failed.";
+    $_SESSION['error_message_station'] = "User not found or permission check failed.";
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php" ?>
 </head>
 
@@ -42,36 +41,34 @@ if ($result_user && $result_user->num_rows > 0) {
     <div class="wrapper">
         <?php include "../inc/nav.php" ?>
         <?php include "../inc/sidebar.php" ?>
-
         <div class="content-wrapper">
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Station</h1>
+                            <h1 class="m-0">Stations</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <?php
-                                if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                       
-                                   <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                    unset($_SESSION['success_message']);
+                                if (isset($_SESSION['success_message_station'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message_station']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message_station']); // Clear the message after displaying
                                 }
 
-                                if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                    unset($_SESSION['error_message']);
+                                if (isset($_SESSION['error_message_station'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show  mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message_station']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message_station']); // Clear the message after displaying
                                 }
                                 ?>
                             </ol>
@@ -86,23 +83,24 @@ if ($result_user && $result_user->num_rows > 0) {
                         <div class="card-body p-0" style="overflow: hidden;">
                             <?php if ($canAddStation) : ?>
                                 <div class="card-header">
-                                    <a href="add_station.php" class="btn btn-primary ml-2">Add Station</a>
+                                    <a href="add_station.php" id="" class="btn btn-primary">Add Station</a>
                                 </div>
                             <?php endif; ?>
                             <br>
-                            <table id="example1" class="table table-hover text-nowrap">
+                            <table id="tableStation" class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <?php if (!$canEditStation && !$canDeleteStation) : ?>
+                                            <th style="display:none;"></th>
+                                        <?php else : ?>
+                                            <th>Action</th>
+                                        <?php endif; ?>
                                         <th>Station ID</th>
                                         <th>Station Name</th>
                                         <th>Station Type</th>
                                         <th>Province</th>
-                                        <?php if (!$canEditStation && !$canDeleteStation) : ?>
-                                            <th style="display:none;"></th>
-                                        <?php else : ?>
-                                            <th>Option</th>
-                                        <?php endif; ?>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -113,12 +111,8 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                     if ($station_result->num_rows > 0) {
                                         while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr>";
+                                            echo "<tr id='stationId-{$row['id']}'>"; 
                                             echo "<td class='py-1'>{$i}</td>";
-                                            echo "<td class='py-1'>{$row['station_id']}</td>";
-                                            echo "<td class='py-1'>{$row['station_name']}</td>";
-                                            echo "<td class='py-1'>{$row['station_type']}</td>";
-                                            echo "<td class='py-1'>{$row['province']}</td>";
                                             if (!$canEditStation && !$canDeleteStation) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
@@ -127,19 +121,25 @@ if ($result_user && $result_user->num_rows > 0) {
                                                     echo "<a href='edit_station.php?id={$row['id']}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 if ($canDeleteStation) {
-                                                    echo "<a href='delete_station.php?id={$row['id']}' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
+                                            echo "<td class='py-1'>{$row['station_id']}</td>";
+                                            echo "<td class='py-1'>{$row['station_name']}</td>";
+                                            echo "<td class='py-1'>{$row['station_type']}</td>";
+                                            echo "<td class='py-1'>{$row['province']}</td>";
+
                                             echo "</tr>";
                                             $i++;
                                         }
                                     } else {
-                                        echo "<tr><td class='text-center' colspan='5'>Don't have Station!</td></tr>";
+                                        echo "<tr><td class='text-center' colspan='5'>No stations found!</td></tr>";
                                     }
                                     ?>
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>
@@ -162,18 +162,22 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
     <script>
         $(function() {
-            $("#example1").DataTable({
-                "lengthChange": false,
+            $("#tableStation").DataTable({
+                "lengthChange": true,
                 "autoWidth": false,
                 "buttons": ["csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
+            }).buttons().container().appendTo('#tableStation_wrapper .col-md-6:eq(0)');
+            $('#tableStation2').DataTable({
                 "paging": true,
-                "lengthChange": false,
+                "lengthChange": true,
                 "searching": false,
                 "ordering": true,
                 "info": true,
@@ -182,6 +186,60 @@ if ($result_user && $result_user->num_rows > 0) {
             });
         });
     </script>
+    <!-- delete station -->
+    <script>
+        $(document).ready(function() {
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function() {
+                var stationId = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this station!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'delete_station.php',
+                            type: 'POST',
+                            data: {
+                                id: stationId
+                            },
+                            success: function(response) {
+                                console.log('Response:', response); // Debugging: Log the response
+                                if (response === 'success') {
+                                    console.log('Removing row with ID: #stationId-' + stationId); // Log the row being removed
+                                    $('#stationId-' + stationId).remove(); // Remove the row with matching ID
+                                    Swal.fire('Deleted!', 'Your station has been deleted.', 'success');
+                                } else if (response === 'closed') {
+                                    Swal.fire('Error!', 'Closed station cannot be deleted.', 'error');
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete station.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                                Swal.fire('Error!', 'An error occurred while deleting the station.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle edit button click
+            $(document).on('click', '.edit-btn', function() {
+                var ticketId = $(this).data('id');
+                // Redirect or load edit form page, passing ticketId
+                window.location.href = 'edit_ticket.php?id=' + ticketId;
+            });
+        });
+    </script>
+    <!-- auto close alert -->
+    <script src="../scripts/auto_close_alert.js"></script>
+
 </body>
 
 </html>

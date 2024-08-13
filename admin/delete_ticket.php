@@ -2,62 +2,33 @@
 session_start();
 include "config.php";
 
-// Ensure the user is authenticated
-if (!isset($_SESSION['email']) || !isset($_SESSION['password'])) {
-    echo 'unauthorized';
-    exit();
+// Validate and retrieve the ticket ID
+$id = isset($_POST['id']) && is_numeric($_POST['id']) ? $_POST['id'] : exit('invalid');
+$ticket_id = $conn->query("SELECT ticket_id FROM tbl_ticket WHERE id = $id")->fetch_assoc()['ticket_id'] ?? exit('invalid');
+
+// Define the target directory
+$ticket_dir = "../uploads/$ticket_id";
+
+// Delete files and directory
+if (is_dir($ticket_dir)) {
+    array_map('unlink', glob("$ticket_dir/*"));
+    rmdir($ticket_dir);
 }
 
-// Check if the 'id' parameter is set in the POST request
-if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
-    echo 'invalid';
-    exit();
-}
+// Delete related records from tbl_ticket_track and tbl_ticket_images
+$queries = [
+    "DELETE FROM tbl_ticket_track WHERE ticket_id = '$ticket_id'",
+    "DELETE FROM tbl_ticket_images WHERE ticket_id = '$ticket_id'",
+    "DELETE FROM tbl_ticket WHERE id = '$id'"
+];
 
-$id = $_POST['id'];
-
-// Prepare the SQL statement to retrieve the issue_image path and status
-$query = "SELECT issue_image, status FROM tbl_ticket WHERE id = ?";
-if ($stmt = $conn->prepare($query)) {
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->bind_result($issue_image_path, $ticket_status);
-    $stmt->fetch();
-    $stmt->close();
-} else {
-    echo 'error';
-    exit();
-}
-
-// Check if the ticket status is 'Close'
-if ($ticket_status === 'Close') {
-    echo 'closed';
-    exit();
-}
-
-// Prepare the SQL statement to delete the ticket
-$query = "DELETE FROM tbl_ticket WHERE id = ?";
-if ($stmt = $conn->prepare($query)) {
-    $stmt->bind_param("i", $id);
-    if ($stmt->execute()) {
-        // If the deletion is successful, delete the image file
-        if (!empty($issue_image_path)) {
-            $image_paths = explode(',', $issue_image_path);
-            foreach ($image_paths as $path) {
-                $path = trim($path); // Ensure there are no leading/trailing spaces
-                if (file_exists($path)) {
-                    unlink($path);
-                }
-            }
-        }
-        echo 'success';
-    } else {
-        echo 'fail';
+foreach ($queries as $query) {
+    if (!$conn->query($query)) {
+        error_log('Error: ' . $conn->error);
+        echo 'error';
+        exit();
     }
-    $stmt->close();
-} else {
-    echo 'error';
 }
 
-// Close the database connection
+echo "success";
 $conn->close();

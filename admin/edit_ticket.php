@@ -1,21 +1,17 @@
 <?php
-include "config.php"; // Include your database connection configuration
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
-
-$query_user = "
-    SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
+$query_user =
+    "SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status, r.list_ticket_assign
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
 
 $result_user = $conn->query($query_user);
-
-if ($result_user && $result_user->num_rows > 0) {
+if ($result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
-
     $listTicketAssign = $user['list_ticket_assign'];
 
     if (!$user['list_ticket_status'] || !$user['edit_ticket_status']) {
@@ -23,184 +19,355 @@ if ($result_user && $result_user->num_rows > 0) {
         exit();
     }
 } else {
-    $_SESSION['error_message'] = "User not found or permission check failed.";
+    $_SESSION['error_message_ticket'] = "User not found or permission check failed.";
+    header("Location: 404.php");
+    exit();
 }
 
 // Initialize session for storing messages
-$ticket_id = $_GET['id']; // Assuming you're passing the ticket ID through a GET parameter
+$id = $_GET['id'] ?? null; // Assuming you're passing the ticket ID through a GET parameter
+
+if (!is_numeric($id)) {
+    header("Location: 404.php");
+    exit();
+}
 
 // Check if form is submitted
+date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Gather form data
-    $station_id = $_POST['station_id'];
-    $station_name = $_POST['station_name'];
-    $station_type = $_POST['station_type'];
-    $issue_description = $_POST['issue_description'];
-    $issue_image = $_FILES['issue_image']['name']; // Assuming you handle file upload separately
-    $issue_types = implode(', ', $_POST['issue_type']);
-    $priority = $_POST['priority'];
-    $status = $_POST['status'];
-    if (isset($_POST['users_id'])) {
-        $users_id = implode(',', $_POST['users_id']);
+    $id = $_GET['id'] ?? null; // Ensure to sanitize and validate $id
+    $station_id = $_POST['station_id'] ?? null;
+    $station_name = $_POST['station_name'] ?? null;
+    $station_type = $_POST['station_type'] ?? null;
+    $province = $_POST['province'] ?? null;
+    $issue_description = $_POST['issue_description'] ?? null;
+    $issue_types = isset($_POST['issue_type']) ? implode(', ', $_POST['issue_type']) : '';
+    $SLA_category = $_POST['SLA_category'] ?? null;
+    $status = $_POST['status'] ?? null;
+    $users_id = isset($_POST['users_id']) ? implode(',', $_POST['users_id']) : null;
+    $comment = $_POST['comment'] ?? null;
+
+    // Fetch existing ticket details for validation
+    $check_ticket_query = "SELECT status, ticket_open, ticket_on_hold, ticket_in_progress, ticket_pending_vendor, ticket_close ,issue_type ,SLA_category,users_id
+    FROM tbl_ticket 
+    WHERE id = $id";
+    $ticket_result = $conn->query($check_ticket_query);
+
+    if ($ticket_result->num_rows > 0) {
+        $row = $ticket_result->fetch_assoc();
+
+        // Record previous status and timestamps
+        $prev_status = $row['status'];
+        $prev_open = $row['ticket_open'];
+        $prev_on_hold = $row['ticket_on_hold'];
+        $prev_in_progress = $row['ticket_in_progress'];
+        $prev_pending_vendor = $row['ticket_pending_vendor'];
+        $prev_close = $row['ticket_close'];
+
+        $prev_issue_type = $row['issue_type'];
+        $prev_SLA_category = $row['SLA_category'];
+        $prev_users_id = $row['users_id'];
+
+        // Initialize timestamp variables
+        $ticket_open = $prev_open;
+        $ticket_on_hold = $prev_on_hold;
+        $ticket_in_progress = $prev_in_progress;
+        $ticket_pending_vendor = $prev_pending_vendor;
+        $ticket_close = $prev_close;
+
+        // Update timestamp based on status change
+        switch ($status) {
+            case 'On Hold':
+                if ($prev_status != 'On Hold') {
+                    $ticket_on_hold = date('Y-m-d H:i:s');
+                }
+                break;
+            case 'In Progress':
+                if ($prev_status != 'In Progress') {
+                    $ticket_in_progress = date('Y-m-d H:i:s');
+                }
+                break;
+            case 'Pending Vendor':
+                if ($prev_status != 'Pending Vendor') {
+                    $ticket_pending_vendor = date('Y-m-d H:i:s');
+                }
+                break;
+            case 'Close':
+                if ($prev_status != 'Close') {
+                    // Set the current time as the ticket close time
+                    $ticket_close = date('Y-m-d H:i:s');
+
+                    // Calculate the difference between ticket open and close times
+                    $ticketOpenTime = new DateTime($ticket_open);
+                    $ticketCloseTime = new DateTime($ticket_close);
+                    $interval = $ticketCloseTime->diff($ticketOpenTime);
+
+                    // Format the difference
+                    $ticket_time = '';
+                    if ($interval->d > 0) {
+                        $ticket_time .= $interval->d . 'd, ';
+                    }
+                    if ($interval->h > 0 || $interval->d > 0) {
+                        $ticket_time .= $interval->h . 'h, ';
+                    }
+                    if ($interval->i > 0 || $interval->h > 0 || $interval->d > 0) {
+                        $ticket_time .= $interval->i . 'm, ';
+                    }
+                    $ticket_time .= $interval->s . 's';
+                }
+                break;
+            default:
+                // Handle default case if needed
+                break;
+        }
+        // If ticket is already closed and no status change, ensure ticket_time is set
+        if ($prev_status == 'Close' && $ticket_time == '') {
+            $ticketCloseTime = new DateTime($ticket_close);
+            $interval = $ticketCloseTime->diff(new DateTime($ticket_open));
+
+            if ($interval->d > 0) {
+                $ticket_time .= $interval->d . 'd, ';
+            }
+            if ($interval->h > 0 || $interval->d > 0) {
+                $ticket_time .= $interval->h . 'h, ';
+            }
+            if ($interval->i > 0 || $interval->h > 0 || $interval->d > 0) {
+                $ticket_time .= $interval->i . 'm, ';
+            }
+            $ticket_time .= $interval->s . 's';
+        }
+        // Check if ticket status 
+        if ($row['status'] == 'Close' && $listTicketAssign != 0) {
+            $_SESSION['error_message_ticket'] = "Cannot edit a closed ticket.";
+            header("Location: ticket.php");
+            exit();
+        }
     } else {
-        $users_id = null; // or handle this case appropriately
+        $_SESSION['error_message_ticket'] = "Ticket not found.";
+        header("Location: 404.php");
+        exit();
     }
 
-    $comment = $_POST['comment'];
+    // Check if ticket_id exists in tbl_ticket
+    $check_ticket_query = "SELECT ticket_id FROM tbl_ticket WHERE id = '$id'";
+    $ticket_result = $conn->query($check_ticket_query);
+    if ($ticket_result->num_rows > 0) {
 
-    date_default_timezone_set('Asia/Bangkok');
+        // Fetch existing ticket details
+        $row = $ticket_result->fetch_assoc();
+        $existing_ticket_id = $row['ticket_id'];
+        // Process existing images
+        $uploadDir = "../uploads/$existing_ticket_id/";
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
 
-    // Check if the status 
-    if ($status == 'On Hold') {
-        $ticket_on_hold = date('Y-m-d H:i:s');
-    }
-    if ($status == 'In Progress') {
-        $ticket_in_progress = date('Y-m-d H:i:s');
-    }
-    if ($status == 'Pending Vendor') {
-        $ticket_pending_vendor = date('Y-m-d H:i:s');
-    }
-    if ($status == 'Close') {
-        $ticket_close = date('Y-m-d H:i:s');
-    } else {
-        $ticket_close = NULL;
-    }
-    // Process multiple file uploads
-    $uploaded_images = [];
-    if (!empty($_FILES['issue_image']['name'][0])) {
-        $target_dir = "../uploads/";
-        foreach ($_FILES['issue_image']['name'] as $key => $image) {
-            $target_file = $target_dir . basename($image);
-            if (move_uploaded_file($_FILES["issue_image"]["tmp_name"][$key], $target_file)) {
-                $uploaded_images[] = $target_file;
-            } else {
-                $_SESSION['error_message'] = "Error uploading image: " . $image;
-                header('Location: ' . $_SERVER['REQUEST_URI']);
-                exit();
+        $uploadedFiles = [];
+        $deletedFiles = [];
+
+        // Handle deleted images
+        if (!empty($_POST['delete_images'])) {
+            foreach ($_POST['delete_images'] as $deleted_image) {
+                // Validate and delete image file
+                if (!empty($deleted_image) && file_exists($deleted_image)) {
+                    unlink($deleted_image);
+
+                    // Remove from database record
+                    $existing_images_array = !empty($prev_issue_images) ? array_map('trim', explode(', ', $prev_issue_images)) : [];
+                    $existing_images_array = array_diff($existing_images_array, [$deleted_image]);
+                    $prev_issue_images = implode(', ', $existing_images_array);
+
+                    // Delete from tbl_ticket_images
+                    $delete_image_query = "DELETE FROM tbl_ticket_images WHERE image_path = '$deleted_image'";
+                    if ($conn->query($delete_image_query) == true) {
+                        echo "delete success";
+                    } else {
+                        echo "Error preparing delete statement: " . $conn->error;
+                    }
+                }
             }
         }
-    }
-    // Convert the array of image paths to a comma-separated string
-    $issue_image_paths = implode(',', $uploaded_images);
-    try {
-        // Check if the ticket exists and is editable
-        $check_ticket_query = "SELECT * FROM tbl_ticket WHERE id = ?";
-        $stmt_check_ticket = $conn->prepare($check_ticket_query);
-        $stmt_check_ticket->bind_param('i', $ticket_id);
-        $stmt_check_ticket->execute();
-        $ticket_result = $stmt_check_ticket->get_result();
 
-        if ($ticket_result->num_rows > 0) {
-            $row = $ticket_result->fetch_assoc();
+        // Define allowed file types for images and videos
+        $allowedImageTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF];
+        $allowedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
 
-            // Check if ticket status is 'Close'
-            if ($row['status'] == 'Close' && $listTicketAssign != 0) {
-                $_SESSION['error_message'] = "Cannot edit a closed ticket.";
-                header("Location: ticket.php");
-                exit();
+        // Handle uploaded files (images and videos)
+        if (!empty($_FILES['issue_media']['name'][0])) {
+            foreach ($_FILES['issue_media']['tmp_name'] as $key => $tmp_name) {
+                // Check for upload errors
+                if ($_FILES['issue_media']['error'][$key] !== UPLOAD_ERR_OK) {
+                    echo "Error uploading file: " . $_FILES['issue_media']['error'][$key];
+                    continue;
+                }
+
+                $file_name = $_FILES['issue_media']['name'][$key];
+                $file_tmp = $tmp_name;
+                $file_extension = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                $unique_name = uniqid() . '.' . $file_extension;
+                $uploadPath = $uploadDir . $unique_name;
+
+                // Determine if the file is an image or video
+                if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif'])) {
+                    // Validate image type
+                    if (!in_array(exif_imagetype($file_tmp), $allowedImageTypes)) {
+                        echo "Invalid image type for file: " . $file_name;
+                        continue;
+                    }
+
+                    // Move image and insert path into tbl_ticket_images
+                    if (move_uploaded_file($file_tmp, $uploadPath)) {
+                        $image_insert_query = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES ('$existing_ticket_id', '$uploadPath')";
+                        echo $conn->query($image_insert_query) ? "insert image success" : "Error preparing image insert statement: " . $conn->error;
+                    } else {
+                        echo "Error moving uploaded file: " . $file_name;
+                    }
+                } elseif (in_array($_FILES['issue_media']['type'][$key], $allowedVideoTypes)) {
+                    // Move video and insert path into tbl_ticket_videos
+                    if (move_uploaded_file($file_tmp, $uploadPath)) {
+                        $video_insert_query = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES ('$existing_ticket_id', '$uploadPath')";
+                        echo $conn->query($video_insert_query) ? "insert video success" : "Error preparing video insert statement: " . $conn->error;
+                    } else {
+                        echo "Error moving uploaded file: " . $file_name;
+                    }
+                } else {
+                    echo "Invalid file type for file: " . $file_name;
+                }
             }
-        } else {
-            $_SESSION['error_message'] = "Ticket not found.";
-            header("Location: 404.php");
-            exit;
         }
+    } else {
+        // Ticket not found, handle this case (redirect or error message)
+        $_SESSION['error_message_ticket'] = "Ticket not found.";
+        header("Location: 404.php");
+        exit();
+    }
 
-        $stmt_check_ticket->close();
-
-        // Prepare the update query
-        $update_query = "UPDATE tbl_ticket SET 
+    // Update ticket details in the database
+    $update_query = "UPDATE tbl_ticket SET 
                         station_id = ?, 
                         station_name = ?, 
                         station_type = ?, 
+                        province = ?, 
                         issue_description = ?, 
-                        issue_image = ?, 
                         issue_type = ?, 
-                        priority = ?, 
+                        SLA_category = ?, 
                         status = ?, 
                         users_id = ?, 
                         comment = ?, 
-                        ticket_on_hold=?,
-                        ticket_in_progress=?,
-                        ticket_pending_vendor=?,
-                        ticket_close = ?
-                        WHERE id = ?";
+                        ticket_on_hold = ?, 
+                        ticket_in_progress = ?, 
+                        ticket_pending_vendor = ?, 
+                        ticket_close = ?,
+                        ticket_time =?
+                    WHERE id = ?";
 
-        // Prepare the statement
-        $stmt = $conn->prepare($update_query);
-        if (!$stmt) {
-            throw new Exception("Error preparing statement: " . $conn->error);
-        }
+    $stmt_update = $conn->prepare($update_query);
+    $stmt_update->bind_param(
+        'sssssssssssssssi',
+        $station_id,
+        $station_name,
+        $station_type,
+        $province,
+        $issue_description,
+        $issue_types,
+        $SLA_category,
+        $status,
+        $users_id,
+        $comment,
+        $ticket_on_hold,
+        $ticket_in_progress,
+        $ticket_pending_vendor,
+        $ticket_close,
+        $ticket_time,
+        $id
+    );
 
-        // Bind the parameters
-        $stmt->bind_param(
-            'ssssssssssssssi',
-            $station_id,
-            $station_name,
-            $station_type,
-            $issue_description,
-            $issue_image_paths,
-            $issue_types,
-            $priority,
-            $status,
-            $users_id,
-            $comment,
-            $ticket_on_hold,
-            $ticket_in_progress,
-            $ticket_pending_vendor,
-            $ticket_close,
-            $ticket_id
-        );
+    if ($stmt_update->execute()) {
+        // Check if significant fields have changed
+        if (
+            $issue_types !== $prev_issue_type ||
+            $SLA_category !== $prev_SLA_category ||
+            $users_id !== $prev_users_id ||
+            $status !== $prev_status
+        ) {
 
-        // Execute the update
-        if ($stmt->execute()) {
-            $_SESSION['success_message'] = "Ticket updated successfully";
-        } else {
-            // Check for duplicate entry error
-            if ($conn->errno == 1062) { // MySQL error code for duplicate entry
-                $_SESSION['error_message'] = "Duplicate entry error: The selected users already assigned to this ticket.";
+            // Insert a record into tbl_ticket_track
+            $modify_time = date('Y-m-d H:i:s');
+
+            $insert_track_query = "INSERT INTO tbl_ticket_track (
+                                        ticket_id,
+                                        open_time,
+                                        modify_time,
+                                        modified_by,
+                                        issue_type,
+                                        SLA_category,
+                                        assign,
+                                        status
+                                    ) VALUES (
+                                        ?, ?, ?, ?, ?, ?, ?, ?
+                                    )";
+
+            $stmt_track = $conn->prepare($insert_track_query);
+            $stmt_track->bind_param(
+                'ssssssss',
+                $existing_ticket_id,
+                $ticket_open,
+                $modify_time,
+                $user_id,
+                $issue_types,
+                $SLA_category,
+                $users_id,
+                $status
+            );
+
+            if ($stmt_track->execute()) {
+                $_SESSION['success_message_ticket'] = "Ticket updated successfully.";
             } else {
-                throw new Exception("Error updating ticket: " . $stmt->error);
+                $_SESSION['error_message_ticket'] = "Error tracking ticket: " . $stmt_track->error;
             }
+
+            $stmt_track->close();
+        } else {
+            $_SESSION['success_message_ticket'] = "Ticket Updated Successfully.";
         }
 
-        // Close the statement
-        $stmt->close();
-
-        // Redirect to the page or do any additional handling after update
-        header("Location: edit_ticket.php?id=$ticket_id");
+        $stmt_update->close();
+        header("Location: ticket.php");
         exit();
-    } catch (Exception $e) {
-        $_SESSION['error_message'] = "Database error: " . $e->getMessage();
-        header("Location: edit_ticket.php?id=$ticket_id");
-        exit();
+    } else {
+        $_SESSION['error_message_ticket'] = "Error updating ticket: " . $stmt_update->error;
     }
+
+    $stmt_update->close();
+    header("Location: ticket.php");
+    exit();
 }
 
 // Fetch ticket details for display in the form
-$ticket_query = "SELECT * FROM tbl_ticket WHERE id = ?";
-$stmt = $conn->prepare($ticket_query);
-$stmt->bind_param('i', $ticket_id);
-$stmt->execute();
-$ticket_result = $stmt->get_result();
-
+$ticket_query = "SELECT t.*, GROUP_CONCAT(ti.image_path SEPARATOR ',') AS image_paths 
+                 FROM tbl_ticket t
+                 LEFT JOIN tbl_ticket_images ti ON t.ticket_id = ti.ticket_id
+                 WHERE t.id = $id
+                 GROUP BY t.ticket_id";
+$ticket_result = $conn->query($ticket_query);
 if ($ticket_result->num_rows > 0) {
     $row = $ticket_result->fetch_assoc();
+    // Extract image paths from the result
+    $image_paths = !empty($row['image_paths']) ? explode(',', $row['image_paths']) : [];
 } else {
-    // $_SESSION['error_message'] = "Ticket not found.";
+    $_SESSION['error_message_ticket'] = "Ticket not found.";
     header("Location: 404.php");
-    exit;
+    exit();
 }
 
-$stmt->close();
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -215,25 +382,13 @@ $stmt->close();
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6 row">
-                            <a href="ticket.php" class="btn btn-primary mx-2">BACK</a>
+                            <div>
+                                <a href="ticket.php" class="btn btn-primary mx-2">BACK</a>
+                            </div>
+
                             <h1 class="m-0">Update Ticket</h1>
                         </div>
-                        <div class="col-sm-6">                      
-                            <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['success_message']); ?>
-                            <?php endif; ?>
-                            <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['error_message']); ?>
-                            <?php endif; ?>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -243,54 +398,99 @@ $stmt->close();
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
                         <div class="card-body p-0 card-primary">
-                            <!-- <div class="card-header">
-                                
-                            </div> -->
+
                             <div class="card-header card-primary">
                                 <h3 class="card-title">Ticket ID: <?= $row['ticket_id']; ?></h3>
                             </div>
-
                             <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
+
                                 <div class="card-body col">
                                     <div class="row">
-                                        <div class="form-group col-sm-4 ">
-                                            <label for="station_input">Station ID <span class="text-danger">*</span></label>
-                                            <input value="<?php echo $row['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
+                                        <div class="form-group col-sm-3 ">
+                                            <label for="station_id">Station ID <span class="text-danger">*</span></label>
+                                            <input value="<?= $row['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
 
-
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_name">Station Name</label>
-                                            <input value="<?php echo $row['station_name'] ?>" type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
+                                            <input value="<?= $row['station_name'] ?>" type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
                                         </div>
-                                        <div class="form-group col-sm-4">
+                                        <div class="form-group col-sm-3">
                                             <label for="station_type">Station Type</label>
-                                            <input value="<?php echo $row['station_type'] ?>" type="text" name="station_type" class="form-control" id="station_type" placeholder="Station Type" readonly>
+                                            <input value="<?= $row['station_type'] ?>" type="text" name="station_type" class="form-control" id="station_type" placeholder="Station Type" readonly>
+                                        </div>
+                                        <div class="form-group col-sm-3">
+                                            <label for="province">Province</label>
+                                            <input value="<?= $row['province'] ?>" type="text" name="province" class="form-control" id="province" placeholder="Station Type" readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="form-group col-sm-8">
                                             <label for="issue_description">Issue Description</label>
-                                            <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?php echo htmlspecialchars($row['issue_description']); ?></textarea>
+                                            <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?= htmlspecialchars($row['issue_description']); ?></textarea>
                                         </div>
-
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
-                                            <div class="input-group col-12">
-                                                <div class="custom-image">
-                                                    <input type="file" id="issue_image" name="issue_image[]" class="form-control" multiple>
+                                            <input type="file" id="issue_image" name="issue_media[]" class="form-control" multiple accept="image/*,video/*">
+                                        </div>
+                                        <div class="form-group col-sm-12 row mt-2">
+                                            <?php
+                                            if (!empty($image_paths)) {
+                                                foreach ($image_paths as $image_path) {
+                                                    // Check the file extension to determine if it's an image or a video
+                                                    $file_extension = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
 
-                                                </div>
+                                                    // Determine if the file is an image or video
+                                                    if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif'])) {
+                                                        // Image
+                                                        echo '<div class="image-container col-4 col-md-1" style="">';
+                                                        echo '<img style="width:100%;" src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
+                                                        echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times;</button>';
+                                                        echo '</div>';
+                                                    } elseif (in_array($file_extension, ['mp4', 'webm', 'ogg'])) {
+                                                        // Video
+                                                        echo '<div class="image-container col-4 col-md-1" style="">';
+                                                        echo '<video style="width:100%;" src="' . htmlspecialchars($image_path) . '" controls class="issue-video"></video>';
+                                                        echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times;</button>';
+                                                        echo '</div>';
+                                                    }
+                                                }
+                                            }
+                                            ?>
+
+                                            <div class="col-12 row mt-3" id="imagePreview">
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            // Attach click event to delete buttons
+                                            document.querySelectorAll('.delete-image').forEach(item => {
+                                                item.addEventListener('click', function() {
+                                                    const imageToDelete = this.dataset.image;
+
+                                                    // If you want to visually remove the image immediately
+                                                    this.closest('.image-container').remove();
+
+                                                    // If you want to mark the image for deletion on form submit
+                                                    const input = document.createElement('input');
+                                                    input.type = 'hidden';
+                                                    input.name = 'delete_images[]'; // Use an array to collect deleted image paths
+                                                    input.value = imageToDelete;
+                                                    document.getElementById('quickForm').appendChild(input);
+                                                });
+                                            });
+                                        });
+                                    </script>
+
+                                    <div class=" row">
                                         <div class="form-group col-sm-4">
                                             <label for="issue_type">Issue Type</label>
-                                            <select name="issue_type[]" class="form-control" id="issue_type" placeholder="Select up to 2 tags" multiple>
-                                                <?php
-                                                $issue_types = ['Hardware', 'Software', 'Network', 'Dispenser', 'Unassigned'];
+                                            <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>
+                                                <?=
+                                                $issue_types = ['Hardware', 'Software', 'Network', 'Dispenser', 'ABA', 'FleetCard', 'ATG'];
                                                 $selected_issue_types = explode(', ', $row['issue_type']);
                                                 foreach ($issue_types as $issue_type) {
                                                     $selected = in_array(trim($issue_type), $selected_issue_types) ? 'selected' : '';
@@ -300,25 +500,18 @@ $stmt->close();
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
-                                            <label for="priority">SLA Category</label>
-                                            <select name="priority" id="priority" class="form-control select2bs4" style="width: 100%;">
-                                                <option value="CAT Hardware" <?php echo ($row['priority'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-                                                <option value="CAT 1*" <?php echo ($row['priority'] == 'CAT 1*') ? 'selected' : ''; ?>>CAT 1*</option>
-                                                <option value="CAT 2*" <?php echo ($row['priority'] == 'CAT 2*') ? 'selected' : ''; ?>>CAT 2*</option>
-                                                <option value="CAT 3*" <?php echo ($row['priority'] == 'CAT 3*') ? 'selected' : ''; ?>>CAT 3*</option>
-                                                <option value="CAT 4*" <?php echo ($row['priority'] == 'CAT 4*') ? 'selected' : ''; ?>>CAT 4*</option>
-                                                <option value="CAT 4 Report*" <?php echo ($row['priority'] == 'CAT 4 Report*') ? 'selected' : ''; ?>>CAT 4 Report*</option>
-                                                <option value="CAT 5*" <?php echo ($row['priority'] == 'CAT 5*') ? 'selected' : ''; ?>>CAT 5*</option>
+                                            <label for="SLA_category">SLA Category</label>
+                                            <select name="SLA_category" id="SLA_category" class="form-control " style="width: 100%;">
+
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="status">Status</label>
-                                            <select name="status" id="status" class="form-control select2bs4" style="width: 100%;">
-
-                                                <option value="On Hold" <?php echo ($row['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
-                                                <option value="In Progress" <?php echo ($row['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
-                                                <option value="Pending Vendor" <?php echo ($row['status'] == 'Pending Vendor') ? 'selected' : ''; ?>>Pending Vendor</option>
-                                                <option value="Close" <?php echo ($row['status'] == 'Close') ? 'selected' : ''; ?>>Close</option>
+                                            <select name="status" id="status" class="form-control" style="width: 100%;">
+                                                <option value="On Hold" <?= ($row['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
+                                                <option value="In Progress" <?= ($row['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
+                                                <option value="Pending Vendor" <?= ($row['status'] == 'Pending Vendor') ? 'selected' : ''; ?>>Pending Vendor</option>
+                                                <option value="Close" <?= ($row['status'] == 'Close') ? 'selected' : ''; ?>>Close</option>
                                             </select>
                                         </div>
 
@@ -327,9 +520,31 @@ $stmt->close();
                                         <div class="form-group col-sm-4">
                                             <label for="users_id">Assign</label>
                                             <select name="users_id[]" class="form-control" id="users_id" placeholder='-select-' multiple>
-
                                                 <?php
-                                                $user_query = "SELECT users_id, users_name FROM tbl_users WHERE status = 1";
+                                                // Check selected issue types
+                                                $show_hardware_software_companies = in_array('Hardware', $selected_issue_types) || in_array('Software', $selected_issue_types);
+                                                $show_network_companies = in_array('Network', $selected_issue_types);
+                                                $show_dispenser_atg_companies = in_array('Dispenser', $selected_issue_types) || in_array('ATG', $selected_issue_types);
+                                                $show_aba_companies = in_array('ABA', $selected_issue_types);
+                                                $show_fleetcard_companies = in_array('FleetCard', $selected_issue_types);
+
+                                                // Determine the company condition
+                                                if ($show_hardware_software_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'PTT Digital Thailand', 'PTT Digital Cambodia')";
+                                                } elseif ($show_network_companies) {
+                                                    $company_condition = "AND company = 'PTTCL'";
+                                                } elseif ($show_dispenser_atg_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'MBA', 'SD', 'CamSys', 'DIN')";
+                                                } elseif ($show_aba_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'ABA Bank')";
+                                                } elseif ($show_fleetcard_companies) {
+                                                    $company_condition = "AND company IN ('PTTCL', 'Wing Bank')";
+                                                } else {
+                                                    $company_condition = '';
+                                                }
+
+                                                // Fetch users based on the condition
+                                                $user_query = "SELECT users_id, users_name FROM tbl_users WHERE status = 1 $company_condition";
                                                 $user_result = $conn->query($user_query);
                                                 $assigned_users = explode(',', $row['users_id']);
                                                 if ($user_result->num_rows > 0) {
@@ -345,10 +560,10 @@ $stmt->close();
                                         </div>
                                         <div class="form-group col-sm-8">
                                             <label for="comment">Comment</label>
-                                            <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Comment"><?php echo htmlspecialchars($row['comment']); ?></textarea>
+                                            <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Comment"><?= htmlspecialchars($row['comment']); ?></textarea>
                                         </div>
                                     </div>
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" name="Submit" value="Submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
@@ -375,16 +590,16 @@ $stmt->close();
         document.addEventListener('DOMContentLoaded', function() {
             var issueTypeChoices = new Choices('#issue_type', {
                 removeItemButton: true,
-                maxItemCount: 5,
-                searchResultLimit: 3,
-                renderChoiceLimit: 3
+                maxItemCount: 100,
+                searchResultLimit: 100,
+                renderChoiceLimit: 100
             });
 
             var usersIdChoices = new Choices('#users_id', {
                 removeItemButton: true,
-                maxItemCount: 5,
-                searchResultLimit: 3,
-                renderChoiceLimit: 3
+                maxItemCount: 100,
+                searchResultLimit: 100,
+                renderChoiceLimit: 100
             });
         });
     </script>
@@ -411,15 +626,16 @@ $stmt->close();
         }
     </style>
 
-    <!-- auto fill station -->
     <script>
         $(document).ready(function() {
-            $('#station_id').blur(function() {
-                var station_id = $(this).val();
-                fetchStationDetails(station_id);
+            const $stationId = $('#station_id');
+            const $quickForm = $('#quickForm');
+
+            $stationId.on('blur', function() {
+                fetchStationDetails($(this).val());
             });
 
-            $('#quickForm').on('submit', function(event) {
+            $quickForm.on('submit', function(event) {
                 if (!this.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -429,46 +645,105 @@ $stmt->close();
         });
 
         function fetchStationDetails(station_id) {
-            $.ajax({
-                url: 'get_station_details.php',
-                type: 'POST',
-                data: {
-                    station_id: station_id
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        $('#station_name').val(response.station_name);
-                        $('#station_type').val(response.station_type);
-                    } else {
-                        $('#station_name').val('');
-                        $('#station_type').val('');
-                    }
-                }
-            });
+            $.post('get_station_details.php', {
+                station_id
+            }, function(response) {
+                const {
+                    success,
+                    station_name = '',
+                    station_type = '',
+                    province = ''
+                } = response;
+                $('#station_name').val(station_name);
+                $('#station_type').val(station_type);
+                $('#province').val(province);
+            }, 'json');
         }
 
         function showSuggestions(str) {
-            if (str == "") {
-                document.getElementById("suggestion_dropdown").innerHTML = "";
+            if (str === "") {
+                $("#suggestion_dropdown").empty();
                 return;
-            } else {
-                var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById("suggestion_dropdown").innerHTML = this.responseText;
-                    }
-                };
-                xmlhttp.open("GET", "get_suggestions.php?q=" + str, true);
-                xmlhttp.send();
             }
+            $.get("get_suggestions.php", {
+                q: str
+            }, function(response) {
+                $("#suggestion_dropdown").html(response);
+            });
         }
 
         function selectSuggestion(station_id) {
-            document.getElementById("station_id").value = station_id;
-            document.getElementById("suggestion_dropdown").innerHTML = "";
-            $('#station_id').blur();
+            $("#station_id").val(station_id).blur();
+            $("#suggestion_dropdown").empty();
         }
+    </script>
+    <!-- preview media -->
+    <script src="../scripts/previewImages.js"></script>
+    <!-- assign by issue type -->
+
+    <!-- sla category by issue type -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const issueTypeSelect = document.getElementById('issue_type');
+            const slaCategorySelect = document.getElementById('SLA_category');
+            const errorMessageNotSelectIssueType = document.getElementById('error-message-NotSelectIssueType');
+
+            const hardwareSoftwareOptions = `
+            <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+            <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+            <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+            <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+            <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+            <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+            <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+                                    
+        `;
+            const SoftwareOptions = `
+          
+            <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+            <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+            <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+            <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+            <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+            <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+                                    
+        `;
+            const hardwareOrSoftwareOptions = `
+            <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+            <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+            <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+            <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+            <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+            <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+            <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+            <option value="Other" <?= ($row['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>
+        `;
+
+            const allOptions = `  <option value="Other" <?= ($row['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>`;
+
+            function updateSlaCategoryOptions() {
+                const issueTypes = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
+                if (issueTypes.includes('Software') ) {
+                    slaCategorySelect.innerHTML = SoftwareOptions;
+                } else if (issueTypes.includes('Hardware')) {
+                    slaCategorySelect.innerHTML = sSoftwareOptions;
+                } else
+                if (issueTypes.includes('Software') && issueTypes.includes('Hardware')) {
+                    slaCategorySelect.innerHTML = hardwareSoftwareOptions;
+                } else if (issueTypes.includes('Software') || issueTypes.includes('Hardware')) {
+                    slaCategorySelect.innerHTML = hardwareOrSoftwareOptions;
+                } else {
+                    slaCategorySelect.innerHTML = allOptions;
+                }
+
+
+            }
+
+            issueTypeSelect.addEventListener('change', updateSlaCategoryOptions);
+
+            // Initialize the SLA options based on existing selections
+            updateSlaCategoryOptions();
+        });
     </script>
 
 </body>

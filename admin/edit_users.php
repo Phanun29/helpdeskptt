@@ -1,6 +1,6 @@
 <?php
-include "config.php"; // Include your database connection configuration
-include "../inc/header.php";
+
+include "../inc/header_script.php";
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id'];
@@ -21,12 +21,45 @@ if ($result_user && $result_user->num_rows > 0) {
         exit();
     }
 } else {
-    $_SESSION['error_message'] = "User not found or permission check failed.";
+    $_SESSION['error_message_users'] = "User not found or permission check failed.";
+}
+
+
+$User_id = $_GET['id'];
+
+// Check if the form was submitted for updating user information
+if (isset($_POST['change_password'])) {
+    // Get the new password and confirm password from the form
+    $newPassword = $_POST['new_password'];
+    $confirmPassword = $_POST['confirm_password'];
+
+    // Verify if the new password matches the confirm password
+    if ($newPassword === $confirmPassword) {
+        // Hash the new password
+        $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        // Prepare and execute the SQL query to update the user's password
+        $updateSql = "UPDATE tbl_users SET password = '$hashedNewPassword' WHERE users_id = $User_id";
+        if ($conn->query($updateSql) === TRUE) {
+            // Password updated successfully
+            $_SESSION['password_change_message'] = 'Password changed successfully.';
+        } else {
+            // Error updating password
+            $_SESSION['password_change_error_message'] = 'Error occurred while changing password.';
+        }
+    } else {
+        // New password and confirm password do not match
+        $_SESSION['password_change_error_message'] = 'New password and confirm password do not match.';
+    }
+
+    // Redirect back to the same page to display the alert message
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $User_id);
+    exit();
 }
 
 // Check if form is submitted for update
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
+    $User_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
 
     // Retrieve form data
     $users_name = $_POST['users_name'];
@@ -36,22 +69,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $company = $_POST['company'];
 
     // Update user query
-    $update_query = "UPDATE tbl_users SET users_name = '$users_name', email = '$email', status = '$status', rules_id = '$rules_id' ,company ='$company' WHERE users_id = $user_id";
+    $update_query = "UPDATE tbl_users SET users_name = '$users_name', email = '$email', status = '$status', rules_id = '$rules_id' ,company ='$company' WHERE users_id = $User_id";
 
     if ($conn->query($update_query) === TRUE) {
-        $_SESSION['success_message'] = "User details updated successfully.";
+        $_SESSION['success_message_users'] = "User updated successfully.";
     } else {
-        $_SESSION['error_message'] = "Error updating user details: " . $conn->error;
+        $_SESSION['error_message_users'] = "Error updating user : " . $conn->error;
     }
 
     // Redirect back to users.php
-    // header("Location: users.php");
-    // exit();
+    header("Location: users.php");
+    exit();
 }
 
 // Fetch user data based on user ID
-$user_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
-$user_query = "SELECT * FROM tbl_users WHERE users_id = $user_id";
+$User_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
+$user_query = "SELECT * FROM tbl_users WHERE users_id = $User_id";
 $user_result = $conn->query($user_query);
 $row = $user_result->fetch_assoc();
 ?>
@@ -60,9 +93,31 @@ $row = $user_result->fetch_assoc();
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php"; ?>
+    <style>
+        .show-password {
+            position: absolute;
+            top: 50px;
+            right: 25px;
+            background: none;
+            border: none;
+            color: #495057;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .show-password-confirm {
+            position: absolute;
+            top: 119px;
+            right: 25px;
+            background: none;
+            border: none;
+            color: #495057;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -76,29 +131,34 @@ $row = $user_result->fetch_assoc();
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Add Users</h1>
+                            <h1 class="m-0">update Users</h1>
                         </div>
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">Ticket</li>
-                            </ol> -->
-                            <!-- Display success/error messages -->
-                            <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['success_message']); ?>
-                            <?php endif; ?>
-                            <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['error_message']); ?>
-                            <?php endif; ?>
+                            <ol class="breadcrumb float-sm-right">
+                                <?php
+                                if (isset($_SESSION['password_change_message'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show mb-0' role='alert'>
+                                        <strong>{$_SESSION['password_change_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['password_change_message']); // Clear the message after displaying
+                                }
+
+                                if (isset($_SESSION['password_change_error_message'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show mb-0' role='alert'>
+                                        <strong>{$_SESSION['password_change_error_message']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['password_change_error_message']); // Clear the message after displaying
+                                }
+                                ?>
+                            </ol>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -112,6 +172,10 @@ $row = $user_result->fetch_assoc();
                         <div class="card-body p-0 ">
                             <div class="card-header">
                                 <a href="users.php" class="btn btn-primary ml-2">BACK</a>
+                                <button type="button" id="changePasswordBtn" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                    Change Password
+                                </button>
+
                             </div>
                             <form method="POST" action="">
                                 <div class="card-body">
@@ -119,13 +183,13 @@ $row = $user_result->fetch_assoc();
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="users_name">User Name</label>
-                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" value="<?php echo $row['users_name'] ?>" required>
+                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" value="<?= $row['users_name'] ?>" required>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="email">Email address</label>
-                                                <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" value="<?php echo $row['email'] ?>" required>
+                                                <input type="email" name="email" class="form-control" id="email" placeholder="Enter email" value="<?= $row['email'] ?>" required>
                                             </div>
                                         </div>
                                     </div>
@@ -134,8 +198,8 @@ $row = $user_result->fetch_assoc();
                                             <div class="form-group">
                                                 <label for="status">Status</label>
                                                 <select name="status" class="form-control select2bs4" style="width: 100%;" required>
-                                                    <option value="1" <?php echo ($row['status'] == '1') ? 'selected' : ''; ?>>Active</option>
-                                                    <option value="0" <?php echo ($row['status'] == '0') ? 'selected' : ''; ?>>Inactive</option>
+                                                    <option value="1" <?= ($row['status'] == '1') ? 'selected' : ''; ?>>Active</option>
+                                                    <option value="0" <?= ($row['status'] == '0') ? 'selected' : ''; ?>>Inactive</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -163,16 +227,23 @@ $row = $user_result->fetch_assoc();
                                                 <label for="company">Company</label>
 
                                                 <select class="form-control" name="company" id="company">
+                                                    <option value="ABA Bank" <?= $row['company'] == "ABA Bank" ? 'selec   ted' : '' ?>>ABA Bank</option>
+                                                    <option value="Wing Bank" <?= $row['company'] == "ABA Bank" ? "selected" : '' ?>>Wing Bank</option>
+                                                    <option value="PTTCL" <?= $row['company'] == "PTTCL" ? 'selected' : '' ?>>PTTCL</option>
+                                                    <option value="PTT Digital Thailand" <?= $row['company'] == 'PTT Digital Thailand' ? 'selected' : '' ?>>PTT Digital Thailand</option>
+                                                    <option value="PTT Digital Cambodia" <?= $row['company'] == "PTT Digital Cambodia" ? 'selected' : '' ?>>PTT Digital Cambodia</option>
+                                                    <option value="MBA" <?= $row['company'] == "MBA" ? 'selected' : '' ?>>MBA</option>
+                                                    <option value="SD" <?= $row['company'] == "SD" ? 'selected' : '' ?>>SD</option>
+                                                    <option value="CamSys" <?= $row['company'] == "CamSys" ? "selected" : '' ?>>CamSys</option>
+                                                    <option value="DIN" <?= $row['company'] == "DIN" ? "selected" : '' ?>>DIN</option>
 
-                                                    <option value="PTTCL" <?php echo $row['company'] == 'PTTCL' ? 'selected' : ''; ?>>PTTCL</option>
-                                                    <option value="PTTDigital" <?php echo $row['company']  == 'PTTDigital' ? 'selected' : ''; ?>>PTTDigital</option>
 
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="card-footer">
+                                    <div class="mt-3">
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </div>
                                 </div>
@@ -185,17 +256,91 @@ $row = $user_result->fetch_assoc();
         <?php include "../inc/footer.php"; ?>
     </div>
 
+    <!-- model chang password -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Change Password</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form action="" method="POST" onsubmit="return checkPasswordMatch();">
+
+                        <div class="form-group">
+                            <label for="new_password">New Password<span class="text-danger">*</span></label>
+                            <div id="show_password" class="d-flex justify-content-between">
+                                <input class="form-control" type="password" id="new_password" name="new_password" required>
+                                <button type="button" class="show-password btn-sm " onclick="togglePasswordVisibility()"> <i class="fas fa-eye" id="togglePasswordIcon"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="" for="confirm_password">Confirm Password<span class="text-danger">*</span></label>
+                            <div id="show_password" class="d-flex justify-content-between">
+                                <input class="form-control" type="password" id="confirm_password" name="confirm_password" required>
+                                <button type="button" class="show-password-confirm btn-sm " onclick="togglePasswordVisibilityConfirm()"> <i class="fas fa-eye" id="togglePasswordIconConfirm"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-12" style="text-align: right;">
+             
+                            <button class="btn btn-success float-end mt-3" type="submit" name="change_password">Change</button>
+                        </div>
+
+
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-   
+
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
- 
+    <!-- auto close alert -->
+    <script src="../scripts/auto_close_alert.js"></script>
+    <!-- show password -->
+    <script>
+        function togglePasswordVisibility() {
+            var passwordInput = document.getElementById("new_password");
+            var togglePasswordIcon = document.getElementById("togglePasswordIcon");
 
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                togglePasswordIcon.classList.remove("fa-eye");
+                togglePasswordIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                togglePasswordIcon.classList.remove("fa-eye-slash");
+                togglePasswordIcon.classList.add("fa-eye");
+            }
+        }
+
+        function togglePasswordVisibilityConfirm() {
+            var passwordInput = document.getElementById("confirm_password");
+            var togglePasswordIconConfirm = document.getElementById("togglePasswordIconConfirm");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                togglePasswordIconConfirm.classList.remove("fa-eye");
+                togglePasswordIconConfirm.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                togglePasswordIconConfirm.classList.remove("fa-eye-slash");
+                togglePasswordIconConfirm.classList.add("fa-eye");
+            }
+        }
+    </script>
 
 
 </body>

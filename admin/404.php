@@ -1,10 +1,9 @@
-<?php include "../inc/header.php" ?>
+<?php include "../inc/header_script.php" ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php" ?>
 
 
@@ -45,20 +44,9 @@
 
                         <p>
                             We could not find the page you were looking for.
-                            Meanwhile, you may <a href="index.php">return to dashboard</a> or try using the search form.
+                            Meanwhile, you may <a href="index.php">return to dashboard</a>.
                         </p>
 
-                        <!-- <form class="search-form">
-                            <div class="input-group">
-                                <input type="text" name="search" class="form-control" placeholder="Search">
-
-                                <div class="input-group-append">
-                                    <button type="submit" name="submit" class="btn btn-warning"><i class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                           
-                        </form> -->
                     </div>
                     <!-- /.error-content -->
                 </div>
@@ -74,48 +62,7 @@
     </div>
     <!-- ./wrapper -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Data from PHP
-        const labels = <?php echo json_encode($labels); ?>;
-        const data = <?php echo json_encode($data); ?>;
-        // Chart.js setup
-        const config = {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Tickets',
-                    data: data,
-                    backgroundColor: [
-                        'rgba(0, 166, 158, 1)', // Hardware
-                        'rgba(255, 184, 34, 1)', // Software
-                        'rgba(255, 182, 94, 1)', // Network
-                        'rgba(141, 68, 173, 1)', // Dispenser
-                        'rgba(107, 210, 190, 1)' // Unassigned
-                    ],
-                    borderColor: [
-                        'rgba(0, 166, 158, 1)',
-                        'rgba(255, 184, 34, 1)',
-                        'rgba(255, 182, 94, 1)',
-                        'rgba(141, 68, 173, 1)',
-                        'rgba(107, 210, 190, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        };
 
-        // Render the chart
-        const myChart = new Chart(document.getElementById('myChart'), config);
-    </script>
 
     <!-- jQuery -->
     <script src="../plugins/jquery/jquery.min.js"></script>

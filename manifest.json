@@ -1,6 +1,6 @@
 {
-    "name": "My HelpdeskApp",
-    "short_name": "helpdeskptt",
+    "name": "POSHelpDesk",
+    "short_name": "POS_Desk",
     "icons": [
       {
         "src": "/helpdeskptt/icons/icon-512.png",
@@ -13,4 +13,4 @@
     "background_color": "#ffffff",
     "theme_color": "#000000"
   }
-  
+    

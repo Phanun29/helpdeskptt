@@ -1,38 +1,38 @@
 <?php
-include "config.php"; // Include your database connection configuration
-include "../inc/header.php";
 
-// Fetch user details including rules_id and permissions in one query
+include "../inc/header_script.php";
+// Retrieve the current user's ID from the fetched user information
 $user_id = $fetch_info['users_id'];
 
-$query_user = "
-    SELECT u.*, r.list_user_status, r.add_user_status, r.edit_user_status, r.delete_user_status 
+// Construct the SQL query to fetch user details along with their associated permissions
+$query_user =
+    "SELECT u.*, r.list_user_status, r.add_user_status, r.edit_user_status, r.delete_user_status 
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
 
+// Execute the query
 $result_user = $conn->query($query_user);
 
+// Check if the query was successful and if any rows were returned
 if ($result_user && $result_user->num_rows > 0) {
+    // Fetch the user's data as an associative array
     $user = $result_user->fetch_assoc();
 
-    $listUsers = $user['list_user_status'];
-    $AddUsers = $user['add_user_status'];
-    $EditUsers = $user['edit_user_status'];
-    $DeleteUsers = $user['delete_user_status'];
-
-    if (!$listUsers) {
-        header("location: 404.php");
-        exit();
-    }
-    if (!$AddUsers) {
+    // Check if the user has permission to list and add users
+    if (!$user['list_user_status'] || !$user['add_user_status']) {
+        // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
-    $_SESSION['error_message'] = "User not found or permission check failed.";
+    // Set an error message if the user was not found or if permission check failed
+    $_SESSION['error_message_users'] = "User not found or permission check failed.";
+    header("location: 404.php");
+    exit();
 }
 
+// Check if the request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $users_name = $_POST['users_name'];
     $email = $_POST['email'];
@@ -40,48 +40,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rules_id = $_POST['rules_id'];
     $company = $_POST['company'];
     $status = $_POST['status'];
-
-
     // Validate inputs
     if (empty($users_name) || empty($email) || empty($password)) {
-        $_SESSION['error_message'] = "All fields are required.";
+        $_SESSION['error_message_users'] = "All fields are required.";
     } else {
         // Check if email already exists
-        $check_email_query = "SELECT * FROM tbl_users WHERE email = ?";
-        $stmt = $conn->prepare($check_email_query);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $_SESSION['error_message'] = "Email already exists.";
+        $check_email_query = "SELECT * FROM tbl_users WHERE email = '$email'";
+        $result_email = $conn->query($check_email_query);
+        if ($result_email->num_rows > 0) {
+            $_SESSION['error_message_users'] = "Email already exists.";
         } else {
             // Insert new user into the database
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $insert_query = "INSERT INTO tbl_users (users_name, email, password, rules_id,company, status) VALUES (?, ?, ?, ?, ?,?)";
-            $stmt = $conn->prepare($insert_query);
-            $stmt->bind_param("sssiss", $users_name, $email, $hashed_password, $rules_id, $company, $status);
-
-            if ($stmt->execute()) {
-                $_SESSION['success_message'] = "User added successfully.";
+            $insert_user_query = "INSERT INTO tbl_users (users_name, email, password, rules_id,company, status) 
+            VALUES ('$users_name', '$email', '$hashed_password', '$rules_id', '$company', '$status')";
+            if ($conn->query($insert_user_query) == TRUE) {
+                $_SESSION['success_message_users'] = "User added successfully.";
             } else {
-                $_SESSION['error_message'] = "Error adding user: " . $conn->error;
+                $_SESSION['error_message_users'] = "Error adding user: " . $conn->error;
             }
         }
     }
-
-    // Redirect to the same page to display messages
-    header('Location: ' . $_SERVER['REQUEST_URI']);
+    // Redirect to the page user to display messages
+    header('Location: users.php');
     exit();
 }
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <?php include "../inc/head.php"; ?>
 </head>
 
@@ -98,27 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="col-sm-6">
                             <h1 class="m-0">Add Users</h1>
                         </div>
-                        <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">Ticket</li>
-                            </ol> -->
-                            <!-- Display success/error messages -->
-                            <?php if (isset($_SESSION['success_message'])) : ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['success_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['success_message']); ?>
-                            <?php endif; ?>
-                            <?php if (isset($_SESSION['error_message'])) : ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <strong><?php echo $_SESSION['error_message']; ?></strong>
-                                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(this)"></button>
-                                </div>
-                                <?php unset($_SESSION['error_message']); ?>
-                            <?php endif; ?>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -154,17 +124,81 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="form-group">
                                                 <label for="password">Password <span class="text-danger">*</span></label>
                                                 <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                                                <button type="button" class="show-password btn-sm " onclick="togglePasswordVisibility()" id="showPasswordButton">
+                                                    <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                                </button>
                                             </div>
+
+                                            <style>
+                                                .show-password {
+                                                    position: absolute;
+                                                    top: 52px;
+                                                    right: 10px;
+                                                    /* Adjust to fit within your input field */
+                                                    transform: translateY(-50%);
+                                                    background: none;
+                                                    border: none;
+                                                    color: #495057;
+                                                    font-size: 20px;
+                                                    cursor: pointer;
+                                                }
+
+                                                .show-password.hidden {
+                                                    display: none;
+                                                }
+                                            </style>
+
+                                            <script>
+                                                function togglePasswordVisibility() {
+                                                    var passwordInput = document.getElementById('password');
+                                                    var toggleIcon = document.getElementById('togglePasswordIcon');
+                                                    var showPasswordButton = document.getElementById('showPasswordButton');
+
+                                                    if (passwordInput.type === 'password') {
+                                                        passwordInput.type = 'text';
+                                                        toggleIcon.classList.remove('fa-eye');
+                                                        toggleIcon.classList.add('fa-eye-slash');   
+                                                    } else {
+                                                        passwordInput.type = 'password';
+                                                        toggleIcon.classList.remove('fa-eye-slash');
+                                                        toggleIcon.classList.add('fa-eye');
+                                                    }
+                                                }
+
+                                                function checkPasswordInput() {
+                                                    var passwordInput = document.getElementById('password');
+                                                    var showPasswordButton = document.getElementById('showPasswordButton');
+
+                                                    // Show/hide the button based on the input field's value
+                                                    if (passwordInput.value.length > 0) {
+                                                        showPasswordButton.classList.remove('hidden');
+                                                    } else {
+                                                        showPasswordButton.classList.add('hidden');
+                                                    }
+                                                }
+
+                                                // Attach the input event listener to the password field
+                                                document.getElementById('password').addEventListener('input', checkPasswordInput);
+
+                                                // Initialize button visibility based on current input value
+                                                checkPasswordInput();
+                                            </script>
+
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="company">Company <span class="text-danger">*</span></label>
-
                                                 <select class="form-control" name="company" id="company" required>
                                                     <option value="">select</option>
+                                                    <option value="ABA Bank">ABA Bank</option>
+                                                    <option value="Wing Bank">Wing Bank</option>
                                                     <option value="PTTCL">PTTCL</option>
-                                                    <option value="PTTDigital">PTTDigital</option>
-
+                                                    <option value="PTT Digital Thailand">PTT Digital Thailand</option>
+                                                    <option value="PTT Digital Cambodia">PTT Digital Cambodia</option>
+                                                    <option value="MBA">MBA</option>
+                                                    <option value="SD">SD</option>
+                                                    <option value="CamSys">CamSys</option>
+                                                    <option value="DIN">DIN</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -185,7 +219,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
-                                                <label for="rules_id">Permission <span class="text-danger">*</span></label>
+                                                <label for="rules_id">Users Rules <span class="text-danger">*</span></label>
                                                 <select id="rules_id" name="rules_id" class="form-control" required>
                                                     <?php
                                                     $rules_query = "SELECT rules_id, rules_name FROM tbl_users_rules";
@@ -202,7 +236,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                     </div>
 
-                                    <div class="">
+                                    <div class="mt-3">
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
@@ -219,7 +253,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->

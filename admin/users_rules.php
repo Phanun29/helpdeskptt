@@ -1,19 +1,19 @@
 <?php
-include "config.php"; // Include your database connection configuration
-include "../inc/header.php";
+include "../inc/header_script.php";
 
 
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id'];
 
+// Construct the SQL query to fetch user details along with their associated permissions
 $query_user = "
     SELECT u.*, r.list_user_rules, r.add_user_rules, r.edit_user_rules, r.delete_user_rules 
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
-
+// Execute the query
 $result_user = $conn->query($query_user);
-
+// Check if the query was successful and if any rows were returned
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
@@ -21,13 +21,18 @@ if ($result_user && $result_user->num_rows > 0) {
     $AddUserRules = $user['add_user_rules'];
     $EditUserRules = $user['edit_user_rules'];
     $DeleteUserRules = $user['delete_user_rules'];
+    // Check if the user has permission to list and add station
 
     if (!$listUsersRules1) {
+        // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
+    // Set an error message if the user was not found or if permission check failed
     $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("location: 404.php");
+    exit();
 }
 
 ?>
@@ -35,8 +40,6 @@ if ($result_user && $result_user->num_rows > 0) {
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <?php include "../inc/head.php" ?>
 
@@ -59,29 +62,29 @@ if ($result_user && $result_user->num_rows > 0) {
                             <h1 class="m-0">Users Rules</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <?php
+                                if (isset($_SESSION['success_message_users_rules'])) {
+                                    echo "<div class='alert alert-success alert-dismissible fade show  mb-0' role='alert'>
+                                        <strong>{$_SESSION['success_message_users_rules']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['success_message_users_rules']); // Clear the message after displaying
+                                }
 
-                            <?php
-
-                            if (isset($_SESSION['success_message'])) {
-                                echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                unset($_SESSION['success_message']); // Clear the message after displaying
-                            }
-
-                            if (isset($_SESSION['error_message'])) {
-                                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                     <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
-                                        <span aria-hidden='true'>&times;</span>
-                                    </button>
-                                </div>";
-                                unset($_SESSION['error_message']); // Clear the message after displaying
-                            }
-                            ?>
+                                if (isset($_SESSION['error_message_users_rules'])) {
+                                    echo "<div class='alert alert-danger alert-dismissible fade show  mb-0' role='alert'>
+                                        <strong>{$_SESSION['error_message_users_rules']}</strong>
+                                        <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
+                                            <span aria-hidden='true'>&times;</span>
+                                        </button>
+                                    </div>";
+                                    unset($_SESSION['error_message_users_rules']); // Clear the message after displaying
+                                }
+                                ?>
+                            </ol>
                         </div>
                         <!-- /.col -->
                     </div><!-- /.row -->
@@ -94,28 +97,26 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="container-fluid">
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
-
                         <!-- /.card-header -->
                         <div class="card-body p-0" style="overflow: hidden;">
-
                             <?php if (isset($AddUserRules) && $AddUserRules) : ?>
                                 <div class="card-header">
-                                    <a href="add_users_rules.php" class="btn btn-primary ml-2">Add Users Rules</a>
+                                    <a href="add_users_rules.php" id="add_ticket" class="btn btn-primary ">Add Users Rules</a>
                                 </div>
                             <?php endif; ?>
                             <br>
 
-                            <table id="example1" class="table table-hover text-nowrap">
+                            <table id="tableUserRules" class="table_users_rules table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Rules Name</th>
                                         <?php if ($EditUserRules == 0 & $DeleteUserRules == 0) {
-
                                             echo "<th style='display:none;'></th>";
                                         } else {
-                                            echo " <th>Option</th>";
+                                            echo " <th>Action</th>";
                                         } ?>
+                                        <th>Rules Name</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -125,10 +126,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $i =  1;
                                     if ($station_result->num_rows > 0) {
                                         while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr>";
+                                            echo "<tr id='userRules-{$row['rules_id']}'>";
                                             echo "<td  class='py-1'>" . $i++ . "</td>";
-                                            echo "<td  class='py-1'>" . $row['rules_name'] . "</td>";
-
                                             if ($EditUserRules == 0 &  $DeleteUserRules == 0) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
@@ -139,10 +138,14 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 }
                                                 // Delete button if user has permission
                                                 if ($DeleteUserRules) {
-                                                    echo "<a href='delete_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    //echo "<a href='delete_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
+                                                    echo "<button data-id='" . $row['rules_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
+                                            echo "<td  class='py-1'>" . $row['rules_name'] . "</td>";
+
+
                                             echo "</tr>";
                                         }
                                     } else {
@@ -183,6 +186,8 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
@@ -190,22 +195,67 @@ if ($result_user && $result_user->num_rows > 0) {
     <!-- Page specific script -->
     <script>
         $(function() {
-            $("#example1").DataTable({
-                // "responsive": true,
-
-                "lengthChange": false,
+            $("#tableUserRules").DataTable({
+                "responsive": true,
+                "lengthChange": true,
                 "autoWidth": false,
                 "buttons": [, "csv", "excel", "pdf"]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            $('#example2').DataTable({
+            }).buttons().container().appendTo('#tableUserRules_wrapper .col-md-6:eq(0)');
+            $('#tableUserRules2').DataTable({
                 "paging": true,
-                "lengthChange": false,
+                "lengthChange": true,
                 "searching": false,
                 "ordering": true,
                 "info": true,
                 "autoWidth": false,
                 "responsive": true,
             });
+        });
+    </script>
+    <!-- auto close alert -->
+    <script src="../scripts/auto_close_alert.js"></script>
+    <!-- delete user rules-->
+    <script>
+        $(document).ready(function() {
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function() {
+                var userRules = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this users rules!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'delete_users_rules.php', // Adjust URL to your delete script
+                            type: 'POST',
+                            data: {
+                                id: userRules
+                            },
+                            success: function(response) {
+                                console.log('Response:', response); // Debugging: Log the response
+                                if (response === 'success') {
+                                    console.log('Removing row with ID: #userRules-' + userRules); // Log the row being removed
+                                    $('#userRules-' + userRules).remove(); // Remove the row from the table
+                                    Swal.fire('Deleted!', 'Your user Rules has been deleted.', 'success');
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete user rules.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                                Swal.fire('Error!', 'An error occurred while deleting the user rules.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+
         });
     </script>
 </body>

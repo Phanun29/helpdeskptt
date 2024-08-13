@@ -1,6 +1,104 @@
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin-top: 50px;
+html, body{
+  scroll-behavior: smooth;
+}
+
+/* tabel  */
+td,textarea {
+  font-family: "Khmer", sans-serif;
+}
+
+.col-sm-12 {
+  overflow: auto;
+}
+
+.dataTables_wrapper>.row:first-child {
+  margin: 0 10px;
+}
+.dataTables_wrapper>.row:last-child {
+  margin: 0 10px;
+}
+/* tabel  */
+
+/* suggestion_dropdown station id */
+.dropdown-content {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+.dropdown-content p {
+  color: black;
+  padding: 8px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  margin: 0;
+}
+.dropdown-content p:hover {
+  background-color: #f1f1f1;
+}
+/* suggestion_dropdown  station id*/
+
+/* image ticket */
+.image-container {
+  width: 200px;
+  overflow: hidden;
+  border-radius: 5px;
+  float: left;
+  position: relative;
+}
+
+.preview-image, .preview-video {
+    width: 100%;
+    height: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 0px;
+  right: 3px;
+  background: none;
+  border: none;
+  color: red;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+/* /image ticket */
+
+/* table ticket */
+#example1_filter{
+  text-align: right;
+}
+#table_ticket{
+  overflow: auto;
+}
+
+
+.table_users_rules{
+  width: 60%;
+}
+.form-group{
+  margin-bottom: 0;
+}
+@media (max-width: 767px) {
+  #example1_filter{
+      text-align: left;
   }
-  
+
+}
+@media screen and (max-width: 767px) {
+  #button_export.dt-buttons {
+    /* width: 40%;
+    margin-bottom:0; */
+  }
+  #add_ticket ,.button-filter{
+    margin-bottom: .5em;
+  }
+  .table_users_rules{
+    width: 100%;
+  }
+}
+
+
