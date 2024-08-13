@@ -35,11 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_id = $_POST['station_id'];
     $issue_description = $_POST['issue_description'];
     $issue_type = isset($_POST['issue_type']) ? implode(',', $_POST['issue_type']) : null; // Convert array to string without spaces
-    // if ($SLA_category != null) {
     $SLA_category = $_POST['SLA_category'] ?? null;
-    // } else {
-    //     $SLA_category = null;
-    // }
     $status = 'Open';
     $users_id = $fetch_info['users_id'];
     $user_create_ticket = $fetch_info['users_id'];
