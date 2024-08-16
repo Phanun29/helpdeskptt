@@ -113,6 +113,18 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                             <p>Track</p>
                         </a>
                     </li>
+                <?php
+                endif;
+                if (!$listTicketAssign) :
+                ?>
+                    <li class="nav-item">
+                        <a href="telegram_bot.php" <?php if ($current_menu === 'telegram_bot.php') echo 'class="nav-link active"';
+                                            else echo 'class="nav-link"'; ?>>
+       
+                            <i class=" nav-icon fas fa-robot  " aria-hidden="true"></i>
+                            <p>Telegram Bot</p>
+                        </a>
+                    </li>
                 <?php endif; ?>
                 <li class="nav-item">
 

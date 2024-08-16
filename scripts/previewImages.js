@@ -1,13 +1,10 @@
 var selectedFiles = []; // Array to store selected files
 
-// Function to create preview for each selected file
-function previewImages(event) {
+// Function to create preview for each selected or pasted file
+function previewFiles(files) {
     var previewContainer = document.getElementById('imagePreview');
-    var files = event.target.files;
-    var newFiles = Array.from(files); // Convert FileList to array
 
-    // Add newly selected files to the selectedFiles array
-    newFiles.forEach(function (file) {
+    files.forEach(function (file) {
         selectedFiles.push(file);
 
         var reader = new FileReader();
@@ -61,23 +58,26 @@ function updateFileInput() {
     document.getElementById('issue_image').files = newFileList.files;
 }
 
-// Bind previewImages function to file input change event
-document.getElementById('issue_image').addEventListener('change', previewImages);
+// Handle file selection through file input
+document.getElementById('issue_image').addEventListener('change', function (event) {
+    var files = Array.from(event.target.files);
+    previewFiles(files);
+});
 
-// Handle form submission to save images
-document.getElementById('imageForm').addEventListener('submit', function (event) {
-    event.preventDefault();
+// Handle pasting of images
+document.addEventListener('paste', function (event) {
+    var items = event.clipboardData.items;
+    var newFiles = [];
 
-    // Simulate saving all selected files (for demonstration purposes)
-    console.log("Selected Files:", selectedFiles);
-    // Here you would typically submit the form using AJAX or other methods
-    // to save the selected files on the server.
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+            var blob = items[i].getAsFile();
+            var file = new File([blob], `pasted_${Date.now()}.jpg`, { type: blob.type });
+            newFiles.push(file);
+        }
+    }
 
-    // Reset selectedFiles array for next submission
-    selectedFiles = [];
-
-    // Clear previews after saving (optional)
-    document.getElementById('imagePreview').innerHTML = '';
-    // Clear file input
-    document.getElementById('issue_image').value = '';
+    if (newFiles.length > 0) {
+        previewFiles(newFiles);
+    }
 });
