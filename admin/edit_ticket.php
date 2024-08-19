@@ -24,10 +24,42 @@ if ($result_user->num_rows > 0) {
     exit();
 }
 
-// Initialize session for storing messages
-$id = $_GET['id'] ?? null; // Assuming you're passing the ticket ID through a GET parameter
+if (isset($_GET['id'])) {
+    $encoded_id = $_GET['id'];
 
-if (!is_numeric($id)) {
+    // Fetch all possible IDs and their encoded versions
+    $id_query = "SELECT id FROM tbl_ticket";
+    $result = $conn->query($id_query);
+
+    $id = null;
+
+    // Iterate through all the rows to find the matching encoded ID
+    while ($row = $result->fetch_assoc()) {
+        $hashed_id = hash('sha256', $row['id']);
+        $check_encoded_id = substr(base64_encode($hashed_id), 0, 20);
+
+        if ($check_encoded_id === $encoded_id) {
+            $id = $row['id'];
+            break;
+        }
+    }
+    if ($id !== null) {
+        // Fetch the station data with the matched ID
+        $sql = "SELECT * FROM tbl_ticket WHERE id = $id";
+        $station_result = $conn->query($sql);
+
+        if ($station_result) {
+            $station = $station_result->fetch_assoc();
+            // Now you can work with $station, which contains the fetched data
+        } else {
+            echo "Error fetching station data.";
+        }
+    } else {
+        echo "No matching station found.";
+        header("Location: 404.php");
+        exit();
+    }
+} else {
     header("Location: 404.php");
     exit();
 }
@@ -36,7 +68,7 @@ if (!is_numeric($id)) {
 date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Gather form data
-    $id = $_GET['id'] ?? null; // Ensure to sanitize and validate $id
+    //   $id = $_GET['id'] ?? null; // Ensure to sanitize and validate $id
     $station_id = $_POST['station_id'] ?? null;
     $station_name = $_POST['station_name'] ?? null;
     $station_type = $_POST['station_type'] ?? null;
@@ -352,9 +384,9 @@ $ticket_query = "SELECT t.*, GROUP_CONCAT(ti.image_path SEPARATOR ',') AS image_
                  GROUP BY t.ticket_id";
 $ticket_result = $conn->query($ticket_query);
 if ($ticket_result->num_rows > 0) {
-    $row = $ticket_result->fetch_assoc();
+    $ticket = $ticket_result->fetch_assoc();
     // Extract image paths from the result
-    $image_paths = !empty($row['image_paths']) ? explode(',', $row['image_paths']) : [];
+    $image_paths = !empty($ticket['image_paths']) ? explode(',', $ticket['image_paths']) : [];
 } else {
     $_SESSION['error_message_ticket'] = "Ticket not found.";
     header("Location: 404.php");
@@ -400,7 +432,7 @@ if ($ticket_result->num_rows > 0) {
                         <div class="card-body p-0 card-primary">
 
                             <div class="card-header card-primary">
-                                <h3 class="card-title">Ticket ID: <?= $row['ticket_id']; ?></h3>
+                                <h3 class="card-title">Ticket ID: <?= $ticket['ticket_id']; ?></h3>
                             </div>
                             <form method="POST" id="quickForm" novalidate="novalidate" enctype="multipart/form-data">
 
@@ -408,27 +440,27 @@ if ($ticket_result->num_rows > 0) {
                                     <div class="row">
                                         <div class="form-group col-sm-3 ">
                                             <label for="station_id">Station ID <span class="text-danger">*</span></label>
-                                            <input value="<?= $row['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
+                                            <input value="<?= $ticket['station_id'] ?>" class="form-control" type="text" name="station_id" id="station_id" autocomplete="off" onkeyup="showSuggestions(this.value)" raedonly>
                                             <div id="suggestion_dropdown" class="dropdown-content"></div>
                                         </div>
 
                                         <div class="form-group col-sm-3">
                                             <label for="station_name">Station Name</label>
-                                            <input value="<?= $row['station_name'] ?>" type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
+                                            <input value="<?= $ticket['station_name'] ?>" type="text" name="station_name" class="form-control" id="station_name" placeholder="Station Name" readonly>
                                         </div>
                                         <div class="form-group col-sm-3">
                                             <label for="station_type">Station Type</label>
-                                            <input value="<?= $row['station_type'] ?>" type="text" name="station_type" class="form-control" id="station_type" placeholder="Station Type" readonly>
+                                            <input value="<?= $ticket['station_type'] ?>" type="text" name="station_type" class="form-control" id="station_type" placeholder="Station Type" readonly>
                                         </div>
                                         <div class="form-group col-sm-3">
                                             <label for="province">Province</label>
-                                            <input value="<?= $row['province'] ?>" type="text" name="province" class="form-control" id="province" placeholder="Station Type" readonly>
+                                            <input value="<?= $ticket['province'] ?>" type="text" name="province" class="form-control" id="province" placeholder="Station Type" readonly>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="form-group col-sm-8">
                                             <label for="issue_description">Issue Description</label>
-                                            <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?= htmlspecialchars($row['issue_description']); ?></textarea>
+                                            <textarea id="issue_description" name="issue_description" class="form-control" rows="3" placeholder="Issue Description"><?= ($ticket['issue_description']); ?></textarea>
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
@@ -445,14 +477,14 @@ if ($ticket_result->num_rows > 0) {
                                                     if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif'])) {
                                                         // Image
                                                         echo '<div class="image-container col-4 col-md-1" style="">';
-                                                        echo '<img style="width:100%;" src="' . htmlspecialchars($image_path) . '" alt="Issue Image" class="issue-image">';
-                                                        echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times;</button>';
+                                                        echo '<img style="width:100%;" src="' . ($image_path) . '" alt="Issue Image" class="issue-image">';
+                                                        echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . ($image_path) . '">&times;</button>';
                                                         echo '</div>';
                                                     } elseif (in_array($file_extension, ['mp4', 'webm', 'ogg'])) {
                                                         // Video
                                                         echo '<div class="image-container col-4 col-md-1" style="">';
-                                                        echo '<video style="width:100%;" src="' . htmlspecialchars($image_path) . '" controls class="issue-video"></video>';
-                                                        echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . htmlspecialchars($image_path) . '">&times;</button>';
+                                                        echo '<video style="width:100%;" src="' . ($image_path) . '" controls class="issue-video"></video>';
+                                                        echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . ($image_path) . '">&times;</button>';
                                                         echo '</div>';
                                                     }
                                                 }
@@ -491,7 +523,7 @@ if ($ticket_result->num_rows > 0) {
                                             <select name="issue_type[]" id="issue_type" class="form-control" placeholder="-Select-" multiple required>
                                                 <?=
                                                 $issue_types = ['Hardware', 'Software', 'Network', 'Dispenser', 'ABA', 'FleetCard', 'ATG'];
-                                                $selected_issue_types = explode(', ', $row['issue_type']);
+                                                $selected_issue_types = explode(', ', $ticket['issue_type']);
                                                 foreach ($issue_types as $issue_type) {
                                                     $selected = in_array(trim($issue_type), $selected_issue_types) ? 'selected' : '';
                                                     echo "<option value=\"$issue_type\" $selected>$issue_type</option>";
@@ -508,10 +540,10 @@ if ($ticket_result->num_rows > 0) {
                                         <div class="form-group col-sm-4">
                                             <label for="status">Status</label>
                                             <select name="status" id="status" class="form-control" style="width: 100%;">
-                                                <option value="On Hold" <?= ($row['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
-                                                <option value="In Progress" <?= ($row['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
-                                                <option value="Pending Vendor" <?= ($row['status'] == 'Pending Vendor') ? 'selected' : ''; ?>>Pending Vendor</option>
-                                                <option value="Close" <?= ($row['status'] == 'Close') ? 'selected' : ''; ?>>Close</option>
+                                                <option value="On Hold" <?= ($ticket['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
+                                                <option value="In Progress" <?= ($ticket['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
+                                                <option value="Pending Vendor" <?= ($ticket['status'] == 'Pending Vendor') ? 'selected' : ''; ?>>Pending Vendor</option>
+                                                <option value="Close" <?= ($ticket['status'] == 'Close') ? 'selected' : ''; ?>>Close</option>
                                             </select>
                                         </div>
 
@@ -546,7 +578,7 @@ if ($ticket_result->num_rows > 0) {
                                                 // Fetch users based on the condition
                                                 $user_query = "SELECT users_id, users_name FROM tbl_users WHERE status = 1 $company_condition";
                                                 $user_result = $conn->query($user_query);
-                                                $assigned_users = explode(',', $row['users_id']);
+                                                $assigned_users = explode(',', $ticket['users_id']);
                                                 if ($user_result->num_rows > 0) {
                                                     while ($user_row = $user_result->fetch_assoc()) {
                                                         $selected = in_array($user_row['users_id'], $assigned_users) ? 'selected' : '';
@@ -560,7 +592,7 @@ if ($ticket_result->num_rows > 0) {
                                         </div>
                                         <div class="form-group col-sm-8">
                                             <label for="comment">Comment</label>
-                                            <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Comment"><?= htmlspecialchars($row['comment']); ?></textarea>
+                                            <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Comment"><?= htmlspecialchars($ticket['comment']); ?></textarea>
                                         </div>
                                     </div>
                                     <div class="mt-3">
@@ -689,44 +721,44 @@ if ($ticket_result->num_rows > 0) {
             const errorMessageNotSelectIssueType = document.getElementById('error-message-NotSelectIssueType');
 
             const hardwareSoftwareOptions = `
-            <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-            <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
-            <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
-            <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
-            <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
-            <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
-            <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+            <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+            <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+            <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+            <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+            <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+            <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+            <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
                                     
         `;
             const SoftwareOptions = `
           
-            <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
-            <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
-            <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
-            <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
-            <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
-            <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+            <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+            <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+            <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+            <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+            <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+            <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
                                     
         `;
             const hardwareOrSoftwareOptions = `
-            <option value="CAT Hardware" <?= ($row['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-            <option value="CAT 1" <?= ($row['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
-            <option value="CAT 2" <?= ($row['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
-            <option value="CAT 3" <?= ($row['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
-            <option value="CAT 4" <?= ($row['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
-            <option value="CAT 4 Report" <?= ($row['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
-            <option value="CAT 5" <?= ($row['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
-            <option value="Other" <?= ($row['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>
+            <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+            <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+            <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+            <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+            <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+            <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+            <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+            <option value="Other" <?= ($ticket['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>
         `;
 
-            const allOptions = `  <option value="Other" <?= ($row['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>`;
+            const allOptions = `  <option value="Other" <?= ($ticket['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>`;
 
             function updateSlaCategoryOptions() {
                 const issueTypes = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
-                if (issueTypes.includes('Software') ) {
+                if (issueTypes.includes('Software')) {
                     slaCategorySelect.innerHTML = SoftwareOptions;
                 } else if (issueTypes.includes('Hardware')) {
-                    slaCategorySelect.innerHTML = sSoftwareOptions;
+                    slaCategorySelect.innerHTML = SoftwareOptions;
                 } else
                 if (issueTypes.includes('Software') && issueTypes.includes('Hardware')) {
                     slaCategorySelect.innerHTML = hardwareSoftwareOptions;

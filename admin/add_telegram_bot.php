@@ -19,21 +19,22 @@ if ($result_user && $result_user->num_rows > 0) {
         exit();
     }
 } else {
-    $_SESSION['error_message'] = "User not found or permission check failed.";
+    $_SESSION['error_message_telegram_bot'] = "User not found or permission check failed.";
 }
 // Check if the request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $bot_name = $_POST['bot_name'];
     $token = $_POST['token'];
     $chat_id = $_POST['chat_id'];
-    
 
 
-    $insert_user_query = "INSERT INTO tbl_telegram_bot (token, chat_id ) 
-            VALUES ('$token', '$chat_id')";
+
+    $insert_user_query = "INSERT INTO tbl_telegram_bot (bot_name,token, chat_id ) 
+            VALUES ('$bot_name','$token', '$chat_id')";
     if ($conn->query($insert_user_query) == TRUE) {
-        $_SESSION['success_message_users'] = "bot added successfully.";
+        $_SESSION['success_message_telegram_bot'] = "telegram_bot added successfully.";
     } else {
-        $_SESSION['error_message_users'] = "Error adding user: " . $conn->error;
+        $_SESSION['error_message_telegram_bot'] = "Error adding telegram_bot: " . $conn->error;
     }
 
 
@@ -76,17 +77,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                         <div class="card-body p-0 ">
                             <div class="card-header">
-                                <a href="users.php" class="btn btn-primary ml-2">BACK</a>
+                                <a href="telegram_bot.php" class="btn btn-primary ml-2">BACK</a>
                             </div>
                             <form method="POST" action="">
                                 <div class="card-body">
                                     <div class="row">
-                                        <!-- <div class="col-sm-12">
+                                        <div class="col-sm-12">
                                             <div class="form-group">
-                                                <label for="users_name"> Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" >
+                                                <label for="bot_name"> Name <span class="text-danger">*</span></label>
+                                                <input type="text" name="bot_name" class="form-control" id="bot_name" placeholder="Enter Bot Name">
                                             </div>
-                                        </div> -->
+                                        </div>
                                         <div class="col-sm-12">
                                             <div class="form-group">
                                                 <label for="token">token <span class="text-danger">*</span></label>

@@ -34,10 +34,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
 
     // Initialize permission statuses to 0 (not allowed)
     $permissions_status = [
-        'add_user' => 0, 'edit_user' => 0, 'delete_user' => 0, 'list_user' => 0,
-        'add_ticket' => 0, 'edit_ticket' => 0, 'delete_ticket' => 0, 'list_ticket' => 0, 'list_ticket_assign' => 0,
-        'add_station' => 0, 'edit_station' => 0, 'delete_station' => 0, 'list_station' => 0,
-        'add_user_rules' => 0, 'edit_user_rules' => 0, 'delete_user_rules' => 0, 'list_user_rules' => 0
+        'add_user' => 0,
+        'edit_user' => 0,
+        'delete_user' => 0,
+        'list_user' => 0,
+        'add_ticket' => 0,
+        'edit_ticket' => 0,
+        'delete_ticket' => 0,
+        'list_ticket' => 0,
+        'list_ticket_assign' => 0,
+        'add_station' => 0,
+        'edit_station' => 0,
+        'delete_station' => 0,
+        'list_station' => 0,
+        'add_user_rules' => 0,
+        'edit_user_rules' => 0,
+        'delete_user_rules' => 0,
+        'list_user_rules' => 0,
+        'list_ticket_track' => 0,
+        'list_telegram_bot' => 0
     ];
 
     // Set selected permissions to 1 (allowed)
@@ -53,13 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         (rules_name, add_user_status, edit_user_status, delete_user_status, list_user_status, 
          add_ticket_status, edit_ticket_status, delete_ticket_status, list_ticket_status, list_ticket_assign,
          add_station, edit_station, delete_station, list_station, 
-         add_user_rules, edit_user_rules, delete_user_rules, list_user_rules) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         add_user_rules, edit_user_rules, delete_user_rules, list_user_rules ,list_ticket_track, list_telegram_bot) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     // Bind parameters to the prepared statement
     $stmt->bind_param(
-        "siiiiiiiiiiiiiiiii",
+        "siiiiiiiiiiiiiiiiiii",
         $rules_name,
         $permissions_status['add_user'],
         $permissions_status['edit_user'],
@@ -77,7 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         $permissions_status['add_user_rules'],
         $permissions_status['edit_user_rules'],
         $permissions_status['delete_user_rules'],
-        $permissions_status['list_user_rules']
+        $permissions_status['list_user_rules'],
+        $permissions_status['list_ticket_track'],
+        $permissions_status['list_telegram_bot']
     );
 
     // Execute the prepared statement and set session messages based on success or failure
@@ -333,6 +350,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                             </div>
                                         </div>
 
+                                    </div>
+                                    <div class="row card-header">
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_ticket_track">List Ticket Track</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_ticket_track" id="list_ticket_track">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_telegram_bot">List Ticket Track</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_telegram_bot" id="list_telegram_bot">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="mt-3">
                                         <button type="submit" name="submit" class="btn btn-primary">Submit</button>

@@ -121,12 +121,12 @@ if ($result_user && $result_user->num_rows > 0) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $station_query = "SELECT * FROM tbl_users_rules ORDER BY rules_id DESC ";
-                                    $station_result = $conn->query($station_query);
+                                    $users_rules_query = "SELECT * FROM tbl_users_rules ORDER BY rules_id DESC ";
+                                    $users_rules_result = $conn->query($users_rules_query);
                                     $i =  1;
-                                    if ($station_result->num_rows > 0) {
-                                        while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr id='userRules-{$row['rules_id']}'>";
+                                    if ($users_rules_result->num_rows > 0) {
+                                        while ($users_rules = $users_rules_result->fetch_assoc()) {
+                                            echo "<tr id='userRules-{$users_rules['rules_id']}'>";
                                             echo "<td  class='py-1'>" . $i++ . "</td>";
                                             if ($EditUserRules == 0 &  $DeleteUserRules == 0) {
                                                 echo "<td style='display:none;'></td>";
@@ -134,16 +134,24 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 echo "<td  class='py-1'>";
                                                 // Edit button if user has permission
                                                 if ($EditUserRules) {
-                                                    echo "<a href='edit_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                    // Your original ID
+                                                    $original_id = $users_rules['rules_id'];
+
+                                                    // Hash the ID to make it unique and consistent
+                                                    $hashed_id = hash('sha256', $original_id);
+
+                                                    // Encode the hash and take the first 10 characters
+                                                    $encoded_id = substr(base64_encode($hashed_id), 0, 20);
+                                                    echo "<a href='edit_users_rules.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 // Delete button if user has permission
                                                 if ($DeleteUserRules) {
                                                     //echo "<a href='delete_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
-                                                    echo "<button data-id='" . $row['rules_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
+                                                    echo "<button data-id='" . $users_rules['rules_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
-                                            echo "<td  class='py-1'>" . $row['rules_name'] . "</td>";
+                                            echo "<td  class='py-1'>" . $users_rules['rules_name'] . "</td>";
 
 
                                             echo "</tr>";

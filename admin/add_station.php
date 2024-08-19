@@ -94,15 +94,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <form method="POST">
                                 <div class="card-body ">
                                     <div class="row">
-                                        <div class="form-group col-12 col-md-6">
+                                        <div class="form-group col-12 col-md-12">
                                             <label for="exampleInputStatioID">Station ID <span class="text-danger">*</span></label>
                                             <input type="text" name="station_id" class="form-control" id="exampleInputStatioID" placeholder="Station ID" required>
                                         </div>
-                                        <div class="form-group col-12 col-md-6">
+                                        <div class="form-group col-12 col-md-12">
                                             <label for="exampleInputStatioName">Station Name <span class="text-danger">*</span></label>
                                             <input type="text" name="station_name" class="form-control" id="exampleInputStatioName" placeholder="Station Name" required>
                                         </div>
-                                        <div class="form-group col-12 col-md-6">
+                                        <div class="form-group col-12 col-md-12">
                                             <label>Station Type <span class="text-danger">*</span></label>
                                             <select name="station_type" class="form-control select2bs4" style="width: 100%;" required>
                                                 <option value="">-Select-</option>
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="DODO">DODO</option>
                                             </select>
                                         </div>
-                                        <div class="form-group col-12 col-md-6">
+                                        <div class="form-group col-12 col-md-12">
                                             <label>Province <span class="text-danger">*</span></label>
                                             <select name="province" class="form-control" style="width: 100%;" required>
                                                 <option value="">-Select-</option>

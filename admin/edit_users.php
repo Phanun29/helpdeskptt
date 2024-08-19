@@ -25,7 +25,7 @@ if ($result_user && $result_user->num_rows > 0) {
 }
 
 
-$User_id = $_GET['id'];
+// $User_id = $_GET['id'];
 
 // Check if the form was submitted for updating user information
 if (isset($_POST['change_password'])) {
@@ -56,10 +56,44 @@ if (isset($_POST['change_password'])) {
     header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $User_id);
     exit();
 }
+if (isset($_GET['id'])) {
+    $encoded_id = $_GET['id'];
 
+    // Fetch all possible IDs and their encoded versions
+    $id_query = "SELECT users_id FROM tbl_users";
+    $result = $conn->query($id_query);
+
+    $id = null;
+    // Iterate through all the rows to find the matching encoded ID
+    while ($row = $result->fetch_assoc()) {
+        $hashed_id = hash('sha256', $row['users_id']);
+        $check_encoded_id = substr(base64_encode($hashed_id), 0, 20);
+
+        if ($check_encoded_id === $encoded_id) {
+            $User_id = $row['users_id'];
+            break;
+        }
+    }
+} else {
+    // Redirect back to the user list page if no user ID is provided
+    header("Location: users.php");
+    exit();
+}
+
+// Fetch user data based on user ID
+if ($User_id) {
+    $user_query = "SELECT* FROM tbl_users WHERE users_id = $User_id";
+    $user_result = $conn->query($user_query);
+    if ($user_result->num_rows > 0) {
+        $row = $user_result->fetch_assoc();
+    }
+} else {
+    header("Location: 404.php");
+    exit();
+}
 // Check if form is submitted for update
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $User_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
+    // $User_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
 
     // Retrieve form data
     $users_name = $_POST['users_name'];
@@ -82,11 +116,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 
-// Fetch user data based on user ID
-$User_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
-$user_query = "SELECT * FROM tbl_users WHERE users_id = $User_id";
-$user_result = $conn->query($user_query);
-$row = $user_result->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -285,7 +314,7 @@ $row = $user_result->fetch_assoc();
                             </div>
                         </div>
                         <div class="col-12" style="text-align: right;">
-             
+
                             <button class="btn btn-success float-end mt-3" type="submit" name="change_password">Change</button>
                         </div>
 

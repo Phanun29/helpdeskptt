@@ -23,15 +23,15 @@ if ($result_user && $result_user->num_rows > 0) {
     $DeleteUsers = $user['delete_user_status'];
 
     if (!$listUsers) {
-         // Redirect to a 404 error page if permissions are insufficient
+        // Redirect to a 404 error page if permissions are insufficient
         header("location: 404.php");
         exit();
     }
 } else {
-      // Set an error message if the user was not found or if permission check failed
-      $_SESSION['error_message'] = "User not found or permission check failed.";
-      header("location: 404.php");
-      exit();
+    // Set an error message if the user was not found or if permission check failed
+    $_SESSION['error_message'] = "User not found or permission check failed.";
+    header("location: 404.php");
+    exit();
 }
 ?>
 <!DOCTYPE html>
@@ -110,7 +110,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <?php if ($EditUsers == 0 && $DeleteUsers == 0) : ?>
                                             <th style='display:none;'></th>
                                         <?php else : ?>
-                                            <th>Option</th>
+                                            <th>Action</th>
                                         <?php endif; ?>
                                         <th>Users Name</th>
                                         <th>Email</th>
@@ -130,8 +130,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $user_result = $conn->query($user_query);
                                     $i = 1;
                                     if ($user_result->num_rows > 0) {
-                                        while ($row = $user_result->fetch_assoc()) {
-                                            echo "<tr id='user-" . $row['users_id'] . "'>";
+                                        while ($user = $user_result->fetch_assoc()) {
+                                            echo "<tr id='user-" . $user['users_id'] . "'>";
                                             echo "<td class='py-1'>" . $i++ . "</td>";
                                             if ($EditUsers == 0 && $DeleteUsers == 0) {
                                                 echo "<td style='display:none;'></td>";
@@ -139,19 +139,27 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 echo "<td class='py-1'>";
                                                 // Edit button if user has permission
                                                 if ($EditUsers) {
-                                                    echo "<a href='edit_users.php?id=" . $row['users_id'] . "' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                    // Your original ID
+                                                    $original_id = $user['users_id'];
+
+                                                    // Hash the ID to make it unique and consistent
+                                                    $hashed_id = hash('sha256', $original_id);
+
+                                                    // Encode the hash and take the first 10 characters
+                                                    $encoded_id = substr(base64_encode($hashed_id), 0, 20);
+                                                    echo "<a href='edit_users.php?id={$encoded_id}' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 // Delete button if user has permission
                                                 if ($DeleteUsers) {
-                                                    echo "<button data-id='" . $row['users_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
+                                                    echo "<button data-id='" . $user['users_id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
-                                            echo "<td class='py-1'>" . $row['users_name'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['email'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['company'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['rules_name'] . "</td>"; // Display rules_name instead of rules_id
-                                            echo "<td class='py-1'>" . ($row['status'] === '1' ? 'active' : 'Inactive') . "</td>";
+                                            echo "<td class='py-1'>" . $user['users_name'] . "</td>";
+                                            echo "<td class='py-1'>" . $user['email'] . "</td>";
+                                            echo "<td class='py-1'>" . $user['company'] . "</td>";
+                                            echo "<td class='py-1'>" . $user['rules_name'] . "</td>"; // Display rules_name instead of rules_id
+                                            echo "<td class='py-1'>" . ($user['status'] === '1' ? 'active' : 'Inactive') . "</td>";
 
                                             echo "</tr>";
                                         }

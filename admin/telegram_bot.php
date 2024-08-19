@@ -46,29 +46,29 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Users Rules</h1>
+                            <h1 class="m-0">Telegram Bot</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <?php
-                                if (isset($_SESSION['success_message_users_rules'])) {
+                                if (isset($_SESSION['success_message_telegram_bot'])) {
                                     echo "<div class='alert alert-success alert-dismissible fade show  mb-0' role='alert'>
-                                        <strong>{$_SESSION['success_message_users_rules']}</strong>
+                                        <strong>{$_SESSION['success_message_telegram_bot']}</strong>
                                         <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
                                             <span aria-hidden='true'>&times;</span>
                                         </button>
                                     </div>";
-                                    unset($_SESSION['success_message_users_rules']); // Clear the message after displaying
+                                    unset($_SESSION['success_message_telegram_bot']); // Clear the message after displaying
                                 }
 
-                                if (isset($_SESSION['error_message_users_rules'])) {
+                                if (isset($_SESSION['error_message_telegram_bot'])) {
                                     echo "<div class='alert alert-danger alert-dismissible fade show  mb-0' role='alert'>
-                                        <strong>{$_SESSION['error_message_users_rules']}</strong>
+                                        <strong>{$_SESSION['error_message_telegram_bot']}</strong>
                                         <button type='button' class='close' data-dismiss='modal' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'>
                                             <span aria-hidden='true'>&times;</span>
                                         </button>
                                     </div>";
-                                    unset($_SESSION['error_message_users_rules']); // Clear the message after displaying
+                                    unset($_SESSION['error_message_telegram_bot']); // Clear the message after displaying
                                 }
                                 ?>
                             </ol>
@@ -97,35 +97,41 @@ if ($result_user && $result_user->num_rows > 0) {
                                 <thead>
                                     <tr>
                                         <th>#</th>
-
                                         <th>Action</th>
-
-                                        <th>token</th>
-                                        <th>chat id</th>
+                                        <th>Bot Name</th>
+                                        <th>Token</th>
+                                        <th>Chat ID</th>
 
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $station_query = "SELECT * FROM tbl_telegram_bot ORDER BY id DESC ";
-                                    $station_result = $conn->query($station_query);
+                                    $telegram_bot_query = "SELECT * FROM tbl_telegram_bot ORDER BY id DESC ";
+                                    $telegram_bot_result = $conn->query($telegram_bot_query);
                                     $i =  1;
-                                    if ($station_result->num_rows > 0) {
-                                        while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr id='userRules-{$row['id']}'>";
+                                    if ($telegram_bot_result->num_rows > 0) {
+                                        while ($telegram_bot = $telegram_bot_result->fetch_assoc()) {
+                                            echo "<tr id='telegram_bot-{$telegram_bot['id']}'>";
                                             echo "<td  class='py-1'>" . $i++ . "</td>";
 
                                             echo "<td  class='py-1'>";
-                                            // Edit button if user has permission
 
-                                            echo "<a href='edit_users_rules.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                            // Your original ID
+                                            $original_id = $telegram_bot['id'];
 
-                                            echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
+                                            // Hash the ID to make it unique and consistent
+                                            $hashed_id = hash('sha256', $original_id);
+
+                                            // Encode the hash and take the first 10 characters
+                                            $encoded_id = substr(base64_encode($hashed_id), 0, 20);
+                                            echo "<a href='edit_telegram_bot.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+
+                                            echo "<button data-id='" . $telegram_bot['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
 
                                             echo "</td>";
-
-                                            echo "<td  class='py-1'>" . $row['token'] . "</td>";
-                                            echo "<td  class='py-1'>" . $row['chat_id'] . "</td>";
+                                            echo "<td class='py-1'>" . $telegram_bot['bot_name'] . "</td>";
+                                            echo "<td class='py-1'>" . $telegram_bot['token'] . "</td>";
+                                            echo "<td class='py-1'>" . $telegram_bot['chat_id'] . "</td>";
 
 
                                             echo "</tr>";
@@ -178,7 +184,7 @@ if ($result_user && $result_user->num_rows > 0) {
     <script>
         $(function() {
             $("#tableUserRules").DataTable({
-                "responsive": true,
+                "responsive": false,
                 "lengthChange": true,
                 "autoWidth": false,
                 "buttons": [, "csv", "excel", "pdf"]
@@ -190,7 +196,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 "ordering": true,
                 "info": true,
                 "autoWidth": false,
-                "responsive": true,
+                "responsive": false,
             });
         });
     </script>
@@ -201,10 +207,10 @@ if ($result_user && $result_user->num_rows > 0) {
         $(document).ready(function() {
             // Handle delete button click
             $(document).on('click', '.delete-btn', function() {
-                var userRules = $(this).data('id');
+                var telegram_bot = $(this).data('id');
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'You will not be able to recover this users rules!',
+                    text: 'You will not be able to recover this telegram bot!',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -213,24 +219,24 @@ if ($result_user && $result_user->num_rows > 0) {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'delete_users_rules.php', // Adjust URL to your delete script
+                            url: 'delete_telegram_bot.php', // Adjust URL to your delete script
                             type: 'POST',
                             data: {
-                                id: userRules
+                                id: telegram_bot
                             },
                             success: function(response) {
                                 console.log('Response:', response); // Debugging: Log the response
                                 if (response === 'success') {
-                                    console.log('Removing row with ID: #userRules-' + userRules); // Log the row being removed
-                                    $('#userRules-' + userRules).remove(); // Remove the row from the table
-                                    Swal.fire('Deleted!', 'Your user Rules has been deleted.', 'success');
+                                    console.log('Removing row with ID: #telegram_bot-' + telegram_bot); // Log the row being removed
+                                    $('#telegram_bot-' + telegram_bot).remove(); // Remove the row from the table
+                                    Swal.fire('Deleted!', 'Your telegram bot has been deleted.', 'success');
                                 } else {
-                                    Swal.fire('Error!', 'Failed to delete user rules.', 'error');
+                                    Swal.fire('Error!', 'Failed to deletetelegram bot.', 'error');
                                 }
                             },
                             error: function(xhr, status, error) {
                                 console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
-                                Swal.fire('Error!', 'An error occurred while deleting the user rules.', 'error');
+                                Swal.fire('Error!', 'An error occurred while deleting the telegram bot.', 'error');
                             }
                         });
                     }

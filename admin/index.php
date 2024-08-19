@@ -179,7 +179,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="col-lg-4 col-4">
                   <div class="small-box bg-info">
                     <div class="inner">
-                      <h3><?php echo $status_counts['Open']; ?></h3>
+                      <h3><?= $status_counts['Open']; ?></h3>
                       <p>Open</p>
                     </div>
                     <div class="icon">
@@ -191,7 +191,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="col-lg-4 col-4">
                   <div class="small-box bg-danger">
                     <div class="inner">
-                      <h3><?php echo $status_counts['On Hold']; ?></h3>
+                      <h3><?= $status_counts['On Hold']; ?></h3>
                       <p>On Hold</p>
                     </div>
                     <div class="icon">
@@ -204,7 +204,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="col-lg-4 col-4">
                   <div class="small-box bg-warning">
                     <div class="inner">
-                      <h3><?php echo $status_counts['In Progress']; ?></h3>
+                      <h3><?= $status_counts['In Progress']; ?></h3>
                       <p>In Progress</p>
                     </div>
                     <div class="icon">
@@ -218,7 +218,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="col-lg-6 col-6">
                   <div class="small-box bg-primary">
                     <div class="inner">
-                      <h3><?php echo $status_counts['Pending Vendor']; ?></h3>
+                      <h3><?=  $status_counts['Pending Vendor']; ?></h3>
                       <p>Pending Vendor</p>
                     </div>
                     <div class="icon">
@@ -231,7 +231,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 <div class="col-lg-6 col-6">
                   <div class="small-box bg-success">
                     <div class="inner">
-                      <h3><?php echo $status_counts['Close']; ?></h3>
+                      <h3><?= $status_counts['Close']; ?></h3>
                       <p>Close</p>
                     </div>
                     <div class="icon">
@@ -263,51 +263,51 @@ if ($result_user && $result_user->num_rows > 0) {
                   <div class="row">
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT Hardware']; ?>" data-width="90" data-height="90" data-fgcolor="#3c8dbc" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT Hardware']; ?>" data-width="90" data-height="90" data-fgcolor="#3c8dbc" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT Hardware</div>
                     </div>
 
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 1']; ?>" data-width="90" data-height="90" data-fgcolor="#f56954" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT 1']; ?>" data-width="90" data-height="90" data-fgcolor="#f56954" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT 1</div>
                     </div>
 
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 2']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT 2']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT 2</div>
                     </div>
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 3']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT 3']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT 3</div>
                     </div>
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT 4']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT 4</div>
                     </div>
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 4 Report']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT 4 Report']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT 4 Report</div>
                     </div>
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['CAT 5']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['CAT 5']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                       </div>
                       <div class="knob-label">CAT 5</div>
                     </div>
                     <div class="col-6 col-md-3 text-center">
                       <div style="display:inline;width:90px;height:90px;">
-                        <input type="text" class="knob" value="<?php echo $SLA_category_percentages['Other']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
+                        <input type="text" class="knob" value="<?= $SLA_category_percentages['Other']; ?>" data-width="90" data-height="90" data-fgcolor="#932ab6" data-readOnly="true">
                       </div>
                       <div class="knob-label">Other</div>
                     </div>
@@ -352,30 +352,30 @@ if ($result_user && $result_user->num_rows > 0) {
                     <?php
                     $i = 1;
                     if ($ticket_result->num_rows > 0) {
-                      while ($row = $ticket_result->fetch_assoc()) {
+                      while ($ticket = $ticket_result->fetch_assoc()) {
 
                         echo "<tr>";
                         echo "<td>" . $i++ . "</td>";
-                        echo "<td>" . $row['ticket_id'] . "</td>";
-                        echo "<td>" . $row['station_id'] . "</td>";
-                        echo "<td>" . $row['station_name'] . "</td>";
-                        echo "<td>" . $row['station_type'] . "</td>";
-                        echo "<td>" . $row['province'] . "</td>";
-                        echo "<td>" . $row['issue_description'] . "</td>";
-                        echo "<td>" . $row['issue_type'] . "</td>";
-                        echo "<td>" . $row['SLA_category'] . "</td>";
-                        echo "<td>" . $row['status'] . "</td>";
-                        echo "<td>" . $row['users_name'] . "</td>";
-                        echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
-                        echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
-                        echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
-                        echo "<td class='py-1'>" . $row['ticket_pending_vendor'] . "</td>";
-                        echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
-                        if ($row['ticket_time'] != null) {
-                          echo "<td class='py-1'>" . $row['ticket_time'] . "</td>";
+                        echo "<td>" . $ticket['ticket_id'] . "</td>";
+                        echo "<td>" . $ticket['station_id'] . "</td>";
+                        echo "<td>" . $ticket['station_name'] . "</td>";
+                        echo "<td>" . $ticket['station_type'] . "</td>";
+                        echo "<td>" . $ticket['province'] . "</td>";
+                        echo "<td>" . $ticket['issue_description'] . "</td>";
+                        echo "<td>" . $ticket['issue_type'] . "</td>";
+                        echo "<td>" . $ticket['SLA_category'] . "</td>";
+                        echo "<td>" . $ticket['status'] . "</td>";
+                        echo "<td>" . $ticket['users_name'] . "</td>";
+                        echo "<td class='py-1'>" . $ticket['ticket_open'] . "</td>";
+                        echo "<td class='py-1'>" . $ticket['ticket_on_hold'] . "</td>";
+                        echo "<td class='py-1'>" . $ticket['ticket_in_progress'] . "</td>";
+                        echo "<td class='py-1'>" . $ticket['ticket_pending_vendor'] . "</td>";
+                        echo "<td class='py-1'>" . $ticket['ticket_close'] . "</td>";
+                        if ($ticket['ticket_time'] != null) {
+                          echo "<td class='py-1'>" . $ticket['ticket_time'] . "</td>";
                         } else {
                           date_default_timezone_set('Asia/Bangkok');
-                          $ticketOpenTime = new DateTime($row['ticket_open']);
+                          $ticketOpenTime = new DateTime($ticket['ticket_open']);
                           $ticketCloseTime = new DateTime();
                           // Calculate the difference
                           $interval = $ticketCloseTime->diff($ticketOpenTime);
@@ -396,7 +396,7 @@ if ($result_user && $result_user->num_rows > 0) {
                           // Output the formatted time difference
                           echo "<td class='py-1'>" . htmlspecialchars($ticket_time) . "</td>";
                         }
-                        echo "<td>" . $row['comment'] . "</td>";
+                        echo "<td>" . $ticket['comment'] . "</td>";
                         echo "</tr>";
                       }
                     } else {

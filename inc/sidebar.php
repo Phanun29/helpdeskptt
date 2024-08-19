@@ -3,7 +3,7 @@
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; //  user ID
 
-$query_user = " SELECT u.*, r.list_station, r.list_ticket_status, r.list_user_status, r.list_user_rules  , r.list_ticket_assign
+$query_user = " SELECT u.*, r.list_station, r.list_ticket_status, r.list_user_status, r.list_user_rules  , r.list_ticket_assign, r.list_ticket_track , r.list_telegram_bot
                 FROM tbl_users u 
                 JOIN tbl_users_rules r 
                 ON u.rules_id = r.rules_id 
@@ -19,6 +19,8 @@ if ($result_user && $result_user->num_rows > 0) {
     $listUsers = $user['list_user_status'];
     $listUsersRules = $user['list_user_rules'];
     $listTicketAssign = $user['list_ticket_assign'];
+    $listTelegramBot = $user['list_telegram_bot'];
+    $listTicketTrack = $user['list_ticket_track'];
 } else {
     $_SESSION['error_message'] = "User not found or permission check failed.";
 }
@@ -104,23 +106,23 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                     </li>
                 <?php
                 endif;
-                if (!$listTicketAssign) :
+                if ($listTicketTrack) :
                 ?>
                     <li class="nav-item">
                         <a href="track.php" <?php if ($current_menu === 'track.php') echo 'class="nav-link active"';
                                             else echo 'class="nav-link"'; ?>>
                             <i class="nav-icon fa fa-search" aria-hidden="true"></i>
-                            <p>Track</p>
+                            <p>Ticket Track</p>
                         </a>
                     </li>
                 <?php
                 endif;
-                if (!$listTicketAssign) :
+                if ($listTelegramBot) :
                 ?>
                     <li class="nav-item">
-                        <a href="telegram_bot.php" <?php if ($current_menu === 'telegram_bot.php') echo 'class="nav-link active"';
-                                            else echo 'class="nav-link"'; ?>>
-       
+                        <a href="telegram_bot.php" <?php if ($current_menu === 'telegram_bot.php' || $current_menu == 'edit_telegram_bot.php' || $current_menu == "add_telegram_bot.php") echo 'class="nav-link active"';
+                                                    else echo 'class="nav-link"'; ?>>
+
                             <i class=" nav-icon fas fa-robot  " aria-hidden="true"></i>
                             <p>Telegram Bot</p>
                         </a>

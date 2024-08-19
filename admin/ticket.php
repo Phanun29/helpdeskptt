@@ -338,15 +338,24 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
                                                 echo "<td class='export-ignore py-1'>";
+
+                                                // Your original ID
+                                                $original_id = $row['id'];
+
+                                                // Hash the ID to make it unique and consistent
+                                                $hashed_id = hash('sha256', $original_id);
+
+                                                // Encode the hash and take the first 10 characters
+                                                $encoded_id = substr(base64_encode($hashed_id), 0, 20);
                                                 if ($row['status'] != "Close") {
                                                     if ($EditTicket) {
-                                                        echo "<a href='edit_ticket.php?id=" . $row['id']  . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                        echo "<a href='edit_ticket.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                     }
                                                     if ($DeleteTicket) {
                                                         echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                     }
                                                 } else if ($listTicketAssign == 0) {
-                                                    echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                    echo "<a href='edit_ticket.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 echo "</td>";
                                             }
@@ -594,7 +603,7 @@ if ($result_user && $result_user->num_rows > 0) {
                 var formData = $('#filterForm').serialize();
                 $.ajax({
                     url: 'filter_ticket.php', // Replace with your PHP script handling filtering
-                    type: 'GET', 
+                    type: 'GET',
                     data: formData,
                     success: function(response) {
                         $('#ticketTableBody').html(response); // Update table body with filtered data

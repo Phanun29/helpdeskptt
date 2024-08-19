@@ -154,51 +154,59 @@ $ticket_result = $conn->query($ticket_query);
                                     <?php
                                     $i = 1;
                                     if ($ticket_result->num_rows > 0) {
-                                        while ($row = $ticket_result->fetch_assoc()) {
-                                            echo "<tr id='ticket-" . $row['id'] . "'>";
+                                        while ($ticket = $ticket_result->fetch_assoc()) {
+                                            echo "<tr id='ticket-" . $ticket['id'] . "'>";
                                             echo "<td class='py-2'>" . $i++ . "</td>";
                                             if ($EditTicket == 0 & $DeleteTicket == 0) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
                                                 echo "<td class='export-ignore py-1'>";
-                                                if ($row['status'] != "Close") {
+                                                if ($ticket['status'] != "Close") {
                                                     if ($EditTicket) {
-                                                        echo "<a href='edit_ticket.php?id=" . $row['id']  . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                        // Your original ID
+                                                        $original_id = $ticket['id'];
+
+                                                        // Hash the ID to make it unique and consistent
+                                                        $hashed_id = hash('sha256', $original_id);
+
+                                                        // Encode the hash and take the first 10 characters
+                                                        $encoded_id = substr(base64_encode($hashed_id), 0, 20);
+                                                        echo "<a href='edit_ticket.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                     }
                                                     if ($DeleteTicket) {
-                                                        echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
+                                                        echo "<button data-id='" . $ticket['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                     }
                                                 } else if ($listTicketAssign == 0) {
-                                                    echo "<a href='edit_ticket.php?id=" . $row['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                                    echo "<a href='edit_ticket.php?id=" . $ticket['id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 echo "</td>";
                                             }
-                                            echo "<td class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($row) . ")'>" . $row['ticket_id'] . "</button></td>";
-                                            echo "<td class='py-1'>" . $row['station_id'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['station_name'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['station_type'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['province'] . "</td>";
-                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif;'>" . $row['issue_description'] . "</td>";
-                                            $image_paths = explode(',', $row['image_paths']);
-                                            if ($row['image_paths'] != null) {
-                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showMedia(\"" . $row['image_paths'] . "\")'>Click to View</button></td>";
+                                            echo "<td class='py-1'><button class='btn btn-link' onclick='showTicketDetails(" . json_encode($ticket) . ")'>" . $ticket['ticket_id'] . "</button></td>";
+                                            echo "<td class='py-1'>" . $ticket['station_id'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['station_name'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['station_type'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['province'] . "</td>";
+                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif;'>" . $ticket['issue_description'] . "</td>";
+                                            $image_paths = explode(',', $ticket['image_paths']);
+                                            if ($ticket['image_paths'] != null) {
+                                                echo "<td class='export-ignore py-1'><button class='btn btn-link' onclick='showMedia(\"" . $ticket['image_paths'] . "\")'>Click to View</button></td>";
                                             } else {
                                                 echo "<td class='export-ignore text-center text-warning'>none</td>";
                                             }
-                                            echo "<td class='py-1'>" . $row['issue_type'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['SLA_category'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['status'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['users_name'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['ticket_open'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['ticket_on_hold'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['ticket_in_progress'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['ticket_pending_vendor'] . "</td>";
-                                            echo "<td class='py-1'>" . $row['ticket_close'] . "</td>";
-                                            if ($row['ticket_time'] != null) {
-                                                echo "<td class='py-1'>" . $row['ticket_time'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['issue_type'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['SLA_category'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['status'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['users_name'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['ticket_open'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['ticket_on_hold'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['ticket_in_progress'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['ticket_pending_vendor'] . "</td>";
+                                            echo "<td class='py-1'>" . $ticket['ticket_close'] . "</td>";
+                                            if ($ticket['ticket_time'] != null) {
+                                                echo "<td class='py-1'>" . $ticket['ticket_time'] . "</td>";
                                             } else {
                                                 date_default_timezone_set('Asia/Bangkok');
-                                                $ticketOpenTime = new DateTime($row['ticket_open']);
+                                                $ticketOpenTime = new DateTime($ticket['ticket_open']);
                                                 $ticketCloseTime = new DateTime();
                                                 // Calculate the difference
                                                 $interval = $ticketCloseTime->diff($ticketOpenTime);
@@ -220,7 +228,7 @@ $ticket_result = $conn->query($ticket_query);
                                                 echo "<td class='py-1'>" . htmlspecialchars($ticket_time) . "</td>";
                                             }
 
-                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif; font-weight: 400; font-style: normal;'>" . $row['comment'] . "</td>";
+                                            echo "<td class='py-1' style='font-family: Khmer, sans-serif; font-weight: 400; font-style: normal;'>" . $ticket['comment'] . "</td>";
                                             echo "</tr>";
                                         }
                                     } else {

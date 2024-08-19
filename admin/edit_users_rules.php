@@ -24,15 +24,41 @@ if ($result_user && $result_user->num_rows > 0) {
 } else {
     $_SESSION['error_message_users_rules'] = "User not found or permission check failed.";
 }
+if (isset($_GET['id'])) {
+    $encoded_id = $_GET['id'];
 
+    // Fetch all possible IDs and their encoded versions
+    $id_query = "SELECT rules_id FROM tbl_users_rules";
+    $result = $conn->query($id_query);
 
-// Fetch existing data (assuming you have an ID or some identifier to fetch the record)
-$rules_id = $_GET['id']; // or however you identify the record to edit
-// Retrieve data from the database
-$user_rules_query = "SELECT * FROM tbl_users_rules WHERE rules_id = $rules_id";
-$user_rules_result = $conn->query($user_rules_query);
-$row = $user_rules_result->fetch_assoc();
+    $id = null;
 
+    // Iterate through all the rows to find the matching encoded ID
+    while ($row = $result->fetch_assoc()) {
+        $hashed_id = hash('sha256', $row['rules_id']);
+        $check_encoded_id = substr(base64_encode($hashed_id), 0, 20);
+
+        if ($check_encoded_id === $encoded_id) {
+            $rules_id = $row['rules_id'];
+            break;
+        }
+    }
+} else {
+    header("Location: 404.php");
+    exit();
+}
+
+if ($rules_id) {
+    // Fetch existing data (assuming you have an ID or some identifier to fetch the record)
+
+    // Retrieve data from the database
+    $user_rules_query = "SELECT * FROM tbl_users_rules WHERE rules_id = $rules_id";
+    $user_rules_result = $conn->query($user_rules_query);
+    $users_rules = $user_rules_result->fetch_assoc();
+} else {
+    header("Location: 404.php");
+    exit();
+}
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
@@ -61,6 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     $delete_user_rules = in_array('delete_user_rules', $permissions) ? 1 : 0;
     $list_user_rules = in_array('list_user_rules', $permissions) ? 1 : 0;
 
+    $list_telegram_bot = in_array('list_telegram_bot', $permissions) ? 1 : 0;
+    $list_ticket_track = in_array('list_ticket_track', $permissions) ? 1 : 0;
     // Create a comma-separated list of permissions for menu_status
 
 
@@ -73,12 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
               SET rules_name = ?, add_user_status = ?, edit_user_status = ?, delete_user_status = ?, list_user_status = ?,
                   add_ticket_status = ?, edit_ticket_status = ?, delete_ticket_status = ?, list_ticket_status = ?,list_ticket_assign=?,
                   add_station = ?, edit_station = ?, delete_station = ?, list_station = ?,
-                  add_user_rules = ?, edit_user_rules = ?, delete_user_rules = ?, list_user_rules = ?
+                  add_user_rules = ?, edit_user_rules = ?, delete_user_rules = ?, list_user_rules = ? , list_telegram_bot=? , list_ticket_track =?
               WHERE rules_id = ?";
 
     $stmt = $conn->prepare($query);
     $stmt->bind_param(
-        "siiiiiiiiiiiiiiiiss",
+        "siiiiiiiiiiiiiiiiiiss",
         $rules_name,
         $add_user_status,
         $edit_user_status,
@@ -97,6 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         $edit_user_rules,
         $delete_user_rules,
         $list_user_rules,
+        $list_telegram_bot,
+        $list_ticket_track,
 
         $rules_id
     );
@@ -156,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="users_name">User Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" value="<?= htmlspecialchars($row['rules_name']); ?>" required>
+                                                <input type="text" name="users_name" class="form-control" id="users_name" placeholder="Enter Name" value="<?= htmlspecialchars($users_rules['rules_name']); ?>" required>
                                             </div>
                                         </div>
                                     </div>
@@ -171,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="add_user">Add User</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="add_user" id="add_user" <?= $row['add_user_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="add_user" id="add_user" <?= $users_rules['add_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -179,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="edit_user">Edit User</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="edit_user" id="edit_user" <?= $row['edit_user_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="edit_user" id="edit_user" <?= $users_rules['edit_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -187,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="delete_user">Delete User</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="delete_user" id="delete_user" <?= $row['delete_user_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="delete_user" id="delete_user" <?= $users_rules['delete_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -195,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="list_user">List User</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="list_user" id="list_user" <?= $row['list_user_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="list_user" id="list_user" <?= $users_rules['list_user_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                     </div>
@@ -210,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="add_ticket">Add Ticket</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="add_ticket" id="add_ticket" <?= $row['add_ticket_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="add_ticket" id="add_ticket" <?= $users_rules['add_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -218,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="edit_ticket">Edit Ticket</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="edit_ticket" id="edit_ticket" <?= $row['edit_ticket_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="edit_ticket" id="edit_ticket" <?= $users_rules['edit_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -226,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="delete_ticket">Delete Ticket</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="delete_ticket" id="delete_ticket" <?= $row['delete_ticket_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="delete_ticket" id="delete_ticket" <?= $users_rules['delete_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -234,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="list_ticket">List Ticket</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="list_ticket" id="list_ticket" <?= $row['list_ticket_status'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="list_ticket" id="list_ticket" <?= $users_rules['list_ticket_status'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -242,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="list_ticket_assign">List Ticket Assign</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="list_ticket_assign" id="list_ticket_assign" value="delete_user" id="delete_user" <?= $row['list_ticket_assign'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="list_ticket_assign" id="list_ticket_assign" value="delete_user" id="delete_user" <?= $users_rules['list_ticket_assign'] ? 'checked' : ''; ?>>
                                             </div>
 
                                         </div>
@@ -258,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="add_station">Add Station</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="add_station" id="add_station" <?= $row['add_station'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="add_station" id="add_station" <?= $users_rules['add_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -266,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="edit_station">Edit Station</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="edit_station" id="edit_station" <?= $row['edit_station'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="edit_station" id="edit_station" <?= $users_rules['edit_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -274,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="delete_station">Delete Station</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="delete_station" id="delete_station" <?= $row['delete_station'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="delete_station" id="delete_station" <?= $users_rules['delete_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -282,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="list_station">List Station</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="list_station" id="list_station" <?= $row['list_station'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="list_station" id="list_station" <?= $users_rules['list_station'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                     </div>
@@ -297,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="add_user_rules">Add User Rules</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="add_user_rules" id="add_user_rules" <?= $row['add_user_rules'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="add_user_rules" id="add_user_rules" <?= $users_rules['add_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -305,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="edit_user_rules">Edit User Rules</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="edit_user_rules" id="edit_user_rules" <?= $row['edit_user_rules'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="edit_user_rules" id="edit_user_rules" <?= $users_rules['edit_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -313,7 +343,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="delete_user_rules">Delete User Rules</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="delete_user_rules" id="delete_user_rules" <?= $row['delete_user_rules'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="delete_user_rules" id="delete_user_rules" <?= $users_rules['delete_user_rules'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 row">
@@ -321,7 +351,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                                 <label for="list_user_rules">List User Rules</label>
                                             </div>
                                             <div class="col-4">
-                                                <input type="checkbox" name="permissions[]" value="list_user_rules" id="list_user_rules" <?= $row['list_user_rules'] ? 'checked' : ''; ?>>
+                                                <input type="checkbox" name="permissions[]" value="list_user_rules" id="list_user_rules" <?= $users_rules['list_user_rules'] ? 'checked' : ''; ?>>
+                                            </div>
+                                        </div>
+                                    </div>
+                                     <div class="row card-header">
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_ticket_track">List Ticket Track</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_ticket_track" id="list_ticket_track" <?= $users_rules['list_ticket_track'] ? 'checked' : ''; ?>>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 row">
+                                            <div class="col-8">
+                                                <label for="list_telegram_bot">List Ticket Track</label>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="checkbox" name="permissions[]" value="list_telegram_bot" id="list_telegram_bot" <?= $users_rules['list_telegram_bot'] ? 'checked' : ''; ?>>
                                             </div>
                                         </div>
                                     </div>

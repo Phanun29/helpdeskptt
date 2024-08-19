@@ -110,25 +110,35 @@ if ($result_user && $result_user->num_rows > 0) {
                                     $i = 1;
 
                                     if ($station_result->num_rows > 0) {
-                                        while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr id='stationId-{$row['id']}'>"; 
+                                        while ($station = $station_result->fetch_assoc()) {
+                                            echo "<tr id='stationId-{$station['id']}'>";
                                             echo "<td class='py-1'>{$i}</td>";
                                             if (!$canEditStation && !$canDeleteStation) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
+                                                
                                                 echo "<td class='py-1'>";
                                                 if ($canEditStation) {
-                                                    echo "<a href='edit_station.php?id={$row['id']}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+
+                                                    // Your original ID
+                                                    $original_id = $station['id'];
+
+                                                    // Hash the ID to make it unique and consistent
+                                                    $hashed_id = hash('sha256', $original_id);
+
+                                                    // Encode the hash and take the first 10 characters
+                                                    $encoded_id = substr(base64_encode($hashed_id), 0, 20);
+                                                    echo "<a href='edit_station.php?id={$encoded_id}' class='btn btn-primary edit-btn'><i class='fa-solid fa-pen-to-square'></i></a> ";
                                                 }
                                                 if ($canDeleteStation) {
-                                                    echo "<button data-id='" . $row['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
+                                                    echo "<button data-id='" . $station['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
                                                 }
                                                 echo "</td>";
                                             }
-                                            echo "<td class='py-1'>{$row['station_id']}</td>";
-                                            echo "<td class='py-1'>{$row['station_name']}</td>";
-                                            echo "<td class='py-1'>{$row['station_type']}</td>";
-                                            echo "<td class='py-1'>{$row['province']}</td>";
+                                            echo "<td class='py-1'>{$station['station_id']}</td>";
+                                            echo "<td class='py-1'>{$station['station_name']}</td>";
+                                            echo "<td class='py-1'>{$station['station_type']}</td>";
+                                            echo "<td class='py-1'>{$station['province']}</td>";
 
                                             echo "</tr>";
                                             $i++;
