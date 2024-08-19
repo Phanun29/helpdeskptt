@@ -69,4 +69,12 @@ TODO
 test.html
 ad.js
 /.cache/
+# Ignore all files in the uploads folder
 /uploads/*
+
+# But do not ignore the folder itself
+!/uploads/
+
+# Optionally, keep a placeholder file
+!/uploads/.gitkeep
+
