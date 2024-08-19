@@ -24,38 +24,6 @@ if ($result_user && $result_user->num_rows > 0) {
     $_SESSION['error_message_users'] = "User not found or permission check failed.";
 }
 
-
-// $User_id = $_GET['id'];
-
-// Check if the form was submitted for updating user information
-if (isset($_POST['change_password'])) {
-    // Get the new password and confirm password from the form
-    $newPassword = $_POST['new_password'];
-    $confirmPassword = $_POST['confirm_password'];
-
-    // Verify if the new password matches the confirm password
-    if ($newPassword === $confirmPassword) {
-        // Hash the new password
-        $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-        // Prepare and execute the SQL query to update the user's password
-        $updateSql = "UPDATE tbl_users SET password = '$hashedNewPassword' WHERE users_id = $User_id";
-        if ($conn->query($updateSql) === TRUE) {
-            // Password updated successfully
-            $_SESSION['password_change_message'] = 'Password changed successfully.';
-        } else {
-            // Error updating password
-            $_SESSION['password_change_error_message'] = 'Error occurred while changing password.';
-        }
-    } else {
-        // New password and confirm password do not match
-        $_SESSION['password_change_error_message'] = 'New password and confirm password do not match.';
-    }
-
-    // Redirect back to the same page to display the alert message
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $User_id);
-    exit();
-}
 if (isset($_GET['id'])) {
     $encoded_id = $_GET['id'];
 
@@ -91,6 +59,38 @@ if ($User_id) {
     header("Location: 404.php");
     exit();
 }
+
+// Check if the form was submitted for updating user information
+if (isset($_POST['change_password'])) {
+    // Get the new password and confirm password from the form
+    $newPassword = $_POST['new_password'];
+    $confirmPassword = $_POST['confirm_password'];
+
+    // Verify if the new password matches the confirm password
+    if ($newPassword === $confirmPassword) {
+        // Hash the new password
+        $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        // Prepare and execute the SQL query to update the user's password
+        $updateSql = "UPDATE tbl_users SET password = '$hashedNewPassword' WHERE users_id = $User_id";
+        if ($conn->query($updateSql) === TRUE) {
+            // Password updated successfully
+            $_SESSION['password_change_message'] = 'Password changed successfully.';
+        } else {
+            // Error updating password
+            $_SESSION['password_change_error_message'] = 'Error occurred while changing password.';
+        }
+    } else {
+        // New password and confirm password do not match
+        $_SESSION['password_change_error_message'] = 'New password and confirm password do not match.';
+    }
+
+    // Redirect back to the same page to display the alert message
+   // header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $User_id);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $encoded_id);
+    exit();
+}
+
 // Check if form is submitted for update
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // $User_id = $_GET['id']; // Assuming you're passing the user's ID through a GET parameter
