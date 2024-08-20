@@ -533,9 +533,20 @@ if ($ticket_result->num_rows > 0) {
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="SLA_category">SLA Category</label>
-                                            <select name="SLA_category" id="SLA_category" class="form-control " style="width: 100%;">
+                                            <!-- <select name="SLA_category" id="SLA_category" class="form-control " style="width: 100%;">
 
+                                            </select> -->
+                                            <select name="SLA_category" id="SLA_category" class="form-control" required>
+                                                <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
+                                                <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
+                                                <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
+                                                <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
+                                                <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
+                                                <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
+                                                <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
+                                                <option value="Other" <?= ($ticket['SLA_category'] == 'Other') ? 'selected' : ''; ?>>Other</option>
                                             </select>
+
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="status">Status</label>
@@ -713,69 +724,97 @@ if ($ticket_result->num_rows > 0) {
     <script src="../scripts/previewImages.js"></script>
     <!-- assign by issue type -->
 
-    <!-- sla category by issue type -->
+    <!-- condition sla category -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const issueTypeSelect = document.getElementById('issue_type');
-            const slaCategorySelect = document.getElementById('SLA_category');
-            const errorMessageNotSelectIssueType = document.getElementById('error-message-NotSelectIssueType');
+        // Define the available SLA options
+        const slaOptions = {
+            'Hardware': [{
+                value: 'CAT Hardware',
+                text: 'CAT Hardware'
+            }],
+            'Software': [{
+                    value: 'CAT 1',
+                    text: 'CAT 1'
+                },
+                {
+                    value: 'CAT 2',
+                    text: 'CAT 2'
+                },
+                {
+                    value: 'CAT 3',
+                    text: 'CAT 3'
+                },
 
-            const hardwareSoftwareOptions = `
-            <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-            <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
-            <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
-            <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
-            <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
-            <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
-            <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
-                                    
-        `;
-            const SoftwareOptions = `
-          
-            <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
-            <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
-            <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
-            <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
-            <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
-            <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
-                                    
-        `;
-            const hardwareOrSoftwareOptions = `
-            <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
-            <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
-            <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
-            <option value="CAT 3" <?= ($ticket['SLA_category'] == 'CAT 3') ? 'selected' : ''; ?>>CAT 3</option>
-            <option value="CAT 4" <?= ($ticket['SLA_category'] == 'CAT 4') ? 'selected' : ''; ?>>CAT 4</option>
-            <option value="CAT 4 Report" <?= ($ticket['SLA_category'] == 'CAT 4 Report') ? 'selected' : ''; ?>>CAT 4 Report</option>
-            <option value="CAT 5" <?= ($ticket['SLA_category'] == 'CAT 5') ? 'selected' : ''; ?>>CAT 5</option>
-            <option value="Other" <?= ($ticket['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>
-        `;
-
-            const allOptions = `  <option value="Other" <?= ($ticket['SLA_category'] == "Other") ? "selected" : ''; ?>>Other</option>`;
-
-            function updateSlaCategoryOptions() {
-                const issueTypes = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
-                if (issueTypes.includes('Software')) {
-                    slaCategorySelect.innerHTML = SoftwareOptions;
-                } else if (issueTypes.includes('Hardware')) {
-                    slaCategorySelect.innerHTML = SoftwareOptions;
-                } else
-                if (issueTypes.includes('Software') && issueTypes.includes('Hardware')) {
-                    slaCategorySelect.innerHTML = hardwareSoftwareOptions;
-                } else if (issueTypes.includes('Software') || issueTypes.includes('Hardware')) {
-                    slaCategorySelect.innerHTML = hardwareOrSoftwareOptions;
-                } else {
-                    slaCategorySelect.innerHTML = allOptions;
+                {
+                    value: 'CAT 4',
+                    text: 'CAT 4'
+                },
+                {
+                    value: 'CAT 4 Report',
+                    text: 'CAT 4 Report'
+                },
+                {
+                    value: 'CAT 5',
+                    text: 'CAT 5'
                 }
+            ],
+            'Other': [{
+                value: 'Other',
+                text: 'Other'
+            }]
+        };
 
+        // Reference to the issue type and SLA category select elements
+        const issueTypeSelect = document.getElementById('issue_type');
+        const slaCategorySelect = document.getElementById('SLA_category');
 
+        // Preselected category from PHP
+        const preSelectedCategory = '<?= $ticket['SLA_category']; ?>';
+
+        // Function to add an option to the SLA category select element
+        function addOption(value, text) {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = text;
+            if (value === preSelectedCategory) {
+                opt.selected = true;
             }
+            slaCategorySelect.appendChild(opt);
+        }
 
-            issueTypeSelect.addEventListener('change', updateSlaCategoryOptions);
+        // Event listener for when the issue type selection changes
+        issueTypeSelect.addEventListener('change', function() {
+            const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
 
-            // Initialize the SLA options based on existing selections
-            updateSlaCategoryOptions();
+            // Clear current options in SLA Category dropdown
+            slaCategorySelect.innerHTML = '<option value="" title="Please select a category">-Select-</option>';
+
+            if (selectedValues.includes('Software') && !selectedValues.includes('Hardware') && selectedValues.length === 1) {
+                // If only Software is selected
+                slaOptions['Software'].forEach(option => addOption(option.value, option.text));
+            } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software') && selectedValues.length === 1) {
+                // If only Hardware is selected
+                slaOptions['Hardware'].forEach(option => addOption(option.value, option.text));
+            } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length === 2) {
+                // If both Software and Hardware are selected
+                slaOptions['Hardware'].concat(slaOptions['Software']).forEach(option => addOption(option.value, option.text));
+            } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length > 2) {
+                // If Software, Hardware, and other options are selected
+                slaOptions['Hardware'].concat(slaOptions['Software']).concat(slaOptions['Other']).forEach(option => addOption(option.value, option.text));
+            } else if (selectedValues.includes('Software') && !selectedValues.includes('Hardware')) {
+                // If Software is selected along with any other option that is not Hardware
+                slaOptions['Software'].concat(slaOptions['Other']).forEach(option => addOption(option.value, option.text));
+            } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software')) {
+                // If Hardware is selected along with any other option that is not Software
+                slaOptions['Hardware'].concat(slaOptions['Other']).forEach(option => addOption(option.value, option.text));
+            } else {
+                // If neither Software nor Hardware is selected, or other combinations
+                slaOptions['Other'].forEach(option => addOption(option.value, option.text));
+            }
         });
+
+        // Trigger the change event to set the options based on pre-selected values
+        issueTypeSelect.dispatchEvent(new Event('change'));
     </script>
 
 </body>

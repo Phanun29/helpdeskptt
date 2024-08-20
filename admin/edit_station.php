@@ -5,8 +5,8 @@ include "../inc/header_script.php";
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; // Example user ID
 
-$query_user = "
-    SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
+$query_user =
+    "SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";

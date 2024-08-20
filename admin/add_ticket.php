@@ -170,7 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
 
             <!-- Main content -->
-            <section class="content">
+            <section class="content" style="overflow: hidden;">
                 <div class="container-fluid">
                     <!-- Small boxes (Stat box) -->
                     <div class="card">
@@ -239,37 +239,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <select name="SLA_category" id="SLA_category" class="form-control" required>
                                                 <option value="" title="Please select a category">-Select-</option>
                                                 <option value="CAT Hardware" title=" Hardware ">CAT Hardware</option>
-                                                <option value="CAT 1" title="
-(CAT 1)means that a system device cannot work in sales at all, a level where sales cannot be performed at the POS, 
-or the back office cannot contact the POS, or the dispenser cannot be dispensed in case the dispenser is connected to the system. Automation, 
-which is the result of software or system glitches, is so outaged that it cannot be sold or cannot be sold through the system (must be sold offline). ">CAT 1
+                                                <option value="CAT 1" title=" ">CAT 1
                                                 </option>
-                                                <option value=" CAT 2" title="
-(CAT 2) means that system equipment can still perform partial sales tasks, which the system can still run because of software glitches. However,
-the station is so severely limited that it affects the data around the day, such as:
-•  Can't afford some fuel, dispenser This is caused by dispensers not being able to connect to automation systems.">CAT 2
+                                                <option value=" CAT 2" title="">CAT 2
                                                 </option>
-                                                <option value="CAT 3" title="(CAT 3) refers to a system device that is defective but does not affect sales work. It has some but mild impact on all stations or operations of the head office, such as:
-•  Each cycle cannot be closed.  
-•  Reports cannot be printed.  
-•  Ticket printers cannot be printed.  
-•  Cash drawers do not open automatically.  
-•  The point-of-sale keyboard is not available, but the Mouse is still available or can be used either.">CAT 3
+                                                <option value="CAT 3" title="">CAT 3
                                                 </option>
-                                                <option value="CAT 4" title="(CAT 4) refers to minor issues that are caused by software vulnerabilities that do not affect the sales process, such as:
-•  Staff at the station are unsure how to use the system, so training is required on the next occasion.
-•  Additional device replacements  
-•  Problems occurring within vulnerable areas as announced by the government. ">CAT 4</option>
-                                                <option value="CAT 4 Report" title="(CAT 4 Report) Report error detection within 96 hours">CAT 4 Report
-
+                                                <option value="CAT 4" title="">CAT 4</option>
+                                                <option value="CAT 4 Report" title="">CAT 4 Report
                                                 </option>
-                                                <option value="CAT 5" title="
-(CAT 5) refers to issues related to data editing in POS, BO systems, such as: Reports cannot be generated.">CAT 5
+                                                <option value="CAT 5" title="">CAT 5
                                                 </option>
-                                                <option value="Other" title="
-(Other) In case problem cause by equipment that is not related with POS system equipment such as Network Cable, 
-Media converter, Internet Router, internet connection,Wi-Fi access point, Fiber Optic Cable, Dispenser signal cable,
-Dispensers, Electric Supply Equipment, etc. is not response by PTT POS System.">Other
+                                                <option value="Other" title="">Other
                                                 </option>
                                             </select>
                                             <div id="error-message-SLA_category" class="text-danger" style="display:none;">Please select SLA category.</div>
@@ -416,115 +397,111 @@ Dispensers, Electric Supply Equipment, etc. is not response by PTT POS System.">
     </script>
     <!-- condition sla category -->
     <script>
-        document.getElementById('issue_type').addEventListener('change', function() {
-            const issueTypes = Array.from(this.selectedOptions).map(option => option.value);
-            const slaCategorySelect = document.getElementById('SLA_category');
-            const errorMessageNotSelectIssueType = document.getElementById('error-message-NotSelectIssueType');
+        const issueTypeSelect = document.getElementById('issue_type');
+        const slaCategorySelect = document.getElementById('SLA_category');
 
-            const software = `
-                                                 <option value="CAT 1" title="(CAT 1)means that a system device cannot work in sales at all, a level where sales cannot be performed at the POS, 
-or the back office cannot contact the POS, or the dispenser cannot be dispensed in case the dispenser is connected to the system. Automation, 
-which is the result of software or system glitches, is so outaged that it cannot be sold or cannot be sold through the system (must be sold offline). ">CAT 1</option>
-                                                <option value=" CAT 2" title="(CAT 2) means that system equipment can still perform partial sales tasks, which the system can still run because of software glitches. However, the station is so severely limited that it affects the data around the day, such as:
-•  Can't afford some fuel, dispenser This is caused by dispensers not being able to connect to automation systems.">CAT 2</option>
-                                                <option value="CAT 3" title="(CAT 3) refers to a system device that is defective but does not affect sales work. It has some but mild impact on all stations or operations of the head office, such as:
-•  Each cycle cannot be closed.  
-•  Reports cannot be printed.  
-•  Ticket printers cannot be printed.  
-•  Cash drawers do not open automatically.  
-•  The point-of-sale keyboard is not available, but the Mouse is still available or can be used either.">CAT 3</option>
-                                                <option value="CAT 4" title="(CAT 4) refers to minor issues that are caused by software vulnerabilities that do not affect the sales process, such as:
-•  Staff at the station are unsure how to use the system, so training is required on the next occasion.
-•  Additional device replacements  
-•  Problems occurring within vulnerable areas as announced by the government. ">CAT 4</option>
-                                                <option value="CAT 4 Report" title="(CAT 4 Report) Report error detection within 96 hours">CAT 4 Report</option>
-                                                <option value="CAT 5" title="(CAT 5) refers to issues related to data editing in POS, BO systems, such as: Reports cannot be generated.">CAT 5</option>
-                                                `;
-            const hardware = `
-                                                    <option value="CAT Hardware">CAT Hardware</option>
-                                                  <option value="CAT 1" title="(CAT 1)means that a system device cannot work in sales at all, a level where sales cannot be performed at the POS, 
-or the back office cannot contact the POS, or the dispenser cannot be dispensed in case the dispenser is connected to the system. Automation, 
-which is the result of software or system glitches, is so outaged that it cannot be sold or cannot be sold through the system (must be sold offline). ">CAT 1</option>
-                                                <option value=" CAT 2" title="(CAT 2) means that system equipment can still perform partial sales tasks, which the system can still run because of software glitches. However, the station is so severely limited that it affects the data around the day, such as:
-•  Can't afford some fuel, dispenser This is caused by dispensers not being able to connect to automation systems.">CAT 2</option>
-                                                <option value="CAT 3" title="(CAT 3) refers to a system device that is defective but does not affect sales work. It has some but mild impact on all stations or operations of the head office, such as:
-•  Each cycle cannot be closed.  
-•  Reports cannot be printed.  
-•  Ticket printers cannot be printed.  
-•  Cash drawers do not open automatically.  
-•  The point-of-sale keyboard is not available, but the Mouse is still available or can be used either.">CAT 3</option>
-                                                <option value="CAT 4" title="(CAT 4) refers to minor issues that are caused by software vulnerabilities that do not affect the sales process, such as:
-•  Staff at the station are unsure how to use the system, so training is required on the next occasion.
-•  Additional device replacements  
-•  Problems occurring within vulnerable areas as announced by the government. ">CAT 4</option>
-                                                <option value="CAT 4 Report" title="(CAT 4 Report) Report error detection within 96 hours">CAT 4 Report</option>
-                                                <option value="CAT 5" title="(CAT 5) refers to issues related to data editing in POS, BO systems, such as: Reports cannot be generated.">CAT 5</option>
-                                                `;
-            const hardwareSoftwareOptions = `
-                                                    <option value="">-Select-</option>
-                                                    <option value="CAT Hardware">CAT Hardware</option>
-                                                    <option value="CAT 1" title="
-(CAT 1)means that a system device cannot work in sales at all, a level where sales cannot be performed at the POS, 
-or the back office cannot contact the POS, or the dispenser cannot be dispensed in case the dispenser is connected to the system. Automation, 
-which is the result of software or system glitches, is so outaged that it cannot be sold or cannot be sold through the system (must be sold offline). ">CAT 1
-                                                    </option>
-                                                <option value=" CAT 2" title="(CAT 2) means that system equipment can still perform partial sales tasks, which the system can still run because of software glitches. However, the station is so severely limited that it affects the data around the day, such as:
-•  Can't afford some fuel, dispenser This is caused by dispensers not being able to connect to automation systems.">CAT 2</option>
-                                                <option value="CAT 3" title="
-(CAT 3) refers to a system device that is defective but does not affect sales work. It has some but mild impact on all stations or operations of the head office, such as:
-•  Each cycle cannot be closed.  
-•  Reports cannot be printed.  
-•  Ticket printers cannot be printed.  
-•  Cash drawers do not open automatically.  
-•  The point-of-sale keyboard is not available, but the Mouse is still available or can be used either.">CAT 3
-                                                </option>
-                                                <option value="CAT 4" title="(CAT 4) refers to minor issues that are caused by software vulnerabilities that do not affect the sales process, such as:
-•  Staff at the station are unsure how to use the system, so training is required on the next occasion.
-•  Additional device replacements  
-•  Problems occurring within vulnerable areas as announced by the government. ">CAT 4</option>
-                                                <option value="CAT 4 Report" title="(CAT 4 Report) Report error detection within 96 hours">CAT 4 Report</option>
-                                                <option value="CAT 5" title="(CAT 5) refers to issues related to data editing in POS, BO systems, such as: Reports cannot be generated.">CAT 5</option>
-                                                `;
+        const slaOptions = {
+            'Hardware': [{
+                value: 'CAT Hardware',
+                text: 'CAT Hardware'
+            }],
+            'Software': [{
+                    value: 'CAT 1',
+                    text: 'CAT 1'
+                },
+                {
+                    value: 'CAT 2',
+                    text: 'CAT 2'
+                },
+                {
+                    value: 'CAT 3',
+                    text: 'CAT 3'
+                },
+                {
+                    value: 'CAT 4',
+                    text: 'CAT 4'
+                },
+                {
+                    value: 'CAT 4 Report',
+                    text: 'CAT 4 Report'
+                },
+                {
+                    value: 'CAT 5',
+                    text: 'CAT 5'
+                }
+            ],
+            'Other': [{
+                value: 'Other',
+                text: 'Other'
+            }]
+        };
 
-            const allOptions = `
-                                                    <option value="">-Select-</option>
-                                                  <option value="Other" title="(Other) In case problem cause by equipment that is not related with POS system equipment such as Network Cable, Media converter, Internet Router, internet connection, Wi-Fi access point, Fiber Optic Cable, Dispenser signal cable,
-                                                 Dispensers, Electric Supply Equipment, etc. is not response by PTT POS System.">Other</option>
-                                                 <option>multil1</option>
-                                                  <option>multil1</option>
-                                                   <option>multil1</option>
-                                                    <option>multil1</option>
-                                                    
-                                                `;
+        issueTypeSelect.addEventListener('change', function() {
+            const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
 
-            const allOptions2 = `
-                                                    <option value="">-Select-</option>
-                                                  <option value="Other" title="(Other) In case problem cause by equipment that is not related with POS system equipment such as Network Cable, Media converter, Internet Router, internet connection, Wi-Fi access point, Fiber Optic Cable, Dispenser signal cable,
-                                                 Dispensers, Electric Supply Equipment, etc. is not response by PTT POS System.">Other</option>
-                                                `;
+            // Clear current options in SLA Category dropdown
+            slaCategorySelect.innerHTML = '<option value="" title="Please select a category">-Select-</option>';
 
-            if (issueTypes.includes('Hardware')) {
-                slaCategorySelect.innerHTML = hardware;
-            } else if (issueTypes.includes('Software')) {
-                slaCategorySelect.innerHTML = software;
-            } else if (issueTypes.includes('Software') && issueTypes.includes('Hardware')) {
-                slaCategorySelect.innerHTML = hardwareSoftwareOptions;
-            } else if (issueTypes.includes('Hardware') && issueTypes.includes('FleetCard')) {
-                slaCategorySelect.innerHTML = allOptions;
+            if (selectedValues.includes('Software') && !selectedValues.includes('Hardware') && selectedValues.length === 1) {
+                // If only Software is selected
+                slaOptions['Software'].forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
+            } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software') && selectedValues.length === 1) {
+                // If only Hardware is selected
+                slaOptions['Hardware'].forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
+            } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length === 2) {
+                // If both Software and Hardware are selected
+                slaOptions['Hardware'].concat(slaOptions['Software']).forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
+            } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length > 2) {
+                // If Software, Hardware, and other options are selected
+                slaOptions['Hardware'].concat(slaOptions['Software']).concat(slaOptions['Other']).forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
+            } else if (selectedValues.includes('Software') && !selectedValues.includes('Hardware')) {
+                // If Software is selected along with any other option that is not Hardware
+                slaOptions['Software'].concat(slaOptions['Other']).forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
+            } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software')) {
+                // If Hardware is selected along with any other option that is not Software
+                slaOptions['Hardware'].concat(slaOptions['Other']).forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
             } else {
-
-                slaCategorySelect.innerHTML = allOptions2;
-            }
-
-            if (issueTypes.length === 0) {
-                slaCategorySelect.disabled = true;
-                errorMessageNotSelectIssueType.style.display = 'block';
-            } else {
-                slaCategorySelect.disabled = false;
-                errorMessageNotSelectIssueType.style.display = 'none';
+                // If neither Software nor Hardware is selected, or other combinations
+                slaOptions['Other'].forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    slaCategorySelect.appendChild(opt);
+                });
             }
         });
     </script>
+
 </body>
 
 </html>

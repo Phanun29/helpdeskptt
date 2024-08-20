@@ -101,6 +101,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Bot Name</th>
                                         <th>Token</th>
                                         <th>Chat ID</th>
+                                        <th>role</th>
+
 
                                     </tr>
                                 </thead>
@@ -132,6 +134,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $telegram_bot['bot_name'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['token'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['chat_id'] . "</td>";
+                                            echo "<td>" . ($telegram_bot['code'] === '1' ? 'nnactive' : 'Inactive') . "</td>";
 
 
                                             echo "</tr>";

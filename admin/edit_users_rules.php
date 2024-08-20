@@ -366,7 +366,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                         </div>
                                         <div class="col-sm-3 row">
                                             <div class="col-8">
-                                                <label for="list_telegram_bot">List Ticket Track</label>
+                                                <label for="list_telegram_bot">List Telegram Bot</label>
                                             </div>
                                             <div class="col-4">
                                                 <input type="checkbox" name="permissions[]" value="list_telegram_bot" id="list_telegram_bot" <?= $users_rules['list_telegram_bot'] ? 'checked' : ''; ?>>
