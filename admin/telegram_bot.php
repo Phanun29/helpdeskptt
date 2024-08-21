@@ -3,7 +3,7 @@ include "../inc/header_script.php";
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; //  user ID
 
-$query_user = " SELECT u.*, r.list_station, r.list_ticket_status, r.list_user_status, r.list_user_rules  , r.list_ticket_assign
+$query_user = " SELECT u.*, r.list_telegram_bot
                 FROM tbl_users u 
                 JOIN tbl_users_rules r 
                 ON u.rules_id = r.rules_id 
@@ -14,7 +14,7 @@ $result_user = $conn->query($query_user);
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
-    if ($user['list_ticket_assign']) {
+    if (!$user['list_telegram_bot']) {
         header("Location: 404.php");
         exit();
     }
@@ -102,8 +102,6 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Token</th>
                                         <th>Chat ID</th>
                                         <th>role</th>
-
-
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -118,7 +116,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                             echo "<td  class='py-1'>";
 
-                                            // Your original ID
+                                            //  original ID
                                             $original_id = $telegram_bot['id'];
 
                                             // Hash the ID to make it unique and consistent
@@ -126,7 +124,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                             // Encode the hash and take the first 10 characters
                                             $encoded_id = substr(base64_encode($hashed_id), 0, 20);
-                                            echo "<a href='edit_telegram_bot.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                            echo "<a href='edit_telegram_bot.php?q={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
 
                                             echo "<button data-id='" . $telegram_bot['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
 
@@ -134,7 +132,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $telegram_bot['bot_name'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['token'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['chat_id'] . "</td>";
-                                            echo "<td>" . ($telegram_bot['code'] === '1' ? 'nnactive' : 'Inactive') . "</td>";
+                                            echo "<td>" . ($telegram_bot['role'] === '1' ? 'All' : 'Today' ) . "</td>";
 
 
                                             echo "</tr>";

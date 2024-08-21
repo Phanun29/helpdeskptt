@@ -31,37 +31,45 @@ function sendTelegramMessage()
     $pending_vendor = $status_counts['Pending Vendor'];
     $close = $status_counts['Close'];
 
-    $bot_telegram_query = "SELECT *FROM tbl_telegram_bot where code = '2'";
+    $bot_telegram_query = "SELECT *FROM tbl_telegram_bot where role = '0'";
     $bot_result = $conn->query($bot_telegram_query);
     $row = $bot_result->fetch_assoc();
 
     $token = $row['token'];
-    $chat_id = $row['chat_id'];
+
     $botToken =  $token;
-    $chatId =  $chat_id;
+
+    $chat_ids_string = $row['chat_id'];
+    $botToken = $token;
+
+    // Split chat IDs into an array
+    $chatIds = explode(',', $chat_ids_string);
 
     $currentDate = date('d-m-Y H:i:s');
     $message = "Status today at $currentDate:\n Open: $open \n On Hold: $onhold \n In Progress $inprogress \n Pending Vendor: $pending_vendor \n Close: $close";
 
     $url = "https://api.telegram.org/bot$botToken/sendMessage";
-    $data = [
-        'chat_id' => $chatId,
-        'text' => $message
-    ];
+    foreach ($chatIds as $chatId) {
+        $data = [
+            'chat_id' => $chatId,
+            'text' => $message
+        ];
 
-    $options = [
-        CURLOPT_URL => $url,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $data,
-        CURLOPT_RETURNTRANSFER => true
-    ];
+        $options = [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_RETURNTRANSFER => true
+        ];
 
-    $ch = curl_init();
-    curl_setopt_array($ch, $options);
-    $response = curl_exec($ch);
-    curl_close($ch);
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-    echo $response;
+        echo "Message sent to chat ID: $chatId\n";
+        echo "Response: $response\n";
+    }
 }
 // sendTelegramMessage();
 sendTelegramMessage();

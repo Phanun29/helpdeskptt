@@ -25,23 +25,34 @@ if ($result_user && $result_user->num_rows > 0) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bot_name = $_POST['bot_name'];
     $token = $_POST['token'];
-    $chat_id = $_POST['chat_id'];
+    $chat_id = isset($_POST['chat_id']) ? implode(',', $_POST['chat_id']) : null;
 
 
+    // Insert each chat_id into the database
+    $insert_user_query = "INSERT INTO tbl_telegram_bot (bot_name, token, chat_id) 
+                              VALUES ('$bot_name', '$token', '$chat_id')";
 
-    $insert_user_query = "INSERT INTO tbl_telegram_bot (bot_name,token, chat_id ) 
-            VALUES ('$bot_name','$token', '$chat_id')";
-    if ($conn->query($insert_user_query) == TRUE) {
-        $_SESSION['success_message_telegram_bot'] = "telegram_bot added successfully.";
+    if ($conn->query($insert_user_query) === TRUE) {
+        $success++;
     } else {
-        $_SESSION['error_message_telegram_bot'] = "Error adding telegram_bot: " . $conn->error;
+        $errors[] = "Error adding telegram_bot for chat_id $chat_id: " . $conn->error;
     }
 
+
+    // Set session messages
+    if ($success > 0) {
+        $_SESSION['success_message_telegram_bot'] = "$success telegram_bot(s) added successfully.";
+    }
+
+    if (!empty($errors)) {
+        $_SESSION['error_message_telegram_bot'] = implode("<br>", $errors);
+    }
 
     // Redirect to the page user to display messages
     header('Location: telegram_bot.php');
     exit();
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,43 +90,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="card-header">
                                 <a href="telegram_bot.php" class="btn btn-primary ml-2">BACK</a>
                             </div>
-                            <form method="POST" action="">
+
+                            <form method="POST">
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-sm-12">
-                                            <div class="form-group">
-                                                <label for="bot_name"> Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="bot_name" class="form-control" id="bot_name" placeholder="Enter Bot Name">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-12">
-                                            <div class="form-group">
-                                                <label for="token">token <span class="text-danger">*</span></label>
-                                                <input type="text" name="token" class="form-control" id="token" placeholder="Enter token" required>
-                                            </div>
-                                        </div>
+                                        <div class="col-12">
 
-                                        <div class="col-sm-12">
-                                            <div class="form-group">
-                                                <label for="chat_id">chat id <span class="text-danger">*</span></label>
-                                                <input type="text" name="chat_id" class="form-control" id="chat_id" placeholder="token" required>
+                                            <label for="bot_name"> Name <span class="text-danger">*</span></label>
+                                            <input type="text" name="bot_name" class="form-control" id="bot_name" placeholder="Enter Bot Name">
 
-                                            </div>
+                                        </div>
+                                        <div class="col-12">
+
+                                            <label for="token">Token <span class="text-danger">*</span></label>
+                                            <input type="text" name="token" class="form-control" id="token" placeholder="Enter token" required>
 
                                         </div>
 
+                                        <div class="form-group col-12">
 
+                                            <label for="chat_id">Chat ID<span class="text-danger">*</span></label>
+                                            <select name="chat_id[]" id="chat_id" class="form-control" multiple placeholder='Select chat id' required>
+                                                <option value="">select chat id</option>
+                                                <?php
+                                                // Fetch users based on the condition
+                                                $station_query = "SELECT station_name, chat_id FROM tbl_station";
+                                                $station_result = $conn->query($station_query);
+
+                                                if ($station_result->num_rows > 0) {
+                                                    while ($station_row = $station_result->fetch_assoc()) {
+
+                                                        echo "<option value=" . $station_row['chat_id'] . ">" . $station_row['station_name'] . "</option>";
+                                                    }
+                                                } else {
+                                                    echo "<option value=\"\">No active users found</option>";
+                                                }
+                                                ?>
+                                            </select>
+
+                                        </div>
                                     </div>
-
-
 
                                     <div class="mt-3">
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
                             </form>
+
                         </div>
                     </div>
+                    <!-- /.card-body -->
                 </div>
             </section>
         </div>
@@ -131,7 +155,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
+    <!-- select multiple -->
+    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var chatIDChoices = new Choices('#chat_id', {
+                removeItemButton: true,
+                maxItemCount: 100,
+                searchResultLimit: 100,
+                renderChoiceLimit: 100
+            });
 
+        });
+    </script>
 
 
 

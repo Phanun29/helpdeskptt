@@ -123,73 +123,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="password">Password <span class="text-danger">*</span></label>
-                                                <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                                                <input type="password" name="password" class="form-control" id="password" placeholder="Enter Password" required>
                                                 <button type="button" class="show-password btn-sm " onclick="togglePasswordVisibility()" id="showPasswordButton">
                                                     <i class="fas fa-eye" id="togglePasswordIcon"></i>
                                                 </button>
                                             </div>
 
-                                            <style>
-                                                .show-password {
-                                                    position: absolute;
-                                                    top: 52px;
-                                                    right: 10px;
-                                                    /* Adjust to fit within your input field */
-                                                    transform: translateY(-50%);
-                                                    background: none;
-                                                    border: none;
-                                                    color: #495057;
-                                                    font-size: 20px;
-                                                    cursor: pointer;
-                                                }
 
-                                                .show-password.hidden {
-                                                    display: none;
-                                                }
-                                            </style>
-
-                                            <script>
-                                                function togglePasswordVisibility() {
-                                                    var passwordInput = document.getElementById('password');
-                                                    var toggleIcon = document.getElementById('togglePasswordIcon');
-                                                    var showPasswordButton = document.getElementById('showPasswordButton');
-
-                                                    if (passwordInput.type === 'password') {
-                                                        passwordInput.type = 'text';
-                                                        toggleIcon.classList.remove('fa-eye');
-                                                        toggleIcon.classList.add('fa-eye-slash');   
-                                                    } else {
-                                                        passwordInput.type = 'password';
-                                                        toggleIcon.classList.remove('fa-eye-slash');
-                                                        toggleIcon.classList.add('fa-eye');
-                                                    }
-                                                }
-
-                                                function checkPasswordInput() {
-                                                    var passwordInput = document.getElementById('password');
-                                                    var showPasswordButton = document.getElementById('showPasswordButton');
-
-                                                    // Show/hide the button based on the input field's value
-                                                    if (passwordInput.value.length > 0) {
-                                                        showPasswordButton.classList.remove('hidden');
-                                                    } else {
-                                                        showPasswordButton.classList.add('hidden');
-                                                    }
-                                                }
-
-                                                // Attach the input event listener to the password field
-                                                document.getElementById('password').addEventListener('input', checkPasswordInput);
-
-                                                // Initialize button visibility based on current input value
-                                                checkPasswordInput();
-                                            </script>
 
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="company">Company <span class="text-danger">*</span></label>
                                                 <select class="form-control" name="company" id="company" required>
-                                                    <option value="">select</option>
+                                                    <option value="">-- Select --</option>
                                                     <option value="ABA Bank">ABA Bank</option>
                                                     <option value="Wing Bank">Wing Bank</option>
                                                     <option value="PTTCL">PTTCL</option>
@@ -210,7 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="form-group">
                                                 <label for="status">Status <span class="text-danger">*</span></label>
                                                 <select name="status" class="form-control select2bs4" style="width: 100%;" required>
-                                                    <option value="">select</option>
+                                                    <option value="">-- Select --</option>
                                                     <option value="1">Active</option>
                                                     <option value="0">Inactive</option>
 
@@ -221,6 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="form-group">
                                                 <label for="rules_id">Users Rules <span class="text-danger">*</span></label>
                                                 <select id="rules_id" name="rules_id" class="form-control" required>
+                                                    <option value="">-- Select --</option>
                                                     <?php
                                                     $rules_query = "SELECT rules_id, rules_name FROM tbl_users_rules";
                                                     $rules_result = $conn->query($rules_query);
@@ -258,8 +206,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
+    <!-- show password -->
+    <style>
+        .show-password {
+            position: absolute;
+            top: 52px;
+            right: 10px;
+            /* Adjust to fit within your input field */
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #495057;
+            font-size: 20px;
+            cursor: pointer;
+        }
 
+        .show-password.hidden {
+            display: none;
+        }
+    </style>
 
+    <script>
+        function togglePasswordVisibility() {
+            var passwordInput = document.getElementById('password');
+            var toggleIcon = document.getElementById('togglePasswordIcon');
+            var showPasswordButton = document.getElementById('showPasswordButton');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPasswordInput() {
+            var passwordInput = document.getElementById('password');
+            var showPasswordButton = document.getElementById('showPasswordButton');
+
+            // Show/hide the button based on the input field's value
+            if (passwordInput.value.length > 0) {
+                showPasswordButton.classList.remove('hidden');
+            } else {
+                showPasswordButton.classList.add('hidden');
+            }
+        }
+
+        // Attach the input event listener to the password field
+        document.getElementById('password').addEventListener('input', checkPasswordInput);
+
+        // Initialize button visibility based on current input value
+        checkPasswordInput();
+    </script>
 
 
 </body>

@@ -37,9 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
     $province = $_POST['province'];
+    $chat_id = $_POST['chat_id'];
 
-    $insert_station_query = "INSERT INTO tbl_station (station_id, station_name, station_type, province) 
-            VALUES ('$station_id', '$station_name', '$station_type', '$province')";
+    $insert_station_query = "INSERT INTO tbl_station (station_id, station_name, station_type, province, chat_id) 
+            VALUES ('$station_id', '$station_name', '$station_type', '$province', '$chat_id')";
 
     if ($conn->query($insert_station_query) === TRUE) {
         // Successful insertion
@@ -141,6 +142,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <option value="Takeo">Takeo </option>
 
                                             </select>
+                                        </div>
+                                        <div class="form-group col-12 col-md-12">
+                                            <label>Chat ID <span class="text-danger">*</span></label>
+                                            <input type="text" value="" name="chat_id" id="chat_id" class="form-control" placeholder="Chat ID">
                                         </div>
                                     </div>
                                     <div class="mt-3">

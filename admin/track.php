@@ -3,7 +3,7 @@ include "../inc/header_script.php";
 // Fetch user details including rules_id and permissions in one query
 $user_id = $fetch_info['users_id']; //  user ID
 
-$query_user = " SELECT u.*, r.list_station, r.list_ticket_status, r.list_user_status, r.list_user_rules  , r.list_ticket_assign
+$query_user = " SELECT u.*  , r.list_ticket_track
                 FROM tbl_users u 
                 JOIN tbl_users_rules r 
                 ON u.rules_id = r.rules_id 
@@ -14,7 +14,7 @@ $result_user = $conn->query($query_user);
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
-    if ($user['list_ticket_assign']) {
+    if (!$user['list_ticket_track']) {
         header("Location: 404.php");
         exit();
     }

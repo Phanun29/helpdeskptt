@@ -787,7 +787,7 @@ if ($ticket_result->num_rows > 0) {
             const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
 
             // Clear current options in SLA Category dropdown
-            slaCategorySelect.innerHTML = '<option value="" title="Please select a category">-Select-</option>';
+            slaCategorySelect.innerHTML = '';
 
             if (selectedValues.includes('Software') && !selectedValues.includes('Hardware') && selectedValues.length === 1) {
                 // If only Software is selected

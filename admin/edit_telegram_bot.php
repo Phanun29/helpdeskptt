@@ -6,7 +6,7 @@ include "../inc/header_script.php";
 $user_id = $fetch_info['users_id']; // Example user ID
 
 $query_user = "
-    SELECT u.*, r.list_station, r.add_station, r.edit_station, r.delete_station 
+    SELECT u.*, r.list_telegram_bot 
     FROM tbl_users u 
     JOIN tbl_users_rules r ON u.rules_id = r.rules_id 
     WHERE u.users_id = $user_id";
@@ -16,19 +16,19 @@ $result_user = $conn->query($query_user);
 if ($result_user && $result_user->num_rows > 0) {
     $user = $result_user->fetch_assoc();
 
-    if (!$user['list_station'] || !$user['edit_station']) {
+    if (!$user['list_telegram_bot']) {
         header("Location: 404.php");
         exit();
     }
 } else {
     $_SESSION['error_message_station'] = "User not found or permission check failed.";
-    header("Location: station.php");
+    header("Location: 404.php");
     exit();
 }
-$id = $_GET['id'];
+
 // Retrieve the station details for editing
-if (isset($_GET['id'])) {
-    $encoded_id = $_GET['id'];
+if (isset($_GET['q'])) {
+    $encoded_id = $_GET['q'];
 
     // Fetch all possible IDs and their encoded versions
     $id_query = "SELECT id FROM tbl_telegram_bot";
@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
     $bot_name = $_POST['bot_name'];
     $token = $_POST['token'];
-    $chat_id = $_POST['chat_id'];
+    $chat_id = isset($_POST['chat_id']) ? implode(',', $_POST['chat_id']) : null;
 
 
     // Update user query
@@ -78,7 +78,7 @@ if ($id) {
         $row = $telegram_bot_result->fetch_assoc();
     }
 } else {
-  
+
     header("Location: 404.php");
     exit();
 }
@@ -127,25 +127,32 @@ if ($id) {
 
                                 <div class="card-body ">
                                     <div class="row">
-                                        <div class="form-group col-12 col-md-12">
+                                        <div class="form-group col-12">
                                             <label for="bot_name">bot name</label>
                                             <input type="text" class="form-control" id="bot_name" name="bot_name" value="<?= $row['bot_name'] ?>" required>
                                         </div>
-                                        <div class="form-group col-12 col-md-12">
+                                        <div class="form-group col-12">
                                             <label for="token">Token</label>
                                             <input type="text" class="form-control" id="token" name="token" value="<?= $row['token'] ?>" required>
                                         </div>
-                                        <div class="form-group col-12 col-md-12">
+                                        <div class="form-group col-12">
                                             <label for="chat_id">Chat ID</label>
-                                            <input type="text" class="form-control" id="chat_id" name="chat_id" value="<?= $row['chat_id'] ?>" required>
-                                        </div>
-
-                                        <div class="form-group col-12 col-md-12">
-                                            <!-- <label>Province</label>
-                                            <select name="province" class="form-control" style="width: 100%;" required>
-                                                <option value="">-Select-</option>
-
-                                            </select> -->
+                                            <select name="chat_id[]" class="form-control" id="chat_id" placeholder='-select-' multiple>
+                                                <?php
+                                                // Fetch users based on the condition
+                                                $station_query = "SELECT chat_id, station_name FROM tbl_station  ";
+                                                $station_result = $conn->query($station_query);
+                                                $chat_id = explode(',', $row['chat_id']);
+                                                if ($station_result->num_rows > 0) {
+                                                    while ($station_row = $station_result->fetch_assoc()) {
+                                                        $selected = in_array($station_row['chat_id'], $chat_id) ? 'selected' : '';
+                                                        echo "<option value=\"" . $station_row['chat_id'] . "\" $selected>" . $station_row['station_name'] . "</option>";
+                                                    }
+                                                } else {
+                                                    echo "<option value=\"\">No active users found</option>";
+                                                }
+                                                ?>
+                                            </select>
                                         </div>
 
                                     </div>
@@ -178,7 +185,19 @@ if ($id) {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
+    <!-- select multiple -->
+    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var chatIDChoices = new Choices('#chat_id', {
+                removeItemButton: true,
+                maxItemCount: 100,
+                searchResultLimit: 100,
+                renderChoiceLimit: 100
+            });
 
+        });
+    </script>
 
 </body>
 
