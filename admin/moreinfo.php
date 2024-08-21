@@ -74,7 +74,7 @@ $ticket_result = $conn->query($ticket_query);
 
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <?php include "../inc/nav.php"; ?>
+        <?php include "../inc/top_nav_bar.php"; ?>
         <?php include "../inc/sidebar.php"; ?>
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">

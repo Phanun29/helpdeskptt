@@ -15,7 +15,7 @@ if ($result_user && $result_user->num_rows > 0) {
   $user = $result_user->fetch_assoc();
 
   $listTicketAssign = $user['list_ticket_assign'];
-  $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
+  // $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
 
   // Set common parts of the query
   $ticket_select =
@@ -137,7 +137,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
 <body class="hold-transition sidebar-mini layout-fixed">
   <div class="wrapper">
-    <?php include "../inc/nav.php" ?>
+    <?php include "../inc/top_nav_bar.php" ?>
     <?php include "../inc/sidebar.php" ?>
 
     <!-- Content Wrapper. Contains page content -->

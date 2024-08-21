@@ -39,7 +39,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <?php include "../inc/nav.php" ?>
+        <?php include "../inc/top_nav_bar.php" ?>
         <?php include "../inc/sidebar.php" ?>
         <div class="content-wrapper">
             <div class="content-header">
