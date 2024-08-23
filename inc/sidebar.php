@@ -46,8 +46,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
          with font-awesome or any other icon font library -->
                 <li class="nav-item menu-open">
 
-                    <a href="index.php" <?php if ($current_menu === 'index.php') echo 'class="nav-link active"';
-                                        else echo 'class="nav-link"'; ?>>
+                    <a href="index.php" <?php echo ($current_menu === 'index.php') ? 'class="nav-link active"' : 'class="nav-link"'; ?>>
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
                             Dashboard
@@ -57,21 +56,18 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 <?php
                 if ($listTicket) : ?>
                     <li class="nav-item">
-                        <a href="ticket.php" <?php if ($current_menu === 'ticket.php' || $current_menu === 'add_ticket.php' || $current_menu === 'edit_ticket.php') echo 'class="nav-link active"';
-                                                else echo 'class="nav-link"'; ?>>
-                            <i class="nav-icon  fa-solid fa-ticket"></i>
-                            <p>
-                                Ticket
-                            </p>
+                        <a href="ticket.php" class="<?php echo ($current_menu === 'ticket.php' || $current_menu === 'add_ticket.php' || $current_menu === 'edit_ticket.php') ? 'nav-link active' : 'nav-link'; ?>">
+                            <i class="nav-icon fa-solid fa-ticket"></i>
+                            <p>Ticket</p>
                         </a>
+
                     </li>
                 <?php
                 endif;
                 if ($listStation) : ?>
                     <li class="nav-item">
 
-                        <a href="station.php" <?php if ($current_menu === 'station.php'  || $current_menu === 'add_station.php' || $current_menu === 'edit_station.php') echo 'class="nav-link active"';
-                                                else echo 'class="nav-link"'; ?>>
+                        <a href="station.php" class="<?php echo ($current_menu === 'station.php'  || $current_menu === 'add_station.php' || $current_menu === 'edit_station.php') ? 'nav-link active' : 'nav-link'; ?>">
                             <i class="nav-icon fa-solid fa-gas-pump"></i>
                             <p>
                                 Station
@@ -83,8 +79,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listUsers) : ?>
                     <li class="nav-item">
 
-                        <a href="users.php" <?php if ($current_menu === 'users.php' || $current_menu === 'add_users.php' || $current_menu === 'edit_users.php') echo 'class="nav-link active"';
-                                            else echo 'class="nav-link"'; ?>>
+                        <a href="users.php" class="<?php echo ($current_menu === 'users.php' || $current_menu === 'add_users.php' || $current_menu === 'edit_users.php') ? 'nav-link active' : 'nav-link'; ?>">
                             <i class="nav-icon fa-solid fa-users"></i>
                             <p>
                                 Users
@@ -96,8 +91,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listUsersRules) : ?>
                     <li class="nav-item">
 
-                        <a href="users_rules.php" <?php if ($current_menu === 'users_rules.php' || $current_menu === 'add_users_rules.php' || $current_menu === 'edit_users_rules.php') echo 'class="nav-link active"';
-                                                    else echo 'class="nav-link"'; ?>>
+                        <a href="users_rules.php" class="<?php echo ($current_menu === 'users_rules.php' || $current_menu === 'add_users_rules.php' || $current_menu === 'edit_users_rules.php') ? 'nav-link active' : 'nav-link'; ?>">
                             <i class="nav-icon fas fa-users-cog"></i>
                             <p>
                                 Users Rules
@@ -109,8 +103,8 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listTicketTrack) :
                 ?>
                     <li class="nav-item">
-                        <a href="track.php" <?php if ($current_menu === 'track.php') echo 'class="nav-link active"';
-                                            else echo 'class="nav-link"'; ?>>
+                        <a href="track.php" class="<?php echo ($current_menu === 'track.php') ? 'nav-link active' :
+                                                        'nav-link'; ?>">
                             <i class="nav-icon fa fa-search" aria-hidden="true"></i>
                             <p>Ticket Track</p>
                         </a>
@@ -120,8 +114,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 if ($listTelegramBot) :
                 ?>
                     <li class="nav-item">
-                        <a href="telegram_bot.php" <?php if ($current_menu === 'telegram_bot.php' || $current_menu == 'edit_telegram_bot.php' || $current_menu == "add_telegram_bot.php") echo 'class="nav-link active"';
-                                                    else echo 'class="nav-link"'; ?>>
+                        <a href="telegram_bot.php" class="<?php echo ($current_menu === 'telegram_bot.php' || $current_menu == 'edit_telegram_bot.php' || $current_menu == "add_telegram_bot.php") ? 'nav-link active' : 'nav-link'; ?>">
 
                             <i class=" nav-icon fas fa-robot  " aria-hidden="true"></i>
                             <p>Telegram Bot</p>
@@ -130,8 +123,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                 <?php endif; ?>
                 <li class="nav-item">
 
-                    <a href="report.php" <?php if ($current_menu === 'report.php') echo 'class="nav-link active"';
-                                            else echo 'class="nav-link"'; ?>>
+                    <a href="report.php" <?php echo ($current_menu === 'report.php') ? 'class="nav-link active"' : 'class="nav-link"'; ?>>
                         <i class="nav-icon fa fa-file"></i>
                         <p>
                             Report

@@ -53,11 +53,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
     $bot_name = $_POST['bot_name'];
     $token = $_POST['token'];
-    $chat_id = isset($_POST['chat_id']) ? implode(',', $_POST['chat_id']) : null;
+    $station_type = $_POST['station_type'];
 
 
     // Update user query
-    $update_query = "UPDATE tbl_telegram_bot SET bot_name = '$bot_name', token = '$token', chat_id = '$chat_id' WHERE id = $id";
+    $update_query = "UPDATE tbl_telegram_bot SET bot_name = '$bot_name', token = '$token', station_type = '$station_type' WHERE id = $id";
 
     if ($conn->query($update_query) === TRUE) {
         $_SESSION['success_message_telegram_bot'] = "telegram_bot updated successfully.";
@@ -136,22 +136,10 @@ if ($id) {
                                             <input type="text" class="form-control" id="token" name="token" value="<?= $row['token'] ?>" required>
                                         </div>
                                         <div class="form-group col-12">
-                                            <label for="chat_id">Chat ID</label>
-                                            <select name="chat_id[]" class="form-control" id="chat_id" placeholder='-select-' multiple>
-                                                <?php
-                                                // Fetch users based on the condition
-                                                $station_query = "SELECT chat_id, station_name FROM tbl_station  ";
-                                                $station_result = $conn->query($station_query);
-                                                $chat_id = explode(',', $row['chat_id']);
-                                                if ($station_result->num_rows > 0) {
-                                                    while ($station_row = $station_result->fetch_assoc()) {
-                                                        $selected = in_array($station_row['chat_id'], $chat_id) ? 'selected' : '';
-                                                        echo "<option value=\"" . $station_row['chat_id'] . "\" $selected>" . $station_row['station_name'] . "</option>";
-                                                    }
-                                                } else {
-                                                    echo "<option value=\"\">No active users found</option>";
-                                                }
-                                                ?>
+                                            <label for="station_type">Chat ID</label>
+                                            <select name="station_type" class="form-control" id="station_type" placeholder='-select-' >
+                                                <option value="DODO" <?= $row['station_type'] == 'DODO' ? 'selected' : ''; ?>>DODO</option>
+                                                <option value="COCO" <?= $row['station_type'] == 'COCO' ? 'selected' : '';  ?>>COCO</option>
                                             </select>
                                         </div>
 
@@ -185,19 +173,7 @@ if ($id) {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-    <!-- select multiple -->
-    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var chatIDChoices = new Choices('#chat_id', {
-                removeItemButton: true,
-                maxItemCount: 100,
-                searchResultLimit: 100,
-                renderChoiceLimit: 100
-            });
-
-        });
-    </script>
+  
 
 </body>
 

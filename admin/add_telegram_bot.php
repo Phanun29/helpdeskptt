@@ -25,7 +25,7 @@ if ($result_user && $result_user->num_rows > 0) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bot_name = $_POST['bot_name'];
     $token = $_POST['token'];
-    $chat_id = isset($_POST['chat_id']) ? implode(',', $_POST['chat_id']) : null;
+    $chat_id = $_POST['chat_id'];
 
 
     // Insert each chat_id into the database
@@ -110,22 +110,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="form-group col-12">
 
                                             <label for="chat_id">Chat ID<span class="text-danger">*</span></label>
-                                            <select name="chat_id[]" id="chat_id" class="form-control" multiple placeholder='Select chat id' required>
-                                                <option value="">select chat id</option>
-                                                <?php
-                                                // Fetch users based on the condition
-                                                $station_query = "SELECT station_name, chat_id FROM tbl_station";
-                                                $station_result = $conn->query($station_query);
+                                            <select name="chat_id" id="chat_id" class="form-control" placeholder='Select chat id' required>
+                                                <option value="">-- Select --</option>
+                                                <option value="DODO">DODO</option>
+                                                <option value="COCO">COCO</option>
 
-                                                if ($station_result->num_rows > 0) {
-                                                    while ($station_row = $station_result->fetch_assoc()) {
 
-                                                        echo "<option value=" . $station_row['chat_id'] . ">" . $station_row['station_name'] . "</option>";
-                                                    }
-                                                } else {
-                                                    echo "<option value=\"\">No active users found</option>";
-                                                }
-                                                ?>
                                             </select>
 
                                         </div>
@@ -155,19 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-    <!-- select multiple -->
-    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var chatIDChoices = new Choices('#chat_id', {
-                removeItemButton: true,
-                maxItemCount: 100,
-                searchResultLimit: 100,
-                renderChoiceLimit: 100
-            });
 
-        });
-    </script>
 
 
 

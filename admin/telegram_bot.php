@@ -131,7 +131,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['bot_name'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['token'] . "</td>";
-                                            echo "<td class='py-1'>" . $telegram_bot['chat_id'] . "</td>";
+                                            echo "<td class='py-1'>" . $telegram_bot['station_type'] . "</td>";
                                             echo "<td>" . ($telegram_bot['role'] === '1' ? 'All' : 'Today' ) . "</td>";
 
 

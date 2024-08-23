@@ -28,7 +28,7 @@ if ($result_user && $result_user->num_rows > 0) {
     if ($listTicketAssign == 0) {
         $ticket_query = "
             SELECT t.*, 
-                   REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+                   REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ','), ',',',') AS users_name,
                    GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
             FROM tbl_ticket t
             LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id)
@@ -39,7 +39,7 @@ if ($result_user && $result_user->num_rows > 0) {
         $user_create_ticket_sanitized = $conn->real_escape_string($user_create_ticket);
         $ticket_query = "
             SELECT t.*, 
-                   REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
+                   REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ','),',',',') AS users_name,
                    GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
             FROM tbl_ticket t
             LEFT JOIN tbl_users u ON FIND_IN_SET(u.users_id, t.users_id) OR FIND_IN_SET(u.users_id, t.user_create_ticket)
@@ -449,7 +449,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Description:</td>
-                                                    <td class="p-1"><span id="modalDescription" class="word-wrap"></span></td>
+                                                    <td class="p-1" style="text-align: justify;"><span id="modalDescription" class="word-wrap"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Issue Type:</td>
@@ -497,7 +497,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 </tr>
                                                 <tr>
                                                     <td class="p-1">Comment:</td>
-                                                    <td class="p-1"> <span id="modalComment" class="word-wrap"></span></td>
+                                                    <td class="p-1" style="text-align: justify;"> <span id="modalComment" class="word-wrap"></span></td>
                                                 </tr>
 
                                             </table>

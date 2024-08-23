@@ -52,14 +52,14 @@ function showTicketDetails(ticket) {
         const media = ticket.image_paths.split(',');
         media.forEach(item => {
             const trimmedItem = item.trim();
-            if (trimmedItem.match(/\.(jpeg|jpg|gif|png)$/i)) {
+            if (trimmedItem.match(/\.(jpeg|jpg|gif|png|bmp|webp)$/i)) {
                 const imgElement = document.createElement('img');
                 imgElement.src = trimmedItem;
                 imgElement.style.width = '50px';
                 imgElement.style.cursor = 'pointer';
                 imgElement.onclick = () => showMedia(trimmedItem);
                 modalIssueMedia.appendChild(imgElement);
-            } else if (trimmedItem.match(/\.(mp4|webm|ogg)$/i)) {
+            } else if (trimmedItem.match(/\.(mp4|webm|ogg|mov|avi|mkv|flv)$/i)) {
                 const videoElement = document.createElement('video');
                 videoElement.src = trimmedItem;
                 videoElement.style.width = '50px';

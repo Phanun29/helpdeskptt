@@ -8,7 +8,12 @@ function sendTelegramMessage()
   global $conn;
 
   // Query to get the status counts
-  $status_query = "SELECT status, COUNT(*) as count FROM tbl_ticket GROUP BY status";
+  $status_query = "SELECT status, COUNT(*) as count 
+                FROM tbl_ticket
+                WHERE MONTH(ticket_open) = MONTH(CURDATE()) 
+                AND YEAR(ticket_open) = YEAR(CURDATE())
+                GROUP BY status";
+
   $status_counts = [
     'Open' => 0,
     'On Hold' => 0,
@@ -48,7 +53,7 @@ function sendTelegramMessage()
 
   foreach ($chatIds as $chatId) {
     $data = [
-      'chat_id' => $chatId,
+      'chat_id' => trim($chatId),  // Trim any whitespace
       'text' => $message
     ];
 

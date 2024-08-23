@@ -189,14 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Fetch existing ticket details
         $row = $ticket_result->fetch_assoc();
         $existing_ticket_id = $row['ticket_id'];
-        // Process existing images
-        $uploadDir = "../uploads/$existing_ticket_id/";
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
 
-        $uploadedFiles = [];
-        $deletedFiles = [];
 
         // Handle deleted images
         if (!empty($_POST['delete_images'])) {
@@ -221,50 +214,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // Define allowed file types for images and videos
-        $allowedImageTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF];
-        $allowedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
 
-        // Handle uploaded files (images and videos)
+        // Handle file uploads
+        $uploaded_images = [];
         if (!empty($_FILES['issue_media']['name'][0])) {
-            foreach ($_FILES['issue_media']['tmp_name'] as $key => $tmp_name) {
-                // Check for upload errors
-                if ($_FILES['issue_media']['error'][$key] !== UPLOAD_ERR_OK) {
-                    echo "Error uploading file: " . $_FILES['issue_media']['error'][$key];
-                    continue;
-                }
+            $target_dir = "../uploads/$existing_ticket_id/";
+            if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
 
-                $file_name = $_FILES['issue_media']['name'][$key];
-                $file_tmp = $tmp_name;
-                $file_extension = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-                $unique_name = uniqid() . '.' . $file_extension;
-                $uploadPath = $uploadDir . $unique_name;
-
-                // Determine if the file is an image or video
-                if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif'])) {
-                    // Validate image type
-                    if (!in_array(exif_imagetype($file_tmp), $allowedImageTypes)) {
-                        echo "Invalid image type for file: " . $file_name;
-                        continue;
-                    }
-
-                    // Move image and insert path into tbl_ticket_images
-                    if (move_uploaded_file($file_tmp, $uploadPath)) {
-                        $image_insert_query = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES ('$existing_ticket_id', '$uploadPath')";
-                        echo $conn->query($image_insert_query) ? "insert image success" : "Error preparing image insert statement: " . $conn->error;
-                    } else {
-                        echo "Error moving uploaded file: " . $file_name;
-                    }
-                } elseif (in_array($_FILES['issue_media']['type'][$key], $allowedVideoTypes)) {
-                    // Move video and insert path into tbl_ticket_videos
-                    if (move_uploaded_file($file_tmp, $uploadPath)) {
-                        $video_insert_query = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES ('$existing_ticket_id', '$uploadPath')";
-                        echo $conn->query($video_insert_query) ? "insert video success" : "Error preparing video insert statement: " . $conn->error;
-                    } else {
-                        echo "Error moving uploaded file: " . $file_name;
-                    }
+            foreach ($_FILES['issue_media']['name'] as $key => $image) {
+                $image_extension = pathinfo($image, PATHINFO_EXTENSION);
+                $unique_name = uniqid() . '.' . $image_extension;
+                $target_file = $target_dir . $unique_name;
+                if (move_uploaded_file($_FILES["issue_media"]["tmp_name"][$key], $target_file)) {
+                    $uploaded_images[] = $target_file; // Save the file path
                 } else {
-                    echo "Invalid file type for file: " . $file_name;
+                    $_SESSION['error_message_ticket'] = "Error uploading image: " . $image;
+                    header('Location: ' . $_SERVER['REQUEST_URI']);
+                    exit();
                 }
             }
         }
@@ -316,6 +282,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     );
 
     if ($stmt_update->execute()) {
+        $image_insert_success = true;
+        foreach ($uploaded_images as $target_file) {
+            $query_media = "INSERT INTO tbl_ticket_images (ticket_id, image_path) VALUES ('$existing_ticket_id', '$target_file')";
+            if ($conn->query($query_media) == true) {
+                echo "success";
+            } else {
+                echo "error" . $query_media . $conn->error;
+            }
+        }
         // Check if significant fields have changed
         if (
             $issue_types !== $prev_issue_type ||
@@ -474,13 +449,13 @@ if ($ticket_result->num_rows > 0) {
                                                     $file_extension = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
 
                                                     // Determine if the file is an image or video
-                                                    if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif'])) {
+                                                    if (in_array($file_extension, ['jpeg', 'jpg', 'png', 'gif', 'bmp', 'webp'])) {
                                                         // Image
                                                         echo '<div class="image-container col-4 col-md-1" style="">';
                                                         echo '<img style="width:100%;" src="' . ($image_path) . '" alt="Issue Image" class="issue-image">';
                                                         echo '<button type="button" class="close-button btn-sm delete-image" data-image="' . ($image_path) . '">&times;</button>';
                                                         echo '</div>';
-                                                    } elseif (in_array($file_extension, ['mp4', 'webm', 'ogg'])) {
+                                                    } elseif (in_array($file_extension, ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv'])) {
                                                         // Video
                                                         echo '<div class="image-container col-4 col-md-1" style="">';
                                                         echo '<video style="width:100%;" src="' . ($image_path) . '" controls class="issue-video"></video>';
@@ -533,9 +508,7 @@ if ($ticket_result->num_rows > 0) {
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="SLA_category">SLA Category</label>
-                                            <!-- <select name="SLA_category" id="SLA_category" class="form-control " style="width: 100%;">
 
-                                            </select> -->
                                             <select name="SLA_category" id="SLA_category" class="form-control" required>
                                                 <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
                                                 <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
@@ -722,7 +695,7 @@ if ($ticket_result->num_rows > 0) {
     </script>
     <!-- preview media -->
     <script src="../scripts/previewImages.js"></script>
-    <!-- assign by issue type -->
+
 
     <!-- condition sla category -->
     <script>

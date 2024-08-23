@@ -209,7 +209,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                         <div class="form-group col-sm-4">
                                             <label for="issue_image">Issue Image</label>
-                                            <input type="file" class="form-control" id="issue_image" name="issue_image[]" multiple accept="image/*,video/*">
+                                            <input type="file" class="form-control" id="issue_image" name="issue_image[]" multiple accept="">
                                         </div>
                                         <!-- Display selected new images -->
                                         <div class="col-12 row mt-3" id="imagePreview">

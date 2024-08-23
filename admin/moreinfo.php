@@ -24,10 +24,9 @@ if ($result_user && $result_user->num_rows > 0) {
     // Determine user type and adjust query accordingly
     if ($listTicketAssign == 0) {
         // User type 1: Select all tickets with the specified status
-        $ticket_query = "
-            SELECT 
-                t.*, 
-                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name,
+        $ticket_query = 
+           " SELECT t.*, 
+                REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
                  GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
             FROM 
                 tbl_ticket t
@@ -45,7 +44,7 @@ if ($result_user && $result_user->num_rows > 0) {
         $ticket_query = "
             SELECT 
                 t.*, 
-                REPLACE(GROUP_CONCAT(u.users_name SEPARATOR ', '), ', ', ',') as users_name,
+                REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') as users_name,
                  GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
             FROM 
                 tbl_ticket t

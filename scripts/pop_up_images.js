@@ -7,11 +7,11 @@ function showMedia(media) {
 
     function showCurrentMedia() {
         var currentMedia = mediaArray[currentMediaIndex];
-        if (currentMedia.match(/\.(jpeg|jpg|gif|png)$/i)) {
+        if (currentMedia.match(/\.(jpeg|jpg|gif|png|bmp|webp)$/i)) {
             modalImage.src = currentMedia;
             modalImage.style.display = 'block';
             modalVideo.style.display = 'none';
-        } else if (currentMedia.match(/\.(mp4|webm|ogg)$/i)) {
+        } else if (currentMedia.match(/\.(mp4|webm|ogg|mov|avi|mkv|flv)$/i)) {
             modalVideo.src = currentMedia;
             modalVideo.style.display = 'block';
             modalImage.style.display = 'none';
