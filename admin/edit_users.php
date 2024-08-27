@@ -25,6 +25,7 @@ if ($result_user && $result_user->num_rows > 0) {
 }
 
 if (isset($_GET['id'])) {
+    //Decryption id
     $encoded_id = $_GET['id'];
 
     // Fetch all possible IDs and their encoded versions
@@ -86,7 +87,7 @@ if (isset($_POST['change_password'])) {
     }
 
     // Redirect back to the same page to display the alert message
-   // header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $User_id);
+    // header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $User_id);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $encoded_id);
     exit();
 }
@@ -145,6 +146,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #495057;
             font-size: 20px;
             cursor: pointer;
+        }
+
+        .form-group>.dropdown {
+            border: 1px solid #ced4da;
         }
     </style>
 </head>
@@ -226,7 +231,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="status">Status</label>
-                                                <select name="status" class="form-control select2bs4" style="width: 100%;" required>
+                                                <select name="status" class="selectpicker form-control select2bs4" style="width: 100%;" required>
                                                     <option value="1" <?= ($row['status'] == '1') ? 'selected' : ''; ?>>Active</option>
                                                     <option value="0" <?= ($row['status'] == '0') ? 'selected' : ''; ?>>Inactive</option>
                                                 </select>
@@ -235,7 +240,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="rules_id">Permission</label>
-                                                <select id="rules_id" name="rules_id" class="form-control">
+                                                <select id="rules_id" name="rules_id" class="selectpicker form-control">
                                                     <?php
                                                     $rules_query = "SELECT rules_id, rules_name FROM tbl_users_rules";
                                                     $rules_result = $conn->query($rules_query);
@@ -255,7 +260,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="form-group">
                                                 <label for="company">Company</label>
 
-                                                <select class="form-control" name="company" id="company">
+                                                <select class="selectpicker form-control" name="company" id="company">
                                                     <option value="ABA Bank" <?= $row['company'] == "ABA Bank" ? 'selec   ted' : '' ?>>ABA Bank</option>
                                                     <option value="Wing Bank" <?= $row['company'] == "ABA Bank" ? "selected" : '' ?>>Wing Bank</option>
                                                     <option value="PTTCL" <?= $row['company'] == "PTTCL" ? 'selected' : '' ?>>PTTCL</option>
@@ -331,7 +336,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            // Initialize the Bootstrap Select plugin
+            $('.selectpicker').selectpicker();
+        });
+    </script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->

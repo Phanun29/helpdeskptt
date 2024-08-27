@@ -30,29 +30,8 @@ include "../inc/header_script.php";
                             <h1 class="m-0">Report</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
-                            <!-- <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="index.php"> <i class="nav-icon fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item active">User Rules</li>
-                            </ol> -->
-                            <?php
-                            // session_start(); // Start the session at the beginning of your file
-
-                            if (isset($_SESSION['success_message'])) {
-                                echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
-                                </div>";
-                                unset($_SESSION['success_message']); // Clear the message after displaying
-                            }
-
-                            if (isset($_SESSION['error_message'])) {
-                                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
-                                </div>";
-                                unset($_SESSION['error_message']); // Clear the message after displaying
-                            }
-                            ?>
+                          
+            
                         </div>
                         <!-- /.col -->
                     </div><!-- /.row -->
@@ -73,50 +52,7 @@ include "../inc/header_script.php";
                             </div>
                             <br>
 
-                            <!-- <table id="example1" class="table table-hover text-nowrap">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Rules Name</th>
-                                        <?php if ($EditUserRules || $DeleteUserRules) : ?>
-                                            <th>Option</th>
-                                        <?php endif; ?>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $station_query = "SELECT * FROM tbl_users_rules ORDER BY rules_id DESC ";
-                                    $station_result = $conn->query($station_query);
-                                    $i =  1;
-                                    if ($station_result->num_rows > 0) {
-                                        while ($row = $station_result->fetch_assoc()) {
-                                            echo "<tr>";
-                                            echo "<td  class='p-1'>" . $i++ . "</td>";
-                                            echo "<td  class='p-1'>" . $row['rules_name'] . "</td>";
-
-                                            if ($EditUserRules == 0 &  $DeleteUserRules == 0) {
-                                                echo "<td style='display:none;'></td>";
-                                            } else {
-                                                echo "<td  class='p-1'>";
-                                                // Edit button if user has permission
-                                                if ($EditUserRules) {
-                                                    echo "<a href='edit_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
-                                                }
-                                                // Delete button if user has permission
-                                                if ($DeleteUserRules) {
-                                                    echo "<a href='delete_users_rules.php?id=" . $row['rules_id'] . "' class='btn btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\");'><i class='fa-solid fa-trash'></i></a>";
-                                                }
-                                                echo "</td>";
-                                            }
-                                            echo "</tr>";
-                                        }
-                                    } else {
-                                        echo "<tr><td class='text-center' colspan='6'>No users found!</td></tr>";
-                                    }
-                                    ?>
-                                </tbody>
-
-                            </table> -->
+                     
                         </div>
                         <!-- /.card-body -->
                     </div>

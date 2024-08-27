@@ -134,7 +134,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 echo "<td  class='py-1'>";
                                                 // Edit button if user has permission
                                                 if ($EditUserRules) {
-                                                    // Your original ID
+                                                     // Encrypt id
+                                                    //  original ID
                                                     $original_id = $users_rules['rules_id'];
 
                                                     // Hash the ID to make it unique and consistent

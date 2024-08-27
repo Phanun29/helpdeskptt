@@ -100,8 +100,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Action</th>
                                         <th>Bot Name</th>
                                         <th>Token</th>
-                                        <th>Chat ID</th>
-                                        <th>role</th>
+                                        <th>station type</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -115,7 +115,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td  class='py-1'>" . $i++ . "</td>";
 
                                             echo "<td  class='py-1'>";
-
+                                            // Encrypt id
                                             //  original ID
                                             $original_id = $telegram_bot['id'];
 
@@ -124,7 +124,7 @@ if ($result_user && $result_user->num_rows > 0) {
 
                                             // Encode the hash and take the first 10 characters
                                             $encoded_id = substr(base64_encode($hashed_id), 0, 20);
-                                            echo "<a href='edit_telegram_bot.php?q={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
+                                            echo "<a href='edit_telegram_bot.php?id={$encoded_id}' class='btn btn-primary'><i class='fa-solid fa-pen-to-square'></i></a> ";
 
                                             echo "<button data-id='" . $telegram_bot['id'] . "' class='btn btn-danger delete-btn'><i class='fa-solid fa-trash'></i></button>";
 
@@ -132,7 +132,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>" . $telegram_bot['bot_name'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['token'] . "</td>";
                                             echo "<td class='py-1'>" . $telegram_bot['station_type'] . "</td>";
-                                            echo "<td>" . ($telegram_bot['role'] === '1' ? 'All' : 'Today' ) . "</td>";
+
 
 
                                             echo "</tr>";

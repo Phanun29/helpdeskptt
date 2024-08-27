@@ -25,17 +25,17 @@ if ($result_user && $result_user->num_rows > 0) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bot_name = $_POST['bot_name'];
     $token = $_POST['token'];
-    $chat_id = $_POST['chat_id'];
+    $station_type = $_POST['station_type'];
 
 
     // Insert each chat_id into the database
-    $insert_user_query = "INSERT INTO tbl_telegram_bot (bot_name, token, chat_id) 
-                              VALUES ('$bot_name', '$token', '$chat_id')";
+    $insert_user_query = "INSERT INTO tbl_telegram_bot (bot_name, token, station_type) 
+                              VALUES ('$bot_name', '$token', '$station_type')";
 
     if ($conn->query($insert_user_query) === TRUE) {
         $success++;
     } else {
-        $errors[] = "Error adding telegram_bot for chat_id $chat_id: " . $conn->error;
+        $errors[] = "Error adding telegram_bot for station_type $station_type: " . $conn->error;
     }
 
 
@@ -60,6 +60,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
 
     <?php include "../inc/head.php"; ?>
+    <style>
+        .form-group>.dropdown {
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -109,12 +114,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                         <div class="form-group col-12">
 
-                                            <label for="chat_id">Chat ID<span class="text-danger">*</span></label>
-                                            <select name="chat_id" id="chat_id" class="form-control" placeholder='Select chat id' required>
-                                                <option value="">-- Select --</option>
+                                            <label for="station_type">Chat ID<span class="text-danger">*</span></label>
+                                            <select name="station_type" id="station_type" class="selectpicker form-control" required>
+                                                <option disabled selected>-- Select --</option>
                                                 <option value="DODO">DODO</option>
                                                 <option value="COCO">COCO</option>
-
 
                                             </select>
 
@@ -145,7 +149,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            // Initialize the Bootstrap Select plugin
+            $('.selectpicker').selectpicker();
+        });
+    </script>
 
 
 

@@ -82,6 +82,11 @@ td,textarea {
 .form-group{
   margin-bottom: 0;
 }
+/* style select */
+.form-group > .dropdown {
+  border: 1px solid #ced4da;
+}
+/* style select */
 @media (max-width: 767px) {
   #example1_filter{
       text-align: left;
@@ -89,10 +94,7 @@ td,textarea {
 
 }
 @media screen and (max-width: 767px) {
-  #button_export.dt-buttons {
-    /* width: 40%;
-    margin-bottom:0; */
-  }
+
   #add_ticket ,.button-filter{
     margin-bottom: .5em;
   }

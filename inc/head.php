@@ -27,8 +27,6 @@
 <link rel="stylesheet" href="../plugins/summernote/summernote-bs4.min.css">
 <!-- icon website -->
 <link rel="icon" href="../icons/favicon.ico.png">
-<!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- Google Font: Source Sans Pro -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 <!-- DataTables -->
@@ -46,5 +44,8 @@
 <!-- app -->
 <link rel="manifest" href="../manifest.json">
 <script src="../scripts/app.js"></script>
-
+<!-- pdf-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<!-- Bootstrap Select CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css"
+    rel="stylesheet">

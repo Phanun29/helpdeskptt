@@ -27,8 +27,9 @@ if ($result_user && $result_user->num_rows > 0) {
 }
 
 // Retrieve the station details for editing
-if (isset($_GET['q'])) {
-    $encoded_id = $_GET['q'];
+if (isset($_GET['id'])) {
+    //Decryption id
+    $encoded_id = $_GET['id'];
 
     // Fetch all possible IDs and their encoded versions
     $id_query = "SELECT id FROM tbl_telegram_bot";
@@ -90,6 +91,11 @@ if ($id) {
 <head>
 
     <?php include "../inc/head.php" ?>
+    <style>
+        .form-group>.dropdown {
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -137,7 +143,7 @@ if ($id) {
                                         </div>
                                         <div class="form-group col-12">
                                             <label for="station_type">Chat ID</label>
-                                            <select name="station_type" class="form-control" id="station_type" placeholder='-select-' >
+                                            <select name="station_type" class="selectpicker form-control" id="station_type" placeholder='-select-'>
                                                 <option value="DODO" <?= $row['station_type'] == 'DODO' ? 'selected' : ''; ?>>DODO</option>
                                                 <option value="COCO" <?= $row['station_type'] == 'COCO' ? 'selected' : '';  ?>>COCO</option>
                                             </select>
@@ -173,7 +179,15 @@ if ($id) {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-  
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize the Bootstrap Select plugin
+            $('.selectpicker').selectpicker();
+        });
+    </script>
 
 </body>
 

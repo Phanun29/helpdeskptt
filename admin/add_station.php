@@ -61,6 +61,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
 
     <?php include "../inc/head.php"; ?>
+    <style>
+        .form-group>.dropdown {
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -105,16 +110,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                         <div class="form-group col-12 col-md-12">
                                             <label>Station Type <span class="text-danger">*</span></label>
-                                            <select name="station_type" class="form-control select2bs4" style="width: 100%;" required>
-                                                <option value="">-Select-</option>
+                                            <select name="station_type" class="selectpicker form-control select2bs4" style="width: 100%;" required>
+                                                <option disabled selected>-Select-</option>
                                                 <option value="COCO">COCO</option>
                                                 <option value="DODO">DODO</option>
                                             </select>
                                         </div>
                                         <div class="form-group col-12 col-md-12">
                                             <label>Province <span class="text-danger">*</span></label>
-                                            <select name="province" class="form-control" style="width: 100%;" required>
-                                                <option value="">-Select-</option>
+                                            <select name="province" class="selectpicker form-control" style="width: 100%;" required>
+                                                <option disabled selected>-Select-</option>
                                                 <option value="Phnom Penh">Phnom Penh</option>
                                                 <option value="Siem Reap">Siem Reap </option>
                                                 <option value="Banteay Meanchey">Banteay Meanchey </option>
@@ -153,7 +158,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </div>
                                 </div>
 
-
                             </form>
                         </div>
                     </div>
@@ -171,7 +175,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
-
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize the Bootstrap Select plugin
+            $('.selectpicker').selectpicker();
+        });
+    </script>
 </body>
 
 </html>

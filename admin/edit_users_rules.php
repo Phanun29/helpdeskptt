@@ -25,6 +25,7 @@ if ($result_user && $result_user->num_rows > 0) {
     $_SESSION['error_message_users_rules'] = "User not found or permission check failed.";
 }
 if (isset($_GET['id'])) {
+    //Decryption id
     $encoded_id = $_GET['id'];
 
     // Fetch all possible IDs and their encoded versions
@@ -355,7 +356,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                             </div>
                                         </div>
                                     </div>
-                                     <div class="row card-header">
+                                    <div class="row card-header">
                                         <div class="col-sm-3 row">
                                             <div class="col-8">
                                                 <label for="list_ticket_track">List Ticket Track</label>

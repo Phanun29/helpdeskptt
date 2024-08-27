@@ -5,7 +5,9 @@ date_default_timezone_set('Asia/Bangkok');
 function sendTelegramMessage()
 {
     global $conn;
-
+    // Get the previous month and year
+    $previousMonth = date('m', strtotime('first day of last month'));
+    $previousYear = date('Y', strtotime('first day of last month'));
     // Retrieve all stations
     $station_query = "SELECT station_id, station_type, station_name, chat_id FROM tbl_station";
     $station_result = $conn->query($station_query);
@@ -20,8 +22,8 @@ function sendTelegramMessage()
         $status_query = "SELECT status, COUNT(*) as count 
         FROM tbl_ticket
         WHERE station_id = '$station_id' 
-        AND MONTH(ticket_open) = MONTH(CURDATE()) 
-        AND YEAR(ticket_open) = YEAR(CURDATE())
+        AND MONTH(ticket_open) = '$previousMonth' 
+        AND YEAR(ticket_open) = '$previousYear'
         GROUP BY status";
 
         $status_counts = [
@@ -51,41 +53,45 @@ function sendTelegramMessage()
         $chatIds = explode(',', $chat_ids_string);  // Split chat IDs into an array
 
         $currentDate = date('d-m-Y');
-        $message = "Status for $station_type\n\n(Station ID: $station_id)  \n\n(Station name: $station_name) \n\nthis month at $currentDate:\n\n\n Open: $open \n On Hold: $onhold \n In Progress: $inprogress \n Pending Vendor: $pending_vendor \n Close: $close";
+        $message = "Status for $station_type\n\n(Station ID: $station_id)  \n\n(Station name: $station_name) \n\nfor the month of $previousMonth-$previousYear:\n\n\n Open: $open \n On Hold: $onhold \n In Progress: $inprogress \n Pending Vendor: $pending_vendor \n Close: $close";
 
         $url = "https://api.telegram.org/bot$botToken/sendMessage";
 
         foreach ($chatIds as $chatId) {
-            $data = [
-                'chat_id' => trim($chatId),  // Trim any whitespace
-                'text' => $message
-            ];
+            $retry = true;
+            while ($retry) {
+                $data = [
+                    'chat_id' => trim($chatId),  // Trim any whitespace
+                    'text' => $message
+                ];
 
-            $options = [
-                CURLOPT_URL => $url,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $data,
-                CURLOPT_RETURNTRANSFER => true
-            ];
+                $options = [
+                    CURLOPT_URL => $url,
+                    CURLOPT_POST => true,
+                    CURLOPT_POSTFIELDS => $data,
+                    CURLOPT_RETURNTRANSFER => true
+                ];
 
-            $ch = curl_init();
-            curl_setopt_array($ch, $options);
-            $response = curl_exec($ch);
-            curl_close($ch);
+                $ch = curl_init();
+                curl_setopt_array($ch, $options);
+                $response = curl_exec($ch);
+                curl_close($ch);
 
-            echo "Message sent to chat ID: $chatId\n";
-            echo "Response: $response\n";
+                echo "Message sent to chat ID: $chatId\n";
+                echo "Response: $response\n";
 
-            // Handle rate limiting by adding a short delay
-            if (strpos($response, '"error_code":429') !== false) {
-                $retryAfter = 1; // Shorter retry time
-                if (preg_match('/"retry_after":(\d+)/', $response, $matches)) {
-                    $retryAfter = (int)$matches[1];
+                // Handle rate limiting by adding a short delay
+                if (strpos($response, '"error_code":429') !== false) {
+                    $retryAfter = 1; // Shorter retry time
+                    if (preg_match('/"retry_after":(\d+)/', $response, $matches)) {
+                        $retryAfter = (int)$matches[1];
+                    }
+                    echo "Rate limit hit. Retrying after $retryAfter seconds.\n";
+                    sleep($retryAfter); // Wait for the specified time before retrying
+                } else {
+                    usleep(500000); // Shorter delay between successful requests (0.5 second)
+                    $retry = false; // Exit loop if no rate limit error
                 }
-                echo "Rate limit hit. Retrying after $retryAfter seconds.\n";
-                sleep($retryAfter); // Wait for the specified time before retrying
-            } else {
-                usleep(500000); // Shorter delay between successful requests (0.5 second)
             }
         }
     }

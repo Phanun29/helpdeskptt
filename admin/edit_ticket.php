@@ -25,6 +25,7 @@ if ($result_user->num_rows > 0) {
 }
 
 if (isset($_GET['id'])) {
+    //Decryption id
     $encoded_id = $_GET['id'];
 
     // Fetch all possible IDs and their encoded versions
@@ -68,7 +69,6 @@ if (isset($_GET['id'])) {
 date_default_timezone_set('Asia/Bangkok');
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Gather form data
-    //   $id = $_GET['id'] ?? null; // Ensure to sanitize and validate $id
     $station_id = $_POST['station_id'] ?? null;
     $station_name = $_POST['station_name'] ?? null;
     $station_type = $_POST['station_type'] ?? null;
@@ -376,6 +376,11 @@ if ($ticket_result->num_rows > 0) {
 <head>
 
     <?php include "../inc/head.php"; ?>
+    <style>
+        .form-group>.dropdown {
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -471,26 +476,7 @@ if ($ticket_result->num_rows > 0) {
                                         </div>
                                     </div>
 
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function() {
-                                            // Attach click event to delete buttons
-                                            document.querySelectorAll('.delete-image').forEach(item => {
-                                                item.addEventListener('click', function() {
-                                                    const imageToDelete = this.dataset.image;
 
-                                                    // If you want to visually remove the image immediately
-                                                    this.closest('.image-container').remove();
-
-                                                    // If you want to mark the image for deletion on form submit
-                                                    const input = document.createElement('input');
-                                                    input.type = 'hidden';
-                                                    input.name = 'delete_images[]'; // Use an array to collect deleted image paths
-                                                    input.value = imageToDelete;
-                                                    document.getElementById('quickForm').appendChild(input);
-                                                });
-                                            });
-                                        });
-                                    </script>
 
                                     <div class=" row">
                                         <div class="form-group col-sm-4">
@@ -507,9 +493,12 @@ if ($ticket_result->num_rows > 0) {
                                             </select>
                                         </div>
                                         <div class="form-group col-sm-4">
-                                            <label for="SLA_category">SLA Category</label>
+                                            <label for="SLA_category">SLA Category <span class="text-danger">*</span>
+                                                <input style="border: none; background:none;" type="button" value="?" class="circle"
+                                                    data-toggle="modal" data-target="#myModal">
+                                            </label>
 
-                                            <select name="SLA_category" id="SLA_category" class="form-control" required>
+                                            <select name="SLA_category" id="SLA_category" class="selectpicker form-control" required>
                                                 <option value="CAT Hardware" <?= ($ticket['SLA_category'] == 'CAT Hardware') ? 'selected' : ''; ?>>CAT Hardware</option>
                                                 <option value="CAT 1" <?= ($ticket['SLA_category'] == 'CAT 1') ? 'selected' : ''; ?>>CAT 1</option>
                                                 <option value="CAT 2" <?= ($ticket['SLA_category'] == 'CAT 2') ? 'selected' : ''; ?>>CAT 2</option>
@@ -523,7 +512,7 @@ if ($ticket_result->num_rows > 0) {
                                         </div>
                                         <div class="form-group col-sm-4">
                                             <label for="status">Status</label>
-                                            <select name="status" id="status" class="form-control" style="width: 100%;">
+                                            <select name="status" id="status" class="selectpicker form-control" style="width: 100%;">
                                                 <option value="On Hold" <?= ($ticket['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
                                                 <option value="In Progress" <?= ($ticket['status'] == 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
                                                 <option value="Pending Vendor" <?= ($ticket['status'] == 'Pending Vendor') ? 'selected' : ''; ?>>Pending Vendor</option>
@@ -592,10 +581,66 @@ if ($ticket_result->num_rows > 0) {
         <?php include "../inc/footer.php"; ?>
     </div>
 
+
+    <!-- pop up sla details -->
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div style="padding:10px" class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+
+                    <p><strong>CAT 1:</strong>means that a system device cannot work in sales at all, a level where
+                        sales cannot be performed at the POS, or the back office cannot contact the POS, or the
+                        dispenser cannot be dispensed in case the dispenser is connected to the system. Automation,
+                        which is the result of software or system glitches, is so "outaged" that it cannot be sold
+                        or cannot be sold through the system (must be sold offline). </p>
+                    <p><strong>CAT 2:</strong> means that system equipment can still perform partial sales tasks,
+                        which the system can still run because of software glitches. However, the station is so
+                        severely limited that it affects the data around the day, such as:
+                        • Can't afford some fuel, dispenser This is caused by dispensers not being able to connect
+                        to automation systems.</p>
+                    <p><strong>CAT 3:</strong> refers to a system device that is defective but does not affect sales
+                        work. It has some but mild impact on all stations or operations of the head office, such as:
+                        • Each cycle cannot be closed.
+                        • Reports cannot be printed.
+                        • Ticket printers cannot be printed.
+                        • Cash drawers do not open automatically.
+                        • The point-of-sale keyboard is not available, but the Mouse is still available or can be
+                        used either.</p>
+                    <p><strong>CAT 4:</strong>refers to minor issues that are caused by software vulnerabilities
+                        that do not affect the sales process, such as:
+                        • Staff at the station are unsure how to use the system, so training is required on the next
+                        occasion.
+                        • Additional device replacements
+                        • Problems occurring within vulnerable areas as announced by the government. </p>
+                    <p><strong>CAT 4 Report:</strong> (CAT 4 Report) Report error detection within 96 hours</p>
+                    <p><strong>CAT 5:</strong>refers to issues related to data editing in POS, BO systems, such as:
+                        Reports cannot be generated.</p>
+                    <p><strong>Other:</strong>In case problem cause by equipment that is not related with POS system
+                        equipment such as Network Cable, Media converter, Internet Router, internet connection,
+                        Wi-Fi access point, Fiber Optic Cable, Dispenser signal cable, Dispensers, Electric Supply
+                        Equipment, etc. is not response by PTT POS System.</p>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
     <!-- jQuery -->
     <script src="../plugins/jquery/jquery.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap-Select JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
@@ -693,13 +738,36 @@ if ($ticket_result->num_rows > 0) {
             $("#suggestion_dropdown").empty();
         }
     </script>
+    <!-- remove image or video -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach click event to delete buttons
+            document.querySelectorAll('.delete-image').forEach(item => {
+                item.addEventListener('click', function() {
+                    const imageToDelete = this.dataset.image;
+
+                    // If you want to visually remove the image immediately
+                    this.closest('.image-container').remove();
+
+                    // If you want to mark the image for deletion on form submit
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'delete_images[]'; // Use an array to collect deleted image paths
+                    input.value = imageToDelete;
+                    document.getElementById('quickForm').appendChild(input);
+                });
+            });
+        });
+    </script>
     <!-- preview media -->
     <script src="../scripts/previewImages.js"></script>
 
 
     <!-- condition sla category -->
     <script>
-        // Define the available SLA options
+        // Initialize the Bootstrap Select plugin
+        $('.selectpicker').selectpicker();
+
         const slaOptions = {
             'Hardware': [{
                 value: 'CAT Hardware',
@@ -717,7 +785,6 @@ if ($ticket_result->num_rows > 0) {
                     value: 'CAT 3',
                     text: 'CAT 3'
                 },
-
                 {
                     value: 'CAT 4',
                     text: 'CAT 4'
@@ -737,14 +804,10 @@ if ($ticket_result->num_rows > 0) {
             }]
         };
 
-        // Reference to the issue type and SLA category select elements
         const issueTypeSelect = document.getElementById('issue_type');
         const slaCategorySelect = document.getElementById('SLA_category');
-
-        // Preselected category from PHP
         const preSelectedCategory = '<?= $ticket['SLA_category']; ?>';
 
-        // Function to add an option to the SLA category select element
         function addOption(value, text) {
             const opt = document.createElement('option');
             opt.value = value;
@@ -755,41 +818,44 @@ if ($ticket_result->num_rows > 0) {
             slaCategorySelect.appendChild(opt);
         }
 
-        // Event listener for when the issue type selection changes
-        issueTypeSelect.addEventListener('change', function() {
-            const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
-
-            // Clear current options in SLA Category dropdown
+        function updateSLAOptions(selectedValues) {
             slaCategorySelect.innerHTML = '';
 
             if (selectedValues.includes('Software') && !selectedValues.includes('Hardware') && selectedValues.length === 1) {
-                // If only Software is selected
+                // Only Software selected
                 slaOptions['Software'].forEach(option => addOption(option.value, option.text));
             } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software') && selectedValues.length === 1) {
-                // If only Hardware is selected
+                // Only Hardware selected
                 slaOptions['Hardware'].forEach(option => addOption(option.value, option.text));
             } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length === 2) {
-                // If both Software and Hardware are selected
+                // Both Software and Hardware selected
                 slaOptions['Hardware'].concat(slaOptions['Software']).forEach(option => addOption(option.value, option.text));
             } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length > 2) {
-                // If Software, Hardware, and other options are selected
+                // Software, Hardware, and Other options selected
                 slaOptions['Hardware'].concat(slaOptions['Software']).concat(slaOptions['Other']).forEach(option => addOption(option.value, option.text));
             } else if (selectedValues.includes('Software') && !selectedValues.includes('Hardware')) {
-                // If Software is selected along with any other option that is not Hardware
+                // Software and other options (excluding Hardware)
                 slaOptions['Software'].concat(slaOptions['Other']).forEach(option => addOption(option.value, option.text));
             } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software')) {
-                // If Hardware is selected along with any other option that is not Software
+                // Hardware and other options (excluding Software)
                 slaOptions['Hardware'].concat(slaOptions['Other']).forEach(option => addOption(option.value, option.text));
             } else {
-                // If neither Software nor Hardware is selected, or other combinations
+                // Neither Software nor Hardware selected
                 slaOptions['Other'].forEach(option => addOption(option.value, option.text));
             }
+
+            // Refresh Bootstrap Select
+            $('.selectpicker').selectpicker('refresh');
+        }
+
+        issueTypeSelect.addEventListener('change', function() {
+            const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
+            updateSLAOptions(selectedValues);
         });
 
-        // Trigger the change event to set the options based on pre-selected values
+        // Trigger the change event initially to set options based on pre-selected values
         issueTypeSelect.dispatchEvent(new Event('change'));
     </script>
-
 </body>
 
 </html>

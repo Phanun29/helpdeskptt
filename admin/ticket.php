@@ -128,8 +128,6 @@ if ($result_user && $result_user->num_rows > 0) {
                                 }
                                 ?>
 
-
-
                             </ol>
                         </div>
                     </div>
@@ -148,23 +146,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                     <a id="add_ticket" href="add_ticket.php" class="btn btn-primary ">Add Ticket</a>
                                 <?php endif; ?>
                                 <button type="button" class="btn btn-secondary button-filter" id="toggleFilterBtn">Filter</button>
-                                <!-- script dropdown filter -->
-                                <script>
-                                    document.getElementById('toggleFilterBtn').addEventListener('click', function() {
-                                        var filterForm = document.getElementById('filterForm1');
-                                        if (filterForm.classList.contains('show')) {
-                                            filterForm.classList.remove('show');
-                                            setTimeout(function() {
-                                                filterForm.style.display = 'none';
-                                            }, 500); // Match the transition duration
-                                        } else {
-                                            filterForm.style.display = 'block';
-                                            setTimeout(function() {
-                                                filterForm.classList.add('show');
-                                            }, 10); // Slight delay to trigger transition
-                                        }
-                                    });
-                                </script>
+
                                 <div id="button_export" class="dt-buttons btn-group flex-wrap">
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToCSV()" type="button"><span>CSV</span></button>
                                     <button class="btn btn-secondary buttons-csv buttons-html5" tabindex="0" aria-controls="tbl_ticket" onclick="exportToExcel()" type="button"><span>Excel</span></button>
@@ -338,8 +320,8 @@ if ($result_user && $result_user->num_rows > 0) {
                                                 echo "<td style='display:none;'></td>";
                                             } else {
                                                 echo "<td class='export-ignore py-1'>";
-
-                                                // Your original ID
+                                                // Encrypt id
+                                                //  original ID
                                                 $original_id = $row['id'];
 
                                                 // Hash the ID to make it unique and consistent
@@ -592,7 +574,55 @@ if ($result_user && $result_user->num_rows > 0) {
     <!-- script pop up image  -->
     <script src="../scripts/pop_up_images.js"></script>
     <!-- script delete ticket -->
-    <script src="../scripts/delete_ticket.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function() {
+                var ticketId = $(this).data('id'); // Get the ID from data attribute
+
+                // Display confirmation dialog using SweetAlert2
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this ticket!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Make AJAX request to delete_ticket.php
+                        $.ajax({
+                            url: 'delete_ticket.php',
+                            type: 'POST',
+                            data: {
+                                id: ticketId
+                            },
+                            success: function(response) {
+                                console.log('Response:', response); // Debugging: Log the response
+
+                                if (response === 'success') {
+                                    // Remove the row from the table
+                                    var rowSelector = '#ticket-' + ticketId;
+                                    console.log('Removing row with selector: ' + rowSelector); // Log the row being removed
+                                    $(rowSelector).remove();
+                                    Swal.fire('Deleted!', 'Your ticket has been deleted.', 'success');
+                                } else if (response === 'closed') {
+                                    Swal.fire('Error!', 'Closed tickets cannot be deleted.', 'error');
+                                } else {
+                                    Swal.fire('Error!', 'Failed to delete ticket.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', status, error); // Debugging: Log AJAX errors
+                                Swal.fire('Error!', 'An error occurred while deleting the ticket.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
     <!-- auto fill station id -->
     <script src="../scripts/get_suggestions_auto_fill_stationID.js"></script>
     <!-- filter -->
@@ -630,7 +660,23 @@ if ($result_user && $result_user->num_rows > 0) {
     <script src="../scripts/export.js"></script>
     <!-- auto close alert -->
     <script src="../scripts/auto_close_alert.js"></script>
-
+    <!-- script dropdown filter -->
+    <script>
+        document.getElementById('toggleFilterBtn').addEventListener('click', function() {
+            var filterForm = document.getElementById('filterForm1');
+            if (filterForm.classList.contains('show')) {
+                filterForm.classList.remove('show');
+                setTimeout(function() {
+                    filterForm.style.display = 'none';
+                }, 500); // Match the transition duration
+            } else {
+                filterForm.style.display = 'block';
+                setTimeout(function() {
+                    filterForm.classList.add('show');
+                }, 10); // Slight delay to trigger transition
+            }
+        });
+    </script>
 </body>
 
 </html>

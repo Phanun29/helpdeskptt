@@ -2,7 +2,7 @@
 
 include "../inc/header_script.php";
 // Fetch user details including rules_id and permissions in one query
-$user_id = $fetch_info['users_id']; // Example user ID
+$user_id = $fetch_info['users_id']; //  user ID
 $status = isset($_GET['status']) ? $_GET['status'] : ''; // Get status from URL parameter
 $query_user = "
     SELECT u.*, r.list_ticket_status, r.add_ticket_status, r.edit_ticket_status, r.delete_ticket_status ,r.list_ticket_assign
@@ -24,8 +24,8 @@ if ($result_user && $result_user->num_rows > 0) {
     // Determine user type and adjust query accordingly
     if ($listTicketAssign == 0) {
         // User type 1: Select all tickets with the specified status
-        $ticket_query = 
-           " SELECT t.*, 
+        $ticket_query =
+            " SELECT t.*, 
                 REPLACE(GROUP_CONCAT(DISTINCT u.users_name SEPARATOR ', '), ', ', ',') AS users_name,
                  GROUP_CONCAT(DISTINCT ti.image_path SEPARATOR ',') AS image_paths
             FROM 
@@ -38,8 +38,6 @@ if ($result_user && $result_user->num_rows > 0) {
                 t.ticket_id DESC
         ";
     } else {
-        // User type 0: Select tickets assigned to the current user with the specified status
-        $user_id = $fetch_info['users_id']; // Assuming you have stored user ID in session
 
         $ticket_query = "
             SELECT 
@@ -87,26 +85,7 @@ $ticket_result = $conn->query($ticket_query);
                             <h1 class="m-0">Ticket</h1>
                         </div>
                         <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
 
-                                <?php
-                                if (isset($_SESSION['success_message'])) {
-                                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['success_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
-                                </div>";
-                                    unset($_SESSION['success_message']); // Clear the message after displaying
-                                }
-
-                                if (isset($_SESSION['error_message'])) {
-                                    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
-                                    <strong>{$_SESSION['error_message']}</strong>
-                                    <button type='button' class='btn-close' aria-label='Close' onclick='this.parentElement.style.display=\"none\";'></button>
-                                </div>";
-                                    unset($_SESSION['error_message']); // Clear the message after displaying
-                                }
-                                ?>
-                            </ol>
                         </div>
                     </div>
                 </div>
@@ -468,14 +447,14 @@ $ticket_result = $conn->query($ticket_query);
                 const media = ticket.image_paths.split(',');
                 media.forEach(item => {
                     const trimmedItem = item.trim();
-                    if (trimmedItem.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                    if (trimmedItem.match(/\.(jpeg|jpg|gif|png|bmp|webp)$/i)) {
                         const imgElement = document.createElement('img');
                         imgElement.src = trimmedItem;
                         imgElement.style.width = '50px';
                         imgElement.style.cursor = 'pointer';
                         imgElement.onclick = () => showMedia(trimmedItem);
                         modalIssueMedia.appendChild(imgElement);
-                    } else if (trimmedItem.match(/\.(mp4|webm|ogg)$/i)) {
+                    } else if (trimmedItem.match(/\.(mp4|webm|ogg|mov|avi|mkv|flv)$/i)) {
                         const videoElement = document.createElement('video');
                         videoElement.src = trimmedItem;
                         videoElement.style.width = '50px';
@@ -491,15 +470,12 @@ $ticket_result = $conn->query($ticket_query);
 
         }
 
-
-
-
         function showMedia(imageUrl) {
             $('#imageToShow').attr('src', imageUrl);
             $('#imageModal').modal('show');
         }
     </script>
-    <!-- delete -->
+    <!-- delete ticket  -->
     <script>
         $(document).ready(function() {
             // Handle delete button click

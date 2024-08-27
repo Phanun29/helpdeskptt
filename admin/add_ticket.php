@@ -150,6 +150,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
 
     <?php include "../inc/head.php"; ?>
+    <style>
+        .form-group>.dropdown {
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -234,27 +239,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div id="error-message-issueType" class="text-danger" style="display:none;">Please select at least one issue type.</div>
                                         </div>
 
-                                        <div class="form-group col-sm-4">
-                                            <label for="SLA_category">SLA Category <span class="text-danger">*</span><input style="border: none; background:none;" type="button" value="?" class="circle" data-toggle="modal" data-target="#myModal"></label>
-                                            <select name="SLA_category" id="SLA_category" class="form-control" required>
-                                                <option value="" title="Please select a category">-Select-</option>
-                                                <option value="CAT Hardware" title=" Hardware ">CAT Hardware</option>
-                                                <option value="CAT 1" title=" ">CAT 1
-                                                </option>
-                                                <option value=" CAT 2" title="">CAT 2
-                                                </option>
-                                                <option value="CAT 3" title="">CAT 3
-                                                </option>
-                                                <option value="CAT 4" title="">CAT 4</option>
-                                                <option value="CAT 4 Report" title="">CAT 4 Report
-                                                </option>
-                                                <option value="CAT 5" title="">CAT 5
-                                                </option>
-                                                <option value="Other" title="">Other
-                                                </option>
+                                        <div class="form-group col-sm-4 sla_category">
+                                            <label for="SLA_category">SLA Category <span class="text-danger">*</span>
+                                                <input style="border: none; background:none;" type="button" value="?" class="circle"
+                                                    data-toggle="modal" data-target="#myModal">
+                                            </label>
+                                            <select name="SLA_category" id="SLA_category" class="form-control selectpicker" required>
+                                                <option value="" disabled selected>-Select-</option>
                                             </select>
-                                            <div id="error-message-SLA_category" class="text-danger" style="display:none;">Please select SLA category.</div>
-
+                                            <div id="error-message-SLA_category" class="text-danger" style="display:none;">Please select SLA
+                                                category.</div>
                                         </div>
 
 
@@ -325,8 +319,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
     <!-- jQuery -->
     <script src="../plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
+    <!-- Bootstrap 4 js -->
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap-Select JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
     <!-- AdminLTE App -->
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
@@ -397,108 +393,116 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
     <!-- condition sla category -->
     <script>
-        const issueTypeSelect = document.getElementById('issue_type');
-        const slaCategorySelect = document.getElementById('SLA_category');
+        $(document).ready(function() {
+            // Initialize the Bootstrap Select plugin
+            $('.selectpicker').selectpicker();
 
-        const slaOptions = {
-            'Hardware': [{
-                value: 'CAT Hardware',
-                text: 'CAT Hardware'
-            }],
-            'Software': [{
-                    value: 'CAT 1',
-                    text: 'CAT 1'
-                },
-                {
-                    value: 'CAT 2',
-                    text: 'CAT 2'
-                },
-                {
-                    value: 'CAT 3',
-                    text: 'CAT 3'
-                },
-                {
-                    value: 'CAT 4',
-                    text: 'CAT 4'
-                },
-                {
-                    value: 'CAT 4 Report',
-                    text: 'CAT 4 Report'
-                },
-                {
-                    value: 'CAT 5',
-                    text: 'CAT 5'
+            const issueTypeSelect = document.getElementById('issue_type');
+            const slaCategorySelect = document.getElementById('SLA_category');
+
+            const slaOptions = {
+                'Hardware': [{
+                    value: 'CAT Hardware',
+                    text: 'CAT Hardware'
+                }],
+                'Software': [{
+                        value: 'CAT 1',
+                        text: 'CAT 1'
+                    },
+                    {
+                        value: 'CAT 2',
+                        text: 'CAT 2'
+                    },
+                    {
+                        value: 'CAT 3',
+                        text: 'CAT 3'
+                    },
+                    {
+                        value: 'CAT 4',
+                        text: 'CAT 4'
+                    },
+                    {
+                        value: 'CAT 4 Report',
+                        text: 'CAT 4 Report'
+                    },
+                    {
+                        value: 'CAT 5',
+                        text: 'CAT 5'
+                    }
+                ],
+                'Other': [{
+                    value: 'Other',
+                    text: 'Other'
+                }]
+            };
+
+
+            issueTypeSelect.addEventListener('change', function() {
+                const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
+
+                // Clear current options in SLA Category dropdown
+                slaCategorySelect.innerHTML = '<option value="" title="Please select a category">-Select-</option>';
+
+                if (selectedValues.includes('Software') && !selectedValues.includes('Hardware') && selectedValues.length === 1) {
+                    // If only Software is selected
+                    slaOptions['Software'].forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
+                } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software') && selectedValues.length === 1) {
+                    // If only Hardware is selected
+                    slaOptions['Hardware'].forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
+                } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length === 2) {
+                    // If both Software and Hardware are selected
+                    slaOptions['Hardware'].concat(slaOptions['Software']).forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
+                } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length > 2) {
+                    // If Software, Hardware, and other options are selected
+                    slaOptions['Hardware'].concat(slaOptions['Software']).concat(slaOptions['Other']).forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
+                } else if (selectedValues.includes('Software') && !selectedValues.includes('Hardware')) {
+                    // If Software is selected along with any other option that is not Hardware
+                    slaOptions['Software'].concat(slaOptions['Other']).forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
+                } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software')) {
+                    // If Hardware is selected along with any other option that is not Software
+                    slaOptions['Hardware'].concat(slaOptions['Other']).forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
+                } else {
+                    // If neither Software nor Hardware is selected, or other combinations
+                    slaOptions['Other'].forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option.value;
+                        opt.textContent = option.text;
+                        slaCategorySelect.appendChild(opt);
+                    });
                 }
-            ],
-            'Other': [{
-                value: 'Other',
-                text: 'Other'
-            }]
-        };
-
-        issueTypeSelect.addEventListener('change', function() {
-            const selectedValues = Array.from(issueTypeSelect.selectedOptions).map(option => option.value);
-
-            // Clear current options in SLA Category dropdown
-            slaCategorySelect.innerHTML = '<option value="" title="Please select a category">-Select-</option>';
-
-            if (selectedValues.includes('Software') && !selectedValues.includes('Hardware') && selectedValues.length === 1) {
-                // If only Software is selected
-                slaOptions['Software'].forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software') && selectedValues.length === 1) {
-                // If only Hardware is selected
-                slaOptions['Hardware'].forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length === 2) {
-                // If both Software and Hardware are selected
-                slaOptions['Hardware'].concat(slaOptions['Software']).forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            } else if (selectedValues.includes('Software') && selectedValues.includes('Hardware') && selectedValues.length > 2) {
-                // If Software, Hardware, and other options are selected
-                slaOptions['Hardware'].concat(slaOptions['Software']).concat(slaOptions['Other']).forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            } else if (selectedValues.includes('Software') && !selectedValues.includes('Hardware')) {
-                // If Software is selected along with any other option that is not Hardware
-                slaOptions['Software'].concat(slaOptions['Other']).forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            } else if (selectedValues.includes('Hardware') && !selectedValues.includes('Software')) {
-                // If Hardware is selected along with any other option that is not Software
-                slaOptions['Hardware'].concat(slaOptions['Other']).forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            } else {
-                // If neither Software nor Hardware is selected, or other combinations
-                slaOptions['Other'].forEach(option => {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.textContent = option.text;
-                    slaCategorySelect.appendChild(opt);
-                });
-            }
+                // Refresh the Bootstrap Select dropdown
+                $(slaCategorySelect).selectpicker('refresh');
+            });
         });
     </script>
 

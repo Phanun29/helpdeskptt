@@ -73,6 +73,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
 
     <?php include "../inc/head.php"; ?>
+    <style>
+        .form-group >.dropdown {
+            border: 1px solid #ced4da;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -135,8 +140,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="company">Company <span class="text-danger">*</span></label>
-                                                <select class="form-control" name="company" id="company" required>
-                                                    <option value="">-- Select --</option>
+                                                <select class="selectpicker form-control" name="company" id="company" required>
+                                                    <option disabled selected>-- Select --</option>
                                                     <option value="ABA Bank">ABA Bank</option>
                                                     <option value="Wing Bank">Wing Bank</option>
                                                     <option value="PTTCL">PTTCL</option>
@@ -156,8 +161,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="status">Status <span class="text-danger">*</span></label>
-                                                <select name="status" class="form-control select2bs4" style="width: 100%;" required>
-                                                    <option value="">-- Select --</option>
+                                                <select name="status" class="selectpicker form-control select2bs4" style="width: 100%;" required>
+                                                    <option disabled selected>-- Select --</option>
                                                     <option value="1">Active</option>
                                                     <option value="0">Inactive</option>
 
@@ -167,8 +172,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="col-sm-6">
                                             <div class="form-group">
                                                 <label for="rules_id">Users Rules <span class="text-danger">*</span></label>
-                                                <select id="rules_id" name="rules_id" class="form-control" required>
-                                                    <option value="">-- Select --</option>
+                                                <select id="rules_id" name="rules_id" class="selectpicker form-control" required>
+                                                    <option disabled selected>-- Select --</option>
                                                     <?php
                                                     $rules_query = "SELECT rules_id, rules_name FROM tbl_users_rules";
                                                     $rules_result = $conn->query($rules_query);
@@ -206,6 +211,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="../dist/js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="../dist/js/demo.js"></script>
+    <!-- Bootstrap Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize the Bootstrap Select plugin
+            $('.selectpicker').selectpicker();
+        });
+    </script>
     <!-- show password -->
     <style>
         .show-password {
