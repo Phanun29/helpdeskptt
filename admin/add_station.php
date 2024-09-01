@@ -1,5 +1,5 @@
 <?php
-include "../inc/header_script.php"; // Include the header
+include "../inc/header_script.php"; // Include the header_script
 
 // Retrieve the current user's ID from the fetched user information
 $user_id = $fetch_info['users_id']; //  user ID
@@ -37,10 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
     $province = $_POST['province'];
-    $chat_id = $_POST['chat_id'];
+    $telegram_chat_id = $_POST['telegram_chat_id'];
 
-    $insert_station_query = "INSERT INTO tbl_station (station_id, station_name, station_type, province, chat_id) 
-            VALUES ('$station_id', '$station_name', '$station_type', '$province', '$chat_id')";
+    $insert_station_query = "INSERT INTO tbl_station (station_id, station_name, station_type, province, telegram_chat_id) 
+            VALUES ('$station_id', '$station_name', '$station_type', '$province', '$telegram_chat_id')";
 
     if ($conn->query($insert_station_query) === TRUE) {
         // Successful insertion
@@ -149,8 +149,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </select>
                                         </div>
                                         <div class="form-group col-12 col-md-12">
-                                            <label>Chat ID <span class="text-danger">*</span></label>
-                                            <input type="text" value="" name="chat_id" id="chat_id" class="form-control" placeholder="Chat ID">
+                                            <label for="telegram_chat_id">Telegram Chat ID <span class="text-danger">*</span></label>
+                                            <input type="text" value="" name="telegram_chat_id" id="telegram_chat_id" class="form-control" placeholder="Chat ID">
                                         </div>
                                     </div>
                                     <div class="mt-3">

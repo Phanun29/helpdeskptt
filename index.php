@@ -146,6 +146,7 @@
         <!-- /.card -->
     </div>
     <!-- /.login-box -->
+    <!-- show password -->
     <script>
         function togglePasswordVisibility() {
             var passwordInput = document.getElementById("password");

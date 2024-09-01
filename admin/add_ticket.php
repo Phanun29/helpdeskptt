@@ -268,7 +268,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php include "../inc/footer.php"; ?>
     </div>
     <!-- pop up sla details -->
-    <!-- Modal -->
+
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">

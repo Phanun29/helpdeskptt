@@ -100,7 +100,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                         <th>Station Name</th>
                                         <th>Station Type</th>
                                         <th>Province</th>
-                                        <th>Chat ID</th>
+                                        <th>Telegram Chat ID</th>
 
                                     </tr>
                                 </thead>
@@ -140,7 +140,7 @@ if ($result_user && $result_user->num_rows > 0) {
                                             echo "<td class='py-1'>{$station['station_name']}</td>";
                                             echo "<td class='py-1'>{$station['station_type']}</td>";
                                             echo "<td class='py-1'>{$station['province']}</td>";
-                                            echo "<td class='py-1'>{$station['chat_id']}</td>";
+                                            echo "<td class='py-1'>{$station['telegram_chat_id']}</td>";
 
                                             echo "</tr>";
                                             $i++;

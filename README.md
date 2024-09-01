@@ -5,7 +5,7 @@ FIRST Download
 
 2."TEXT EDITOR" NOTEPAD++ , VS CODE OR SUBLIME TEXT 3 / ETC.
 
-3"sms"
+3""
 
 4. Download the zip file/ download winrar
 

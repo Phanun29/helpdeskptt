@@ -121,7 +121,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                 <?php endif; ?>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
 
                     <a href="report.php" <?php echo ($current_menu === 'report.php') ? 'class="nav-link active"' : 'class="nav-link"'; ?>>
                         <i class="nav-icon fa fa-file"></i>
@@ -129,7 +129,7 @@ $current_menu = basename($_SERVER['PHP_SELF']);
                             Report
                         </p>
                     </a>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a href="#" class="nav-link" data-toggle="modal" data-target="#logoutModal">
                         <i class="nav-icon fa-solid fa-right-from-bracket"></i>

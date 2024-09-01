@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $station_name = $_POST['station_name'];
     $station_type = $_POST['station_type'];
     $province = $_POST['province'];
-    $chat_id = $_POST['chat_id'];
+    $telegram_chat_id = $_POST['telegram_chat_id'];
 
     // Start a transaction
     $conn->begin_transaction();
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Error updating tbl_ticket" . $conn->$error);
         }
         // Update the station in tbl_station
-        $sql_tbl_station = "UPDATE tbl_station SET station_id = '$new_station_id' ,station_name = '$station_name', station_type = '$station_type', province = '$province', chat_id = '$chat_id'  WHERE id = '$id'";
+        $sql_tbl_station = "UPDATE tbl_station SET station_id = '$new_station_id' ,station_name = '$station_name', station_type = '$station_type', province = '$province', telegram_chat_id = '$telegram_chat_id'  WHERE id = '$id'";
         if (!$conn->query($sql_tbl_station)) {
             throw new Exception("Error updating tbl_station" . $conn->$error);
         }
@@ -235,8 +235,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             </select>
                                         </div>
                                         <div class="col-12">
-                                            <label for="chat_id">Chat ID</label>
-                                            <input type="text" class="form-control" name="chat_id" id="chat_id" value="<?= $station['chat_id'] ?>">
+                                            <label for="telegram_chat_id">Telegram Chat ID</label>
+                                            <input type="text" class="form-control" name="telegram_chat_id" id="telegram_chat_id" value="<?= $station['telegram_chat_id'] ?>">
                                         </div>
 
                                     </div>
