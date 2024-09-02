@@ -1,37 +1,47 @@
 <?php
+// Include the database configuration file
 include "config.php";
+
+// Set the timezone to Bangkok
 date_default_timezone_set('Asia/Bangkok');
 
+// Autoload PhpSpreadsheet library
 require_once 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
+// Main function to send Telegram messages and generate Excel reports
 function sendTelegramMessageAndGenerateExcel()
 {
+    // Access the global database connection variable
     global $conn;
 
+    // Calculate the previous month and year
     $previousMonth = date('m', strtotime('first day of last month'));
     $previousYear = date('Y', strtotime('first day of last month'));
 
+    // Query to fetch station information
     $station_query = "SELECT station_id, station_type, station_name, telegram_chat_id FROM tbl_station";
     $station_result = $conn->query($station_query);
 
-    $directory = 'C:/xampp/htdocs/helpdeskptt/excel_files/';
+    // Directory where Excel files will be saved
+    $directory = 'excel_files/';
 
+    // Check if the directory exists, if not, create it
     if (!file_exists($directory)) {
         mkdir($directory, 0777, true);
     }
 
+    // Loop through each station to generate reports and send them via Telegram
     while ($station_row = $station_result->fetch_assoc()) {
         $station_id = $station_row['station_id'];
         $station_name = $station_row['station_name'];
         $station_type = $station_row['station_type'];
         $chat_ids_string = $station_row['telegram_chat_id'];
 
-        // Refined SQL query
+        // Query to fetch ticket data for the station for the previous month
         $ticket_query = "SELECT t.*
-            
             FROM tbl_ticket t
             WHERE t.station_id = '$station_id' 
             AND MONTH(t.ticket_open) = '$previousMonth' 
@@ -41,9 +51,11 @@ function sendTelegramMessageAndGenerateExcel()
 
         $ticket_result = $conn->query($ticket_query);
 
+        // Create a new Excel spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set column headers in the Excel sheet
         $headers = [
             'A1' => 'Ticket ID',
             'B1' => 'Station ID',
@@ -63,10 +75,12 @@ function sendTelegramMessageAndGenerateExcel()
             'P1' => 'Comment'
         ];
 
+        // Loop through the headers and set them in the sheet
         foreach ($headers as $cell => $header) {
             $sheet->setCellValue($cell, $header);
         }
 
+        // Populate the Excel sheet with ticket data
         $rowNum = 2;
         while ($ticket_row = $ticket_result->fetch_assoc()) {
             $sheet->setCellValue('A' . $rowNum, $ticket_row['ticket_id']);
@@ -88,9 +102,11 @@ function sendTelegramMessageAndGenerateExcel()
             $rowNum++;
         }
 
+        // Define the filename and path for the Excel file
         $filename = 'Station_id_' . $station_id . '_Status_' . $previousMonth . '_' . $previousYear . '.xlsx';
         $filePath = $directory . $filename;
 
+        // Save the Excel file to the specified path
         $writer = new Xlsx($spreadsheet);
 
         try {
@@ -101,6 +117,7 @@ function sendTelegramMessageAndGenerateExcel()
             continue;
         }
 
+        // Query to count the number of tickets by status for the station
         $status_query = "SELECT status, COUNT(*) as count 
             FROM tbl_ticket
             WHERE station_id = '$station_id' 
@@ -108,6 +125,7 @@ function sendTelegramMessageAndGenerateExcel()
               AND YEAR(ticket_open) = '$previousYear'
             GROUP BY status";
 
+        // Initialize status counts
         $status_counts = [
             'Open' => 0,
             'On Hold' => 0,
@@ -115,29 +133,37 @@ function sendTelegramMessageAndGenerateExcel()
             'Pending Vendor' => 0,
             'Close' => 0
         ];
+
+        // Execute the status query and update the status counts
         $result_status = $conn->query($status_query);
         while ($row = $result_status->fetch_assoc()) {
             $status_counts[$row['status']] = $row['count'];
         }
 
+        // Extract individual status counts
         $open = $status_counts['Open'];
         $onhold = $status_counts['On Hold'];
         $inprogress = $status_counts['In Progress'];
         $pending_vendor = $status_counts['Pending Vendor'];
         $close = $status_counts['Close'];
 
+        // Fetch the Telegram bot token for the current station type
         $bot_telegram_query = "SELECT token FROM tbl_telegram_bot WHERE station_type = '$station_type'";
         $bot_result = $conn->query($bot_telegram_query);
         $bot_row = $bot_result->fetch_assoc();
         $botToken = $bot_row['token'];
 
+        // Split the chat IDs into an array
         $chatIds = explode(',', $chat_ids_string);
 
+        // Compose the message to be sent via Telegram
         $currentDate = date('d-m-Y');
         $message = "Status for $station_type\n\n(Station ID: $station_id)\n\n(Station name: $station_name)\n\nfor the month of $previousMonth-$previousYear:\n\n\n Open: $open \n On Hold: $onhold \n In Progress: $inprogress \n Pending Vendor: $pending_vendor \n Close: $close";
 
+        // Telegram API URL for sending documents
         $url = "https://api.telegram.org/bot$botToken/sendDocument";
 
+        // Loop through each chat ID to send the Excel file
         foreach ($chatIds as $chatId) {
             $data = [
                 'chat_id' => trim($chatId),
@@ -145,6 +171,7 @@ function sendTelegramMessageAndGenerateExcel()
                 'document' => new CURLFile($filePath)
             ];
 
+            // Set cURL options for sending the file
             $options = [
                 CURLOPT_URL => $url,
                 CURLOPT_POST => true,
@@ -160,12 +187,13 @@ function sendTelegramMessageAndGenerateExcel()
             echo "File sent to chat ID: $chatId\n";
             echo "Response: $response\n";
 
+            // Delete the file from the server if the response indicates success or rate limit error
             if (strpos($response, '"ok":true') !== false || strpos($response, '"error_code":429') !== false) {
-
                 unlink($filePath);
                 echo "File deleted from server: $filePath\n";
             }
 
+            // Handle rate limiting by retrying the request after the specified wait time
             if (strpos($response, '"error_code":429') !== false) {
                 $retryAfter = 1;
                 if (preg_match('/"retry_after":(\d+)/', $response, $matches)) {
@@ -178,7 +206,10 @@ function sendTelegramMessageAndGenerateExcel()
             }
         }
     }
+
+    // Close the database connection
     $conn->close();
 }
 
+// Call the function to execute the script
 sendTelegramMessageAndGenerateExcel();

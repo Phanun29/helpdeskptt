@@ -1,0 +1,84 @@
+/HELPDESKPTT
+└── /admin
+│   ├── /encodeFont_Phyton
+│   │   └── NotoSanskhmer.ttf
+│   │   ├── convert_to_base64.py
+│   │   ├── run python.txt
+│   ├── .htaccess
+│   ├── 404.php
+│   ├── add_station.php
+│   ├── add_telegram_bot.php
+│   ├── add_ticket.php
+│   ├── add_users_rules.php
+│   ├── add_users.php
+│   ├── bot_helpdesk.php
+│   ├── config.php
+│   ├── delete_station.php
+│   ├── delete_ticket.php
+│   ├── delete_users_rules.php
+│   ├── delete_users.php
+│   ├── edit_station.php
+│   ├── edit_ticket.php
+│   ├── edit_users_rules.php
+│   ├── edit_users.php
+│   ├── filter_ticket_track.php
+│   ├── filter_ticket.php
+│   ├── fontBase64.txt
+│   ├── get_station_details.php
+│   ├── get_suggestions.php
+│   ├── index.php
+│   ├── moreinfo.php
+│   ├── report.php
+│   ├── station
+│   ├── telegram_bot.php
+│   ├── test_query_bot.php
+│   ├── ticket.php
+│   ├── track.php
+│   ├── user_rules.php
+│   ├── user.php
+├── build
+├── /css
+│   └── main.css
+├── database
+├── dist            -----> #link bootstrap and javaScripte
+├── docs
+├── icon
+├── img
+├── /inc
+│   └── footer.php
+│   ├── head.php
+│   ├── header_script.php
+│   ├── top_nav_bar.php
+│   ├── sidebar.php
+├── Mail
+├── /script
+│   └── app.js
+│   ├── auto_close_alert.js
+│   ├── delete_ticket.js
+│   ├── export.js
+│   ├── get_suggestion_auto_fill_stationID.js
+│   ├── pop_up_images.js
+│   ├── pop_up_ticket_details.js
+│   ├── previewImages.js
+├── plugins
+├── style
+├── /upload
+│   └── /POS2408000014
+│   │   └── 66c6b3e38a342.jpg
+├── vendor
+├── .gitignore
+├── .htaccess
+├── 404.php
+├── composer.json
+├── composer.lock
+├── controllerUserData.php
+├── forgot-password.php
+├── index.php
+├── logout.php
+├── manifest.json
+├── new-password.php
+├── password-changed.php
+├── README.md
+├── reset-code.php
+├── service-worker.js
+├── user.otp.php

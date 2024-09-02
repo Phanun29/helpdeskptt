@@ -114,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                         <div class="form-group col-12">
 
-                                            <label for="station_type">Chat ID<span class="text-danger">*</span></label>
+                                            <label for="station_type">station type<span class="text-danger">*</span></label>
                                             <select name="station_type" id="station_type" class="selectpicker form-control" required>
                                                 <option disabled selected>-- Select --</option>
                                                 <option value="DODO">DODO</option>

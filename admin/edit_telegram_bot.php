@@ -142,7 +142,7 @@ if ($id) {
                                             <input type="text" class="form-control" id="token" name="token" value="<?= $row['token'] ?>" required>
                                         </div>
                                         <div class="form-group col-12">
-                                            <label for="station_type">Chat ID</label>
+                                            <label for="station_type">station type</label>
                                             <select name="station_type" class="selectpicker form-control" id="station_type" placeholder='-select-'>
                                                 <option value="DODO" <?= $row['station_type'] == 'DODO' ? 'selected' : ''; ?>>DODO</option>
                                                 <option value="COCO" <?= $row['station_type'] == 'COCO' ? 'selected' : '';  ?>>COCO</option>
